@@ -1,0 +1,339 @@
+{
+  "name": "Task Scheduler - Reset Stuck Tasks Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Setup\n\n1. Set PostgreSQL credentials on `Load Default Lease Duration` and `Reset Stuck Tasks`.\n2. Workflow checks every 1 minute.\n3. Actual reset cadence follows scheduler_config.default_lease_duration.\n4. Wire `Build Warning Payload` to Slack/Email/app-log workflow if needed.",
+        "height": 260,
+        "width": 500,
+        "color": 2
+      },
+      "id": "53aafef8-3af8-4c4d-a9af-5e69695886b1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "f39d15b9-a700-4e11-9c96-a65451c6e9f4",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1088,
+        -32
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "4459fd24-c122-4f5f-b357-91a6264d5b8e",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  COALESCE(\n    (SELECT config_value\n       FROM scheduler_config\n      WHERE config_key = 'default_lease_duration'),\n    '5 minutes'\n  ) AS default_lease_duration,\n  COALESCE(\n    (SELECT CEIL(EXTRACT(EPOCH FROM config_value::INTERVAL))::BIGINT\n       FROM scheduler_config\n      WHERE config_key = 'default_lease_duration'),\n    300\n  ) AS lease_seconds;",
+        "options": {}
+      },
+      "id": "a39062af-8d4a-4544-ba4e-96dc75f9f6db",
+      "name": "Load Default Lease Duration",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        -832,
+        48
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "DaS7mZvyZ9LN6V5S",
+          "name": "Postgress-n8n-db"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $input.first().json ?? {};\nconst leaseText = String(row.default_lease_duration ?? '5 minutes');\nconst leaseSecondsRaw = Number(row.lease_seconds ?? 300);\nconst leaseSeconds = Number.isFinite(leaseSecondsRaw) && leaseSecondsRaw > 0 ? leaseSecondsRaw : 300;\n\nconst isManualExecution = $execution?.mode === 'manual';\nconst nowMs = Date.now();\nconst nowIso = new Date(nowMs).toISOString();\n\nconst state = $getWorkflowStaticData('global');\nconst lastRunIso = state.last_reset_stuck_run_at ?? null;\nconst lastRunMs = lastRunIso ? Date.parse(lastRunIso) : NaN;\nconst hasLastRun = Number.isFinite(lastRunMs);\nconst elapsedSeconds = hasLastRun ? Math.floor((nowMs - lastRunMs) / 1000) : null;\n\nconst shouldRunNow = isManualExecution || !hasLastRun || elapsedSeconds >= leaseSeconds;\n\nif (shouldRunNow) {\n  state.last_reset_stuck_run_at = nowIso;\n}\n\nreturn [{\n  json: {\n    default_lease_duration: leaseText,\n    lease_seconds: leaseSeconds,\n    checked_at: nowIso,\n    last_run_at: lastRunIso,\n    elapsed_seconds: elapsedSeconds,\n    is_manual_execution: isManualExecution,\n    should_run_now: shouldRunNow\n  }\n}];"
+      },
+      "id": "8f8f1373-69f6-4ef7-aab7-bc8d46ee4332",
+      "name": "Evaluate Run Window",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6fc9f35d-00e8-47f0-b833-2978ba2a949f",
+              "leftValue": "={{ $json.should_run_now }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ba0dd369-c0f4-45d6-a8f2-efb34f4cc2fa",
+      "name": "Should Run Now?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT reset_stuck_tasks() AS reset_count;",
+        "options": {}
+      },
+      "id": "60d0e7c0-ef02-4f3f-a595-77595d6f8509",
+      "name": "Reset Stuck Tasks",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        -160,
+        -48
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "DaS7mZvyZ9LN6V5S",
+          "name": "Postgress-n8n-db"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $input.first().json ?? {};\nconst base = $('Evaluate Run Window').first().json ?? {};\nconst parsed = Number(row.reset_count ?? row.reset_stuck_tasks ?? 0);\nconst resetCount = Number.isFinite(parsed) ? parsed : 0;\n\nreturn [{\n  json: {\n    ...base,\n    reset_count: resetCount,\n    should_alert: resetCount > 0\n  }\n}];"
+      },
+      "id": "4ef0960a-a412-489d-b7ae-a2e785da2906",
+      "name": "Evaluate Reset Count",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ea1786b2-a1cd-4d13-9865-8d2cae305740",
+              "leftValue": "={{ $json.should_alert }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1c81b24b-ce6f-42db-bf35-ff1459f7fa90",
+      "name": "Resets Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        288,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nreturn [{\n  json: {\n    level: 'WARN',\n    message: `reset_stuck_tasks() reset ${item.reset_count} task(s)`,\n    source: 'task-scheduler-reset-stuck-monitor',\n    metadata: {\n      reset_count: item.reset_count,\n      checked_at: item.checked_at,\n      default_lease_duration: item.default_lease_duration\n    }\n  }\n}];"
+      },
+      "id": "8ba65818-0fd1-4fc0-9efd-56f4ad8f22ca",
+      "name": "Build Warning Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json ?? {};\n\nif (item.should_run_now === false) {\n  return [{\n    json: {\n      message: 'No action: reset check is not due yet',\n      reason: 'not_due_yet',\n      checked_at: item.checked_at ?? new Date().toISOString(),\n      last_run_at: item.last_run_at ?? null,\n      elapsed_seconds: item.elapsed_seconds ?? null,\n      lease_seconds: item.lease_seconds ?? null,\n      default_lease_duration: item.default_lease_duration ?? null\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    message: 'No stuck tasks found',\n    reason: 'no_resets',\n    reset_count: Number(item.reset_count ?? 0),\n    checked_at: item.checked_at ?? new Date().toISOString(),\n    default_lease_duration: item.default_lease_duration ?? null\n  }\n}];"
+      },
+      "id": "1951f3f7-635d-4653-bf58-2345f9c19077",
+      "name": "No Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        80
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Load Default Lease Duration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Load Default Lease Duration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Default Lease Duration": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Run Window",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Run Window": {
+      "main": [
+        [
+          {
+            "node": "Should Run Now?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Run Now?": {
+      "main": [
+        [
+          {
+            "node": "Reset Stuck Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reset Stuck Tasks": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Reset Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Reset Count": {
+      "main": [
+        [
+          {
+            "node": "Resets Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resets Found?": {
+      "main": [
+        [
+          {
+            "node": "Build Warning Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Warning Payload": {
+      "main": [
+        []
+      ]
+    },
+    "No Action": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "6bfac406-78f2-491c-a7d8-f756cf8f4863",
+  "meta": {
+    "instanceId": "f94ee6675052c2b68be0785e7c4c1b60b0426d14c775c213c4e38fd0abd72c74"
+  },
+  "tags": []
+}

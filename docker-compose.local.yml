@@ -1,0 +1,21 @@
+services:
+  postgres:
+    # Local-only host access for tools/scripts (for example Python psycopg).
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+  workers:
+    # Local-only debugpy port for VS Code attach sessions.
+    ports:
+      - "127.0.0.1:${WORKERS_DEBUG_PORT:-5678}:5678"
+    environment:
+      - PWS_MESSAGE_CLASSIFIER_PROVIDER=ollama
+      - OLLAMA_API_URL=${OLLAMA_API_URL:-http://host.docker.internal:11550}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2:3b}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  fastapi:
+    environment:
+      - OLLAMA_API_URL=${OLLAMA_API_URL:-http://host.docker.internal:11550}
+      - OPENAI_API_BASE_URL=${OPENAI_API_BASE_URL:-https://api.openai.com}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

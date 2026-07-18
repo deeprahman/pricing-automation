@@ -1,0 +1,15 @@
+fastapi==0.110.0
+uvicorn[standard]==0.29.0
+SQLAlchemy==2.0.29
+psycopg2-binary==2.9.11
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+python-dotenv==1.0.1
+itsdangerous==2.2.0
+starlette-admin==0.14.1
+wtforms==3.1.1
+email-validator==2.1.0
+python-multipart==0.0.9
+httpx==0.27.0
+jinja2==3.1.4

@@ -1,0 +1,163 @@
+[
+  {
+    "worker": "messages-worker",
+    "queue": "messages-service",
+    "action": "fetch_dummy",
+    "payload": {
+      "thread_id": 91000002,
+      "booking_id": 51000002,
+      "platform_id": 1,
+      "action": "fetch"
+    }
+  },
+  {
+    "worker": "messages-worker",
+    "queue": "messages-service",
+    "action": "fetch_dummy",
+    "payload": {
+      "thread_id": 91000005,
+      "booking_id": 51000005,
+      "platform_id": 1,
+      "action": "fetch"
+    }
+  },
+  {
+    "worker": "messages-worker",
+    "queue": "messages-service",
+    "action": "check_clasification",
+    "payload": {
+      "platform_id": 1,
+      "thread_id": 91000002,
+      "return_ref": {
+        "worker": "task-scheduler-helper",
+        "queue": "task-scheduler-helper",
+        "action": "tsh_action"
+      }
+    }
+  },
+  {
+    "worker": "messages-worker",
+    "queue": "messages-service",
+    "action": "check_clasification",
+    "payload": {
+      "platform_id": 1,
+      "thread_id": 91000002
+    }
+  },
+  {
+    "worker": "property-platform-worker",
+    "queue": "property-platform",
+    "action": "get_linked_listings",
+    "payload": {
+      "booking_id": 54000001,
+      "categories": [
+        "medical_related"
+      ],
+      "canonical_pair": {
+        "platform_property_lookup_id": 1
+      },
+      "message_ids": [
+        95000001
+      ]
+    }
+  },
+  {
+    "worker": "property-platform-worker",
+    "queue": "property-platform",
+    "action": "get_linked_listings",
+    "payload": {
+      "booking_id": 54000002,
+      "categories": [
+        "job_related"
+      ],
+      "canonical_pair": {
+        "platform_property_lookup_id": 1
+      },
+      "message_ids": [
+        97000027
+      ]
+    }
+  },
+   {
+    "worker": "property-platform-worker",
+    "queue": "property-platform",
+    "action": "get_linked_listings",
+    "payload": {
+      "booking_id": 2,
+      "categories": [
+        "medical_related"
+      ],
+      "canonical_pair": {
+        "platform_property_lookup_id": 3
+      },
+      "message_ids": [
+        10416571
+      ]
+    }
+  },
+  {
+    "worker": "booking-special-operation-worker",
+    "queue": "booking-special-operation",
+    "action": "remove-bso",
+    "payload": {
+      "booking_id": 54000001,
+      "reason_code": "booking_cancelled",
+      "reason_note": "manual remove-bso test"
+    }
+  },
+  {
+    "worker": "bookings-worker",
+    "queue": "bookings",
+    "action": "scan_actives",
+    "payload": {
+      "window_start": "2026-10-01",
+      "n_days": 90,
+      "platform_id": 1,
+      "limit": 100,
+      "cursor_id": 0
+    }
+  },
+  {
+    "worker": "booking-worker",
+    "queue": "bookings",
+    "action": "get_bookings",
+    "payload": {
+      "limit": 30,
+      "n_days": 30,
+      "platform_id": 1,
+      "provider_key": "ownerrez"
+    },
+    "schedule": {
+      "scheduled_at": "2026-04-15T17:59:00Z",
+      "priority": 0,
+      "max_attempts": 3
+    }
+  },
+    {
+    "worker": "bookings-worker",
+    "queue": "bookings",
+    "action": "update_message_threads",
+    "payload": {
+      "action": "update_message_threads",
+      "n_days": 30
+    },
+    "schedule": {
+      "scheduled_at": "2026-04-15T16:04:00Z",
+      "priority": 0,
+      "max_attempts": 3
+    }
+  },
+    {
+    "worker": "messages-worker",
+    "queue": "messages-service",
+    "action": "scan_unclassified",
+    "payload": {
+      "limit": 25
+    },
+    "schedule": {
+      "scheduled_at": "2026-04-15T20:56:00Z",
+      "priority": 0,
+      "max_attempts": 3
+    }
+  }
+]

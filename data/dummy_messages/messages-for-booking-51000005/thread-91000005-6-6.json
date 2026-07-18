@@ -1,0 +1,72 @@
+{
+    "guest": {
+        "first_name": "MORGAN",
+        "id": 720000005,
+        "last_name": "DIAZ"
+    },
+    "items": [
+        {
+            "body": "Great to hear. Parking reminder: please keep to the right side of the driveway so neighbors can access their gate.",
+            "date_utc": "2026-03-12T09:00:00Z",
+            "from_contact_id": 610000005,
+            "from_role": "owner",
+            "id": 96000074,
+            "is_draft": false,
+            "thread_id": 91000005
+        },
+        {
+            "body": "Noted on parking, thanks.",
+            "date_utc": "2026-03-12T09:30:00Z",
+            "from_contact_id": 720000005,
+            "from_role": "guest",
+            "id": 96000075,
+            "is_draft": false,
+            "thread_id": 91000005
+        },
+        {
+            "body": "Checking in: how is your mom feeling today? Need anything adjusted for rest?",
+            "date_utc": "2026-03-11T14:00:00Z",
+            "from_contact_id": 610005005,
+            "from_role": "co_host",
+            "id": 96000060,
+            "is_draft": false,
+            "thread_id": 91000005
+        },
+        {
+            "body": "Could we get an extra blanket? The AC feels cool for her.",
+            "date_utc": "2026-03-11T16:00:00Z",
+            "from_contact_id": 720000005,
+            "from_role": "guest",
+            "id": 96000061,
+            "is_draft": false,
+            "thread_id": 91000005
+        },
+        {
+            "body": "Absolutely. I’ll leave a blanket outside the door in 20 minutes.",
+            "date_utc": "2026-03-11T16:20:00Z",
+            "from_contact_id": 610005005,
+            "from_role": "co_host",
+            "id": 96000062,
+            "is_draft": false,
+            "thread_id": 91000005
+        },
+        {
+            "body": "Trash pickup is Tuesday morning. Cans are by the side fence.",
+            "date_utc": "2026-03-12T12:00:00Z",
+            "from_contact_id": 610000005,
+            "from_role": "owner",
+            "id": 96000063,
+            "is_draft": false,
+            "thread_id": 91000005
+        }
+    ],
+    "limit": 6,
+    "offset": 6,
+    "thread": {
+        "booking_id": 51000005,
+        "id": 91000005,
+        "property_id": 480005,
+        "type": "channel",
+        "channel": "vrbo"
+    }
+}

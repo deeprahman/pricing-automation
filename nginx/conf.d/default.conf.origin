@@ -1,0 +1,73 @@
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+# HTTP - redirect to HTTPS
+server {
+    listen 80;
+    listen [::]:80;
+    server_name auto.palmwavestays.com;
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# HTTPS for auto.palmwavestays.com (n8n)
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name auto.palmwavestays.com;
+
+    # Self-signed SSL certificates
+    ssl_certificate /etc/nginx/ssl/fullchain.pem;
+    ssl_certificate_key /etc/nginx/ssl/privkey.pem;
+
+    # SSL configuration
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:50m;
+    ssl_session_tickets off;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+
+    # Proxy to n8n
+    location / {
+        proxy_pass http://n8n:5678;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_buffering off;
+        proxy_cache off;
+        chunked_transfer_encoding off;
+    }
+}
+
+# HTTPS for palmwavestays.lo (base domain - optional landing/redirect)
+#server {
+#    listen 443 ssl;
+#    listen [::]:443 ssl;
+#    http2 on;
+#    server_name palmwavestays.lo;
+#
+#    ssl_certificate /etc/nginx/ssl/fullchain.pem;
+#    ssl_certificate_key /etc/nginx/ssl/privkey.pem;
+#
+#    ssl_session_timeout 1d;
+#    ssl_session_cache shared:SSL:50m;
+#    ssl_session_tickets off;
+#    ssl_protocols TLSv1.2 TLSv1.3;
+#
+#    # Redirect base domain to auto subdomain, or serve a landing page
+#    location / {
+#        return 302 https://auto.palmwavestays.com$request_uri;
+#    }
+#}

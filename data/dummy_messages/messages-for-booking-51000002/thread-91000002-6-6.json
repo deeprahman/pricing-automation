@@ -1,0 +1,72 @@
+{
+    "guest": {
+        "first_name": "PRIYA",
+        "id": 720000002,
+        "last_name": "PATEL"
+    },
+    "items": [
+        {
+            "body": "Wonderful. A couple of tips: driveway fits two cars; please keep AC at 72°F to avoid humidity.",
+            "date_utc": "2026-02-22T13:00:00Z",
+            "from_contact_id": 610000002,
+            "from_role": "owner",
+            "id": 96000030,
+            "is_draft": false,
+            "thread_id": 91000002
+        },
+        {
+            "body": "Thermostat is on the hallway wall. If it shows a delay, give it 60 seconds to react after changes.",
+            "date_utc": "2026-02-22T15:30:00Z",
+            "from_contact_id": 610005002,
+            "from_role": "co_host",
+            "id": 96000031,
+            "is_draft": false,
+            "thread_id": 91000002
+        },
+        {
+            "body": "WiFi speed is solid, thanks! Video calls are smooth.",
+            "date_utc": "2026-02-22T20:00:00Z",
+            "from_contact_id": 720000002,
+            "from_role": "guest",
+            "id": 96000032,
+            "is_draft": false,
+            "thread_id": 91000002
+        },
+        {
+            "body": "Glad to hear it. Trash pickup is Tuesday morning; cans are on the side gate.",
+            "date_utc": "2026-02-23T09:00:00Z",
+            "from_contact_id": 610000002,
+            "from_role": "owner",
+            "id": 96000033,
+            "is_draft": false,
+            "thread_id": 91000002
+        },
+        {
+            "body": "Could we get two extra towels, please?",
+            "date_utc": "2026-02-23T18:30:00Z",
+            "from_contact_id": 720000002,
+            "from_role": "guest",
+            "id": 96000034,
+            "is_draft": false,
+            "thread_id": 91000002
+        },
+        {
+            "body": "On it. We’ll drop them in the hallway closet within 30 minutes.",
+            "date_utc": "2026-02-23T19:00:00Z",
+            "from_contact_id": 610005002,
+            "from_role": "co_host",
+            "id": 96000035,
+            "is_draft": false,
+            "thread_id": 91000002
+        }
+    ],
+    "limit": 6,
+    "offset": 6,
+    "thread": {
+        "booking_id": 51000002,
+        "id": 91000002,
+        "property_id": 480002,
+        "type": "channel",
+        "channel": "vrbo"
+    }
+}

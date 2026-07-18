@@ -1,0 +1,39 @@
+[
+  {
+    "worker": "bookings-worker",
+    "queue": "bookings",
+    "action": "scan_actives",
+    "return_handler": {
+      "worker": "task-scheduler-helper",
+      "queue": "task-scheduler-helper",
+      "action": "tsh_action"
+    },
+    "payload": {
+      "window_start": "2026-06-25",
+      "n_days": 4,
+      "platform_id": 1,
+      "limit": 100,
+      "cursor_id": 0,
+      "action": "scan_actives",
+      "return_handler": {
+        "worker": "task-scheduler-helper",
+        "queue": "task-scheduler-helper",
+        "action": "tsh_action"
+      },
+      "return_handler_worker": "task-scheduler-helper",
+      "return_handler_queue": "task-scheduler-helper",
+      "return_handler_action": "tsh_action"
+    },
+    "enqueued_task_uuid": "ed437990-6272-4f20-ba60-d46a644cfa9c",
+    "enqueued_at": "2026-05-15T02:28:24.797884+00:00",
+    "enqueued_task_id": 47,
+    "task_status": "completed",
+    "task_status_checked_at": "2026-05-15T02:28:25.858840+00:00",
+    "monitor": {
+      "last_checked_at": "2026-05-15T02:28:25.858840+00:00",
+      "last_known_status": "completed",
+      "is_terminal": true,
+      "output_file": "/workspace/workers/pws_workers/task-scheduler-helper-worker/tsh_out/task_uuid_ed437990-6272-4f20-ba60-d46a644cfa9c.json"
+    }
+  }
+]

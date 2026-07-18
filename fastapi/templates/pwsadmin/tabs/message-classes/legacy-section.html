@@ -1,0 +1,55 @@
+    <section data-panel="message-classes" class="panel hidden rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Message Classes</h2>
+          <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
+            Manage the class names and descriptions used by the message classifier and booking views.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 text-sm">
+          <input id="message-class-limit" type="number" min="1" max="200" value="25" class="control-surface w-20 rounded border px-2 py-1">
+          <button id="message-class-refresh" type="button" class="rounded bg-brand-600 px-3 py-1 text-white">Refresh</button>
+          <button id="message-class-next" type="button" class="secondary-btn rounded border px-3 py-1">Next</button>
+          <button id="message-class-new" type="button" class="secondary-btn rounded border px-3 py-1">New Class</button>
+        </div>
+      </div>
+      <p id="message-class-summary" class="mt-2 text-xs text-slate-600 dark:text-slate-300">Loading message classes...</p>
+      <div class="mt-3 grid gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(320px,1fr)]">
+        <div class="overflow-x-auto">
+          <table class="panel-table w-full min-w-[760px] text-sm">
+            <thead class="border-b text-left">
+              <tr><th>Name</th><th>Status</th><th>Description</th><th>Used</th><th>Updated</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="message-class-rows"></tbody>
+          </table>
+        </div>
+        <div class="control-surface rounded-xl border p-4">
+          <div>
+            <h3 id="message-class-form-title" class="text-base font-semibold text-slate-900 dark:text-slate-100">Add Message Class</h3>
+            <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
+              The fallback <code>unclassified</code> class is protected because downstream workers depend on it.
+            </p>
+          </div>
+          <form id="message-class-form" class="mt-4 space-y-3">
+            <input id="message-class-id" type="hidden">
+            <div>
+              <label for="message-class-name" class="mb-1 block text-sm font-semibold text-slate-700 dark:text-slate-200">Name</label>
+              <input id="message-class-name" required class="control-surface w-full rounded border px-3 py-2 text-sm" placeholder="medical">
+            </div>
+            <div>
+              <label for="message-class-description" class="mb-1 block text-sm font-semibold text-slate-700 dark:text-slate-200">Description</label>
+              <textarea id="message-class-description" required class="control-surface h-28 w-full rounded border px-3 py-2 text-sm" placeholder="Messages about health, illness, emergencies, or medication."></textarea>
+            </div>
+            <label for="message-class-is-active" class="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+              <input id="message-class-is-active" type="checkbox" checked class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-800">
+              <span>Active</span>
+            </label>
+            <div class="flex flex-wrap gap-2">
+              <button id="message-class-save" type="submit" class="rounded bg-brand-600 px-3 py-2 text-sm font-semibold text-white">Create Class</button>
+              <button id="message-class-reset" type="button" class="secondary-btn rounded border px-3 py-2 text-sm font-semibold">Reset</button>
+            </div>
+          </form>
+          <p id="message-class-status" class="mt-3 text-xs text-slate-600 dark:text-slate-300"></p>
+        </div>
+      </div>
+    </section>

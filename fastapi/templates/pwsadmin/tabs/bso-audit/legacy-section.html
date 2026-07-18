@@ -1,0 +1,36 @@
+    <section data-panel="bso-audit" class="panel hidden rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+      <details id="bso-help" class="rounded-lg border border-slate-200 bg-slate-50/90 p-3 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-300" open>
+        <summary class="cursor-pointer select-none text-sm font-semibold text-slate-800 dark:text-slate-100">Help: how to use BSO Audit</summary>
+        <div class="mt-2 space-y-1">
+          <p><strong>booking_entry_id:</strong> booking ID from <code>booking_registers.id</code>.</p>
+          <p><strong>status:</strong> if empty, the list shows only <code>applied</code> and <code>removed</code>.</p>
+          <p><strong>updated_from / updated_to:</strong> date range filter on <code>updated_at</code> (inclusive by day).</p>
+          <p><strong>Instruction:</strong> shows a short excerpt; click it to open full instruction in YML format.</p>
+          <p><strong>Updated / Applied / Removed:</strong> shown in your browser's local timezone.</p>
+          <p><strong>Next:</strong> loads older rows using cursor pagination.</p>
+        </div>
+      </details>
+      <div class="flex flex-wrap gap-2 text-sm">
+        <input id="bso-booking-entry-id" placeholder="booking_entry_id" class="control-surface w-36 rounded border px-2 py-1">
+        <select id="bso-status" class="control-surface w-32 rounded border px-2 py-1">
+          <option value="">applied+removed (default)</option>
+          <option value="processing">processing</option>
+          <option value="applied">applied</option>
+          <option value="removed">removed</option>
+          <option value="failed">failed</option>
+        </select>
+        <input id="bso-updated-from" type="date" placeholder="updated_from" class="control-surface w-40 rounded border px-2 py-1">
+        <input id="bso-updated-to" type="date" placeholder="updated_to" class="control-surface w-40 rounded border px-2 py-1">
+        <input id="bso-limit" type="number" min="1" max="500" value="50" class="control-surface w-20 rounded border px-2 py-1">
+        <button id="bso-apply" class="rounded bg-brand-600 px-3 py-1 text-white">Load</button>
+        <button id="bso-next" class="secondary-btn rounded border px-3 py-1 opacity-60 cursor-not-allowed" disabled>Next</button>
+      </div>
+      <div class="mt-3 overflow-x-auto">
+        <table class="panel-table w-full min-w-[980px] text-sm">
+          <thead class="border-b text-left">
+            <tr><th>ID</th><th>Booking</th><th>Status</th><th>Instruction</th><th>Updated</th><th>Applied</th><th>Removed</th></tr>
+          </thead>
+          <tbody id="bso-rows"></tbody>
+        </table>
+      </div>
+    </section>

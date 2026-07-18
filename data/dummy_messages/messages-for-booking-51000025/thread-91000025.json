@@ -1,0 +1,54 @@
+{
+    "guest": {
+        "first_name": "MORGAN",
+        "id": 720000025,
+        "last_name": "DIAZ"
+    },
+    "items": [
+        {
+            "body": "Reservation Confirmation\n\nDates & Details:\nCheck-in: Mar 30, 2026 at 4:00 PM\nCheck-out: Apr 03, 2026 at 10:00 AM\nNights: 4\nGuests: 3\n\nIf anything is incorrect, please let me know ASAP so I can update it before arrival.\n\nAddress:\n419 Summa St, West Palm Beach, FL 33405\nhttps://www.google.com/maps/place/26.65103,-80.05702\n\nParking:\nStreet parking is available on a first-come basis. Driveway parking is limited to registered vehicles.\n\nWIFI:\nNetwork name: SeabreezeStay\nPassword: ShellsAndSand\nHouse Rules:\nNo smoking or parties/events\nQuiet hours: 11:00 PM - 8:00 AM\n",
+            "date_utc": "2026-03-15T15:00:00Z",
+            "from_contact_id": 610000025,
+            "from_role": "owner",
+            "id": 96000250,
+            "is_draft": false,
+            "thread_id": 91000025
+        },
+        {
+            "body": "Hi,\n\nThanks for booking with us! Your door code is 4025. The code activates at 4 PM on check-in day. Please use the smart lock at the main entrance and message us if you have any trouble.",
+            "date_utc": "2026-03-15T17:00:00Z",
+            "from_contact_id": 610000025,
+            "from_role": "owner",
+            "id": 96000251,
+            "is_draft": false,
+            "thread_id": 91000025
+        },
+        {
+            "body": "Please send a quick message after you arrive so we can make sure everything is perfect for your stay.",
+            "date_utc": "2026-03-16T16:00:00Z",
+            "from_contact_id": 610005025,
+            "from_role": "co_host",
+            "id": 96000256,
+            "is_draft": false,
+            "thread_id": 91000025
+        },
+        {
+            "body": "Reminder: check-out is Apr 03, 2026 at 10:00 AM. Please load the dishwasher and start it, place used towels in the tub, and lock the door on your way out.",
+            "date_utc": "2026-03-17T18:00:00Z",
+            "from_contact_id": 610000025,
+            "from_role": "owner",
+            "id": 96000258,
+            "is_draft": false,
+            "thread_id": 91000025
+        }
+    ],
+    "limit": 4,
+    "offset": 0,
+    "thread": {
+        "booking_id": 51000025,
+        "id": 91000025,
+        "property_id": 480001,
+        "type": "channel",
+        "channel": "airbnb"
+    }
+}

@@ -1,0 +1,25 @@
+.git
+.gitignore
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+
+# Local virtual environments
+.venv/
+.venv_fmt/
+
+# Local test/runtime artifacts
+.pytest_cache/
+.pytest-tmp/
+.pytest_tmp/
+pytest-cache-files-*/
+pytest_run_worker_manager_manifest_seed/
+output/pytest-tmp/
+tmp/pytest-of-dprah/
+tmp_pytest_check/
+tmp_pytest_helper_seed/
+
+# Editor metadata
+.vscode/

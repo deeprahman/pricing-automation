@@ -1,0 +1,54 @@
+# Environment files
+.env
+.env.local
+
+# Data directories
+data/api-data/
+data/webhook-data/
+exports/
+backups/
+reports/
+output/
+outputs/
+tests/system_integration_reports/*
+# Logs
+*.log
+logs/
+
+
+.venv/**/*
+# Docker
+docker-compose.override.yml
+# VSCode
+.vscode/
+n8n_learning.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+n8n_data/
+nginx/ssl/
+
+# Windows Zone Identifier files
+*:Zone.Identifier
+
+temp/
+*/**/__pycache__/
+*/**/*.pyc
+*/**/*.pyo
+*/**/*.pyd
+__pycache__/
+*.py.un~
+.venv*/
+
+.venv/
+.venv_fmt/
+
+tests/task-scheduler-helper/tsh_out/**/*
+workers/pws_workers/task-scheduler-helper-worker/tsh_out/**/*
+tests/system_integration_reports/
+scripts/downlaod_db_pg_dump.sh
+scripts/resotore_dump.sh
+reports/
+!reports/.gitkeep
+!reports/.gitkeep

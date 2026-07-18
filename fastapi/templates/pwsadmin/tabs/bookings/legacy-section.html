@@ -1,0 +1,26 @@
+    <section data-panel="bookings" class="panel hidden rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+      <div class="flex flex-wrap gap-2 text-sm">
+        <input id="booking-property" placeholder="property_id" class="control-surface w-28 rounded border px-2 py-1">
+        <input id="booking-platform" placeholder="platform_id" class="control-surface w-28 rounded border px-2 py-1">
+        <input id="booking-from" placeholder="arrival_from" class="control-surface w-28 rounded border px-2 py-1">
+        <input id="booking-to" placeholder="arrival_to" class="control-surface w-28 rounded border px-2 py-1">
+        <input id="booking-limit" type="number" min="1" max="200" value="50" class="control-surface w-20 rounded border px-2 py-1">
+        <button id="booking-apply" class="rounded bg-brand-600 px-3 py-1 text-white">Load</button>
+        <button id="booking-next" class="secondary-btn rounded border px-3 py-1 opacity-60 cursor-not-allowed" disabled>Next</button>
+      </div>
+      <div class="mt-3 grid gap-3 md:grid-cols-3">
+        <div class="md:col-span-2 overflow-x-auto">
+          <table class="panel-table w-full min-w-[680px] text-sm">
+            <thead class="border-b text-left"><tr><th>ID</th><th>Arrival</th><th>Departure</th><th>Property</th><th>Platform</th></tr></thead>
+            <tbody id="booking-rows"></tbody>
+          </table>
+        </div>
+        <div class="space-y-3">
+          <div class="control-surface rounded border p-3 text-xs">
+            <p class="font-semibold text-slate-700 dark:text-slate-200">Message Threads</p>
+            <div id="booking-thread-list" class="mt-2 flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300">Select a booking to view message threads.</div>
+          </div>
+          <pre id="booking-detail" class="control-surface min-h-[200px] max-h-[70vh] overflow-auto whitespace-pre-wrap break-words rounded border p-3 text-xs leading-5">Select a booking to view details.</pre>
+        </div>
+      </div>
+    </section>

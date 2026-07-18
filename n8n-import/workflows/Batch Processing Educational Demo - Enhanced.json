@@ -1,0 +1,424 @@
+{
+  "name": "Batch Processing Educational Demo - Enhanced",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "2b30b200-dc4c-4cc9-bc37-1b356b2ca091",
+      "name": "Start Demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -4224,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STEP 1: Create dummy task data\n// This simulates receiving a task with 25 customer records to process\n\nconst dummyTask = {\n  taskId: 12345,\n  taskName: 'process_customer_emails',\n  queueName: 'email_queue',\n  taskData: {\n    customers: [\n      { id: 1, name: 'Alice Johnson', email: 'alice@example.com', status: 'active' },\n      { id: 2, name: 'Bob Smith', email: 'bob@example.com', status: 'active' },\n      { id: 3, name: 'Carol White', email: 'carol@example.com', status: 'inactive' },\n      { id: 4, name: 'David Brown', email: 'david@example.com', status: 'active' },\n      { id: 5, name: 'Emma Davis', email: 'emma@example.com', status: 'active' },\n      { id: 6, name: 'Frank Miller', email: 'frank@example.com', status: 'active' },\n      { id: 7, name: 'Grace Wilson', email: 'grace@example.com', status: 'inactive' },\n      { id: 8, name: 'Henry Moore', email: 'henry@example.com', status: 'active' },\n      { id: 9, name: 'Ivy Taylor', email: 'ivy@example.com', status: 'active' },\n      { id: 10, name: 'Jack Anderson', email: 'jack@example.com', status: 'active' },\n      { id: 11, name: 'Kate Thomas', email: 'kate@example.com', status: 'active' },\n      { id: 12, name: 'Leo Jackson', email: 'leo@example.com', status: 'inactive' },\n      { id: 13, name: 'Mia Martin', email: 'mia@example.com', status: 'active' },\n      { id: 14, name: 'Noah Lee', email: 'noah@example.com', status: 'active' },\n      { id: 15, name: 'Olivia Harris', email: 'olivia@example.com', status: 'active' },\n      { id: 16, name: 'Peter Clark', email: 'peter@example.com', status: 'active' },\n      { id: 17, name: 'Quinn Lewis', email: 'quinn@example.com', status: 'inactive' },\n      { id: 18, name: 'Rachel Walker', email: 'rachel@example.com', status: 'active' },\n      { id: 19, name: 'Sam Hall', email: 'sam@example.com', status: 'active' },\n      { id: 20, name: 'Tina Allen', email: 'tina@example.com', status: 'active' },\n      { id: 21, name: 'Uma Young', email: 'uma@example.com', status: 'active' },\n      { id: 22, name: 'Victor King', email: 'victor@example.com', status: 'inactive' },\n      { id: 23, name: 'Wendy Wright', email: 'wendy@example.com', status: 'active' },\n      { id: 24, name: 'Xander Scott', email: 'xander@example.com', status: 'active' },\n      { id: 25, name: 'Yara Green', email: 'yara@example.com', status: 'active' }\n    ],\n    emailTemplate: 'monthly_newsletter',\n    batchSize: 5,\n    leaseExpiresAt: new Date(Date.now() + 300000).toISOString()\n  },\n  attemptNumber: 1,\n  maxAttempts: 3\n};\n\nconsole.log('\\n' + '='.repeat(80));\nconsole.log('🎓 BATCH PROCESSING EDUCATIONAL DEMO - ENHANCED');\nconsole.log('='.repeat(80));\nconsole.log('\\n📋 STEP 1: TASK RECEIVED');\nconsole.log('-'.repeat(80));\nconsole.log('Task ID:', dummyTask.taskId);\nconsole.log('Task Name:', dummyTask.taskName);\nconsole.log('Total Customers:', dummyTask.taskData.customers.length);\nconsole.log('Batch Size:', dummyTask.taskData.batchSize);\nconsole.log('Expected Batches:', Math.ceil(dummyTask.taskData.customers.length / dummyTask.taskData.batchSize));\nconsole.log('Lease Expires:', dummyTask.taskData.leaseExpiresAt);\nconsole.log('\\n💡 WHY BATCH PROCESSING?');\nconsole.log('   - Processing 25 customers at once could overwhelm memory');\nconsole.log('   - If one customer fails, we don\\'t want to lose all progress');\nconsole.log('   - We can extend the lease between batches to prevent timeout');\nconsole.log('   - Better error handling and progress tracking');\nconsole.log('-'.repeat(80));\n\nreturn [{ json: dummyTask }];"
+      },
+      "id": "f89d22db-ea45-4e50-9315-e81d1c36ef2b",
+      "name": "STEP 1: Create Task Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4000,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STEP 2: Prepare Units for Batch Processing\n// This converts the task data into individual units that can be batched\n\nconst item = $input.item;\nconst customers = item.json.taskData.customers;\nconst batchSize = item.json.taskData.batchSize;\n\nconsole.log('\\n📦 STEP 2: PREPARE UNITS');\nconsole.log('-'.repeat(80));\nconsole.log('Converting', customers.length, 'customers into individual processing units...');\n\n// Create one item per customer\nconst units = customers.map((customer, index) => ({\n  json: {\n    // Preserve original task context\n    taskId: item.json.taskId,\n    taskName: item.json.taskName,\n    emailTemplate: item.json.taskData.emailTemplate,\n    leaseExpiresAt: item.json.taskData.leaseExpiresAt,\n    batchSize: batchSize,\n    \n    // Unit-specific data\n    customer: customer,\n    unitIndex: index,\n    totalUnits: customers.length,\n    unitId: `customer-${customer.id}`\n  }\n}));\n\nconsole.log('✓ Created', units.length, 'processing units');\nconsole.log('\\nFirst 3 units:');\nfor (let i = 0; i < Math.min(3, units.length); i++) {\n  console.log(`   Unit ${i}: ${units[i].json.customer.name} (${units[i].json.customer.email})`);\n}\nconsole.log('   ...');\nconsole.log(`   Unit ${units.length - 1}: ${units[units.length - 1].json.customer.name}`);\n\nconsole.log('\\n💡 WHAT HAPPENED?');\nconsole.log('   - Each customer is now a separate \"unit\" that can be processed');\nconsole.log('   - Each unit carries the task context (taskId, lease time, etc.)');\nconsole.log('   - Now we have', units.length, 'items flowing through the workflow');\nconsole.log('-'.repeat(80));\n\nreturn units;"
+      },
+      "id": "42b42ce5-e2ef-4af3-b165-858fc917d85e",
+      "name": "STEP 2: Prepare Units",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3776,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": "={{ $json.batchSize }}",
+        "options": {}
+      },
+      "id": "6be1355e-4773-4c52-b786-83102d020fe4",
+      "name": "STEP 3: Split Into Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -3568,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STEP 3.1: Show Batch Information\n// This runs ONCE per batch (not per item in batch)\n\nconst items = $input.all();\nconst splitNode = $('STEP 3: Split Into Batches');\n\n// Get batch information from the splitInBatches node context\nconst currentBatch = (splitNode.context.batchIndex || 0) + 1;\nconst totalBatches = Math.ceil(items[0].json.totalUnits / items[0].json.batchSize);\nconst isLastBatch = splitNode.context.noItemsLeft || false;\n\nconsole.log('\\n' + '█'.repeat(80));\nconsole.log(`📊 BATCH ${currentBatch} of ${totalBatches}`);\nconsole.log('█'.repeat(80));\nconsole.log('Batch contains', items.length, 'customers:');\n\nitems.forEach((item, idx) => {\n  console.log(`   ${idx + 1}. ${item.json.customer.name} (${item.json.customer.email}) - ${item.json.customer.status}`);\n});\n\nconsole.log('\\n💡 BATCH CONTEXT:');\nconsole.log('   - This batch will be processed as a group');\nconsole.log('   - All', items.length, 'items move together to the next node');\nconsole.log('   - After processing, we\\'ll loop back for the next batch');\nconsole.log('   - Last batch?', isLastBatch ? 'YES ✓' : 'NO, more batches remain');\nconsole.log('   - Split node context.noItemsLeft:', splitNode.context.noItemsLeft);\nconsole.log('-'.repeat(80));\n\n// Add batch metadata to each item\nconst enrichedItems = items.map(item => ({\n  json: {\n    ...item.json,\n    batchNumber: currentBatch,\n    totalBatches: totalBatches,\n    isLastBatch: isLastBatch,\n    itemsInBatch: items.length\n  }\n}));\n\nreturn enrichedItems;"
+      },
+      "id": "0e2a6dea-96e3-4b46-b42a-9f29d56cc893",
+      "name": "STEP 3.1: Log Batch Info",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3328,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STEP 4: Process Each Customer in the Batch\n// This simulates sending emails to each customer\n\nconst items = $input.all();\nconst batchStartTime = Date.now();\nconst batchNumber = items[0].json.batchNumber;\n\nconsole.log('\\n⚙️  STEP 4: PROCESSING BATCH', batchNumber);\nconsole.log('-'.repeat(80));\n\nconst results = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i];\n  const customer = item.json.customer;\n  const startTime = Date.now();\n  \n  console.log(`\\n   Processing ${i + 1}/${items.length}: ${customer.name}...`);\n  \n  try {\n    // Simulate email sending (50-150ms)\n    const processingTime = Math.floor(Math.random() * 100) + 50;\n    await new Promise(resolve => setTimeout(resolve, processingTime));\n    \n    // Skip inactive customers\n    if (customer.status === 'inactive') {\n      console.log(`      ⚠️  SKIPPED - Customer is inactive`);\n      results.push({\n        json: {\n          ...item.json,\n          processingResult: 'skipped',\n          reason: 'inactive_customer',\n          processingTimeMs: Date.now() - startTime\n        }\n      });\n      continue;\n    }\n    \n    // Simulate occasional errors (10% chance)\n    if (Math.random() < 0.1) {\n      throw new Error('SMTP timeout - mail server not responding');\n    }\n    \n    // Success!\n    console.log(`      ✓ Email sent successfully (${processingTime}ms)`);\n    console.log(`         To: ${customer.email}`);\n    console.log(`         Template: ${item.json.emailTemplate}`);\n    \n    results.push({\n      json: {\n        ...item.json,\n        processingResult: 'success',\n        emailSentAt: new Date().toISOString(),\n        processingTimeMs: Date.now() - startTime\n      }\n    });\n    \n  } catch (error) {\n    console.log(`      ✗ FAILED - ${error.message}`);\n    results.push({\n      json: {\n        ...item.json,\n        processingResult: 'failed',\n        error: {\n          message: error.message,\n          timestamp: new Date().toISOString()\n        },\n        processingTimeMs: Date.now() - startTime\n      }\n    });\n  }\n}\n\nconst batchDuration = Date.now() - batchStartTime;\nconst successCount = results.filter(r => r.json.processingResult === 'success').length;\nconst failedCount = results.filter(r => r.json.processingResult === 'failed').length;\nconst skippedCount = results.filter(r => r.json.processingResult === 'skipped').length;\n\nconsole.log('\\n📈 BATCH', batchNumber, 'SUMMARY:');\nconsole.log(`   ✓ Success: ${successCount}`);\nconsole.log(`   ✗ Failed: ${failedCount}`);\nconsole.log(`   ⚠️  Skipped: ${skippedCount}`);\nconsole.log(`   ⏱️  Total time: ${batchDuration}ms`);\nconsole.log('-'.repeat(80));\n\n// Add batch summary to each result\nfor (const result of results) {\n  result.json.batchDuration = batchDuration;\n  result.json.batchSuccessCount = successCount;\n  result.json.batchFailedCount = failedCount;\n  result.json.batchSkippedCount = skippedCount;\n}\n\nreturn results;"
+      },
+      "id": "f4f9046c-cf36-47ea-b880-1ae456e9839e",
+      "name": "STEP 4: Process Batch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3120,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STEP 4.1: DUMMY NODE - Validate Results\n// This is an additional step in the loop to demonstrate multi-step processing\n\nconst items = $input.all();\nconst batchNumber = items[0].json.batchNumber;\n\nconsole.log('\\n🔍 STEP 4.1: VALIDATE BATCH RESULTS');\nconsole.log('-'.repeat(80));\nconsole.log('Validating', items.length, 'processed items from batch', batchNumber);\n\n// Add validation timestamp\nconst validatedItems = items.map(item => ({\n  json: {\n    ...item.json,\n    validatedAt: new Date().toISOString(),\n    validationPassed: item.json.processingResult !== 'failed'\n  }\n}));\n\nconst passedCount = validatedItems.filter(i => i.json.validationPassed).length;\nconst failedCount = validatedItems.length - passedCount;\n\nconsole.log(`   ✓ Validation passed: ${passedCount}`);\nconsole.log(`   ✗ Validation failed: ${failedCount}`);\nconsole.log('\\n💡 This is a DUMMY step to show additional processing in the loop');\nconsole.log('-'.repeat(80));\n\nreturn validatedItems;"
+      },
+      "id": "220819c8-f5c2-4196-8611-8561483bf1d7",
+      "name": "STEP 4.1: Validate Results (Dummy)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2896,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STEP 5: Check Lease and Decide if Extension Needed\n// This is the \"predictive\" part - we check BEFORE we run out of time\n\nconst items = $input.all();\nconst now = Date.now();\nconst leaseExpiresAt = new Date(items[0].json.leaseExpiresAt).getTime();\nconst remainingMs = leaseExpiresAt - now;\nconst remainingSeconds = Math.floor(remainingMs / 1000);\n\n// Calculate average batch processing time\nconst batchDuration = items[0].json.batchDuration;\nconst currentBatch = items[0].json.batchNumber;\nconst totalBatches = items[0].json.totalBatches;\nconst remainingBatches = totalBatches - currentBatch;\n\n// Estimate time needed for remaining work\nconst estimatedRemainingTime = batchDuration * remainingBatches;\nconst bufferTime = 10000; // 10 second safety buffer\nconst timeNeeded = estimatedRemainingTime + bufferTime;\n\nconsole.log('\\n🔍 STEP 5: LEASE CHECK (Predictive)');\nconsole.log('-'.repeat(80));\nconsole.log('Current time:', new Date(now).toISOString());\nconsole.log('Lease expires:', new Date(leaseExpiresAt).toISOString());\nconsole.log('Remaining lease time:', remainingSeconds, 'seconds');\nconsole.log('\\n📊 PREDICTION:');\nconsole.log('   - Last batch took:', batchDuration, 'ms');\nconsole.log('   - Remaining batches:', remainingBatches);\nconsole.log('   - Estimated time needed:', Math.floor(estimatedRemainingTime / 1000), 'seconds');\nconsole.log('   - Safety buffer:', Math.floor(bufferTime / 1000), 'seconds');\nconsole.log('   - Total time needed:', Math.floor(timeNeeded / 1000), 'seconds');\n\nconst shouldExtend = remainingMs < timeNeeded;\n\nif (shouldExtend) {\n  console.log('\\n⚠️  WARNING: Lease will expire before we finish!');\n  console.log('   Decision: EXTEND LEASE NOW (preventive action)');\n} else {\n  console.log('\\n✓ OK: We have enough time to continue');\n  console.log('   Decision: No extension needed');\n}\n\nconsole.log('\\n💡 WHY THIS MATTERS:');\nconsole.log('   - If lease expires mid-processing, another worker might grab this task');\nconsole.log('   - That would cause duplicate processing!');\nconsole.log('   - By checking BEFORE each batch, we stay ahead of expiration');\nconsole.log('-'.repeat(80));\n\n// Enrich items with lease check results\nfor (const item of items) {\n  item.json.remainingLeaseMs = remainingMs;\n  item.json.shouldExtendLease = shouldExtend;\n  item.json.estimatedTimeNeeded = timeNeeded;\n}\n\nreturn items;"
+      },
+      "id": "748eb7b4-1769-45bb-9070-da3c1028b4f5",
+      "name": "STEP 5: Check Lease",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2688,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "extend-check",
+              "leftValue": "={{ $json.shouldExtendLease }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3a299b8d-65f2-4c55-afd0-5b864ffe6b6f",
+      "name": "STEP 6: Extend Needed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -2464,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STEP 6.1: Simulate Extending the Lease\n// In production, this would call the database: heartbeat_task()\n\nconst items = $input.all();\nconst extendByMinutes = 5;\nconst extendByMs = extendByMinutes * 60 * 1000;\n\nconst oldExpiry = new Date(items[0].json.leaseExpiresAt);\nconst newExpiry = new Date(oldExpiry.getTime() + extendByMs);\n\nconsole.log('\\n🔄 STEP 6.1: EXTENDING LEASE');\nconsole.log('-'.repeat(80));\nconsole.log('Old expiry:', oldExpiry.toISOString());\nconsole.log('Extending by:', extendByMinutes, 'minutes');\nconsole.log('New expiry:', newExpiry.toISOString());\nconsole.log('\\n💡 IN PRODUCTION:');\nconsole.log('   - This would call: SELECT heartbeat_task(taskId, \\'5 minutes\\')');\nconsole.log('   - Database updates the lease_expires_at timestamp');\nconsole.log('   - Other workers see this task is still locked to us');\nconsole.log('-'.repeat(80));\n\n// Update all items with new lease time\nfor (const item of items) {\n  item.json.leaseExpiresAt = newExpiry.toISOString();\n  item.json.leaseExtended = true;\n  item.json.leaseExtensionCount = (item.json.leaseExtensionCount || 0) + 1;\n}\n\nreturn items;"
+      },
+      "id": "458d5e1a-4356-437c-85ec-5ad77993b628",
+      "name": "STEP 6.1: Extend Lease",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2240,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STEP 6.2: DUMMY NODE - Update Metrics\n// This simulates updating worker metrics after lease extension\n\nconst items = $input.all();\nconst batchNumber = items[0].json.batchNumber;\n\nconsole.log('\\n📊 STEP 6.2: UPDATE METRICS (Dummy)');\nconsole.log('-'.repeat(80));\nconsole.log('Batch:', batchNumber);\nconsole.log('Lease extensions so far:', items[0].json.leaseExtensionCount || 0);\nconsole.log('\\n💡 In production, this would update worker metrics:');\nconsole.log('   - Increment lease extension counter');\nconsole.log('   - Log to monitoring system');\nconsole.log('   - Update heartbeat timestamp');\nconsole.log('-'.repeat(80));\n\nreturn items;"
+      },
+      "id": "f8f8982a-5baf-421e-8d56-9571ac28b501",
+      "name": "STEP 6.2: Update Metrics (Dummy)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2016,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STEP 7: Log Batch Completion Status\n// Prepare for routing decision\n\nconst items = $input.all();\nconst isLastBatch = items[0].json.isLastBatch;\nconst currentBatch = items[0].json.batchNumber;\nconst totalBatches = items[0].json.totalBatches;\n\nconsole.log('\\n🏁 STEP 7: BATCH COMPLETION CHECK');\nconsole.log('-'.repeat(80));\nconsole.log('Current batch:', currentBatch, 'of', totalBatches);\nconsole.log('Is last batch?', isLastBatch ? 'YES' : 'NO');\n\nif (isLastBatch) {\n  console.log('\\n✓ ALL BATCHES COMPLETE!');\n  console.log('   - Processed all', totalBatches, 'batches');\n  console.log('   - Ready to mark task as complete');\n  console.log('   - Moving to final summary...');\n} else {\n  console.log('\\n↻ MORE BATCHES REMAINING');\n  console.log('   - Next batch:', currentBatch + 1, 'of', totalBatches);\n  console.log('   - Looping back to \"Split Into Batches\" node');\n  console.log('   - The cycle continues...');\n}\nconsole.log('-'.repeat(80));\n\nreturn items;"
+      },
+      "id": "955a28f7-16c6-4660-96a0-cc1ce72b146d",
+      "name": "STEP 7: Log Completion Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1808,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "check-last-batch",
+              "leftValue": "={{ $json.isLastBatch }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "694bb120-fe28-4949-aa28-71a3cae0d911",
+      "name": "STEP 7.1: Route Decision",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1696,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// STEP 8: Aggregate Results and Show Final Summary\n// This runs ONCE after all batches are complete\n\nconst items = $input.all();\nconst taskId = items[0].json.taskId;\nconst totalUnits = items[0].json.totalUnits;\nconst totalBatches = items[0].json.totalBatches;\n\n// Aggregate all results\nconst successCount = items.filter(i => i.json.processingResult === 'success').length;\nconst failedCount = items.filter(i => i.json.processingResult === 'failed').length;\nconst skippedCount = items.filter(i => i.json.processingResult === 'skipped').length;\n\n// Calculate total processing time\nconst totalProcessingTime = items.reduce((sum, item) => sum + (item.json.processingTimeMs || 0), 0);\n\n// Count lease extensions\nconst leaseExtensions = Math.max(...items.map(i => i.json.leaseExtensionCount || 0));\n\n// Find any errors\nconst errors = items\n  .filter(i => i.json.error)\n  .map(i => ({\n    customer: i.json.customer.name,\n    error: i.json.error.message\n  }));\n\nconsole.log('\\n');\nconsole.log('='.repeat(80));\nconsole.log('🎉 STEP 8: FINAL SUMMARY - TASK COMPLETE!');\nconsole.log('='.repeat(80));\nconsole.log('\\n📊 OVERALL STATISTICS:');\nconsole.log('-'.repeat(80));\nconsole.log('Task ID:', taskId);\nconsole.log('Total Customers Processed:', totalUnits);\nconsole.log('Total Batches:', totalBatches);\nconsole.log('Batch Size:', items[0].json.batchSize);\nconsole.log('\\n✓ Success:', successCount, `(${Math.round(successCount/totalUnits*100)}%)`);\nconsole.log('✗ Failed:', failedCount, `(${Math.round(failedCount/totalUnits*100)}%)`);\nconsole.log('⚠️  Skipped:', skippedCount, `(${Math.round(skippedCount/totalUnits*100)}%)`);\nconsole.log('\\n⏱️  PERFORMANCE:');\nconsole.log('-'.repeat(80));\nconsole.log('Total Processing Time:', totalProcessingTime, 'ms');\nconsole.log('Average per Customer:', Math.round(totalProcessingTime / totalUnits), 'ms');\nconsole.log('Lease Extensions:', leaseExtensions);\n\nif (errors.length > 0) {\n  console.log('\\n⚠️  ERRORS ENCOUNTERED:');\n  console.log('-'.repeat(80));\n  errors.forEach((err, idx) => {\n    console.log(`${idx + 1}. ${err.customer}: ${err.error}`);\n  });\n}\n\nconsole.log('\\n💡 KEY TAKEAWAYS:');\nconsole.log('-'.repeat(80));\nconsole.log('✓ Batching prevented memory overload');\nconsole.log('✓ Failed items didn\\'t stop the entire task');\nconsole.log('✓ Lease was extended', leaseExtensions, 'time(s) to prevent timeout');\nconsole.log('✓ Each batch was processed independently');\nconsole.log('✓ Progress was tracked throughout');\nconsole.log('✓ Dummy nodes showed additional processing steps in the loop');\n\nconsole.log('\\n🔄 WHAT HAPPENS NEXT IN PRODUCTION:');\nconsole.log('-'.repeat(80));\nconsole.log('1. Call complete_task() to mark task as done');\nconsole.log('2. Return results to database');\nconsole.log('3. Update metrics (tasks processed, success rate)');\nconsole.log('4. Clear current task from worker state');\nconsole.log('5. Loop back to poll for next task');\n\nconsole.log('\\n' + '='.repeat(80));\nconsole.log('🎓 END OF BATCH PROCESSING DEMO');\nconsole.log('='.repeat(80) + '\\n');\n\nreturn [{\n  json: {\n    taskId: taskId,\n    summary: {\n      totalUnits: totalUnits,\n      totalBatches: totalBatches,\n      successCount: successCount,\n      failedCount: failedCount,\n      skippedCount: skippedCount,\n      totalProcessingTime: totalProcessingTime,\n      leaseExtensions: leaseExtensions,\n      errors: errors\n    }\n  }\n}];"
+      },
+      "id": "30862c2b-9175-459d-88c0-a4dc6f9192e4",
+      "name": "STEP 8: Final Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1280,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3360,
+        384
+      ],
+      "id": "96d5b23c-76ce-415f-bfbb-abf3773e5f66",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start Demo": {
+      "main": [
+        [
+          {
+            "node": "STEP 1: Create Task Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STEP 1: Create Task Data": {
+      "main": [
+        [
+          {
+            "node": "STEP 2: Prepare Units",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STEP 2: Prepare Units": {
+      "main": [
+        [
+          {
+            "node": "STEP 3: Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STEP 3: Split Into Batches": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "STEP 3.1: Log Batch Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STEP 3.1: Log Batch Info": {
+      "main": [
+        [
+          {
+            "node": "STEP 4: Process Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STEP 4: Process Batch": {
+      "main": [
+        [
+          {
+            "node": "STEP 4.1: Validate Results (Dummy)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STEP 4.1: Validate Results (Dummy)": {
+      "main": [
+        [
+          {
+            "node": "STEP 5: Check Lease",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STEP 5: Check Lease": {
+      "main": [
+        [
+          {
+            "node": "STEP 6: Extend Needed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STEP 6: Extend Needed?": {
+      "main": [
+        [
+          {
+            "node": "STEP 6.1: Extend Lease",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "STEP 7: Log Completion Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STEP 6.1: Extend Lease": {
+      "main": [
+        [
+          {
+            "node": "STEP 6.2: Update Metrics (Dummy)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STEP 6.2: Update Metrics (Dummy)": {
+      "main": [
+        [
+          {
+            "node": "STEP 7: Log Completion Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STEP 7: Log Completion Status": {
+      "main": [
+        [
+          {
+            "node": "STEP 7.1: Route Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STEP 7.1: Route Decision": {
+      "main": [
+        [
+          {
+            "node": "STEP 8: Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "STEP 3: Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STEP 8: Final Summary": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "c9278973-a823-438e-ac6a-8f373e9b16ff",
+  "meta": {
+    "instanceId": "f94ee6675052c2b68be0785e7c4c1b60b0426d14c775c213c4e38fd0abd72c74"
+  },
+  "id": "rHEDhcR6tShksw_Dy-u0m",
+  "tags": []
+}

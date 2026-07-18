@@ -1,0 +1,40 @@
+        <div id="llm-pricing-admin-panel" class="rounded border p-3">
+          <div class="flex flex-wrap items-end gap-2 text-sm">
+            <label class="block">
+              <span class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Provider</span>
+              <input id="llm-pricing-provider" class="control-surface w-40 rounded border px-2 py-1" placeholder="openai" />
+            </label>
+            <label class="block min-w-[220px] flex-1">
+              <span class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Model</span>
+              <input id="llm-pricing-model" class="control-surface w-full rounded border px-2 py-1" placeholder="gpt-5-nano" />
+            </label>
+            <label class="block">
+              <span class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Input / 1M</span>
+              <input id="llm-pricing-input" type="number" min="0" step="0.000001" class="control-surface w-32 rounded border px-2 py-1" />
+            </label>
+            <label class="block">
+              <span class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Output / 1M</span>
+              <input id="llm-pricing-output" type="number" min="0" step="0.000001" class="control-surface w-32 rounded border px-2 py-1" />
+            </label>
+            <label class="block">
+              <span class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Currency</span>
+              <input id="llm-pricing-currency" class="control-surface w-24 rounded border px-2 py-1" value="USD" />
+            </label>
+            <label class="inline-flex items-center gap-2 pb-1">
+              <input id="llm-pricing-active" type="checkbox" class="rounded border" checked />
+              <span>Active</span>
+            </label>
+            <button id="llm-pricing-save" class="rounded bg-brand-600 px-3 py-1 text-white">Save Pricing</button>
+            <button id="llm-pricing-reset" class="secondary-btn rounded border px-3 py-1">Reset</button>
+          </div>
+          <p id="llm-pricing-status" class="mt-2 text-xs text-slate-600 dark:text-slate-300"></p>
+        </div>
+        <div class="mt-4 overflow-x-auto">
+          <h3 class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Model Pricing</h3>
+          <table class="panel-table w-full min-w-[980px] text-sm">
+            <thead class="border-b text-left">
+              <tr><th>Provider</th><th>Model</th><th>Input / 1M</th><th>Output / 1M</th><th>Currency</th><th>Status</th><th>Usage Rows</th><th>Last Used</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="llm-pricing-rows"></tbody>
+          </table>
+        </div>

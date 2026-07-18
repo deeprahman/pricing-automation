@@ -1,0 +1,44 @@
+{
+    "guest": {
+        "first_name": "AVERY",
+        "id": 720000027,
+        "last_name": "CLARK"
+    },
+    "items": [
+        {
+            "body": "Reservation Confirmation\n\nDates & Details:\nCheck-in: Apr 01, 2026 at 4:00 PM\nCheck-out: Apr 04, 2026 at 10:00 AM\nNights: 3\nGuests: 2\n\nIf anything is incorrect, please let me know ASAP so I can update it before arrival.\n\nAddress:\n812 Olive Ave, Lake Worth, FL 33460\nhttps://www.google.com/maps/place/26.61512,-80.05781\n\nParking:\nStreet parking is available on a first-come basis. Driveway parking is limited to registered vehicles.\n\nWIFI:\nNetwork name: GuestNet\nPassword: Welcome2026\nHouse Rules:\nNo smoking or parties/events\nQuiet hours: 11:00 PM - 8:00 AM\n",
+            "date_utc": "2026-03-17T15:00:00Z",
+            "from_contact_id": 610000027,
+            "from_role": "owner",
+            "id": 96000270,
+            "is_draft": false,
+            "thread_id": 91000027
+        },
+        {
+            "body": "Hi,\n\nThanks for booking with us! Your door code is 4027. The code activates at 4 PM on check-in day. Please use the smart lock at the main entrance and message us if you have any trouble.",
+            "date_utc": "2026-03-17T17:00:00Z",
+            "from_contact_id": 610000027,
+            "from_role": "owner",
+            "id": 96000271,
+            "is_draft": false,
+            "thread_id": 91000027
+        },
+        {
+            "body": "Please send a quick message after you arrive so we can make sure everything is perfect for your stay.",
+            "date_utc": "2026-03-18T16:00:00Z",
+            "from_contact_id": 610005027,
+            "from_role": "co_host",
+            "id": 96000276,
+            "is_draft": false,
+            "thread_id": 91000027
+        }
+    ],
+    "limit": 3,
+    "offset": 0,
+    "thread": {
+        "booking_id": 51000027,
+        "id": 91000027,
+        "property_id": 480003,
+        "type": "sms"
+    }
+}

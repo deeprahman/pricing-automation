@@ -1,0 +1,280 @@
+{
+  "runtime_variables": {
+    "default_ttl_minutes": 15
+  },
+  "maintenance": {
+    "reset_interval_seconds": 60,
+    "log_prefix": "worker-maintenance",
+    "actions": [
+      {
+        "name": "small_server_disk_maintenance_run",
+        "enabled": true,
+        "interval_minutes": 60,
+        "payload": {}
+      },
+      {
+        "name": "postgres_table_compaction",
+        "enabled": true,
+        "interval_minutes": 10080,
+        "first_run_immediate": false,
+        "payload": {
+          "tables": [
+            "public.task_metadata_history",
+            "public.app_logs",
+            "public.audit_log",
+            "public.task_queue",
+            "public.runtime_variables"
+          ],
+          "min_total_size_mb": 64,
+          "lock_timeout_seconds": 5,
+          "statement_timeout_seconds": 900,
+          "analyze": true,
+          "verbose": true,
+          "reindex": false
+        }
+      }
+    ]
+  },
+  "workers": [
+    {
+      "name": "external-services-worker",
+      "primary_queue": "external-services",
+      "subscribed_queues": [
+        "external-services"
+      ],
+      "script_path": "external-services-worker/external_services_worker.py",
+      "args": [
+        "--auto-dsn",
+        "--db-name",
+        "{db}",
+        "--log-dir",
+        "{logdir}"
+      ],
+      "runtime_variables": {
+        "default_ttl_minutes": 15
+      },
+      "log_prefix": "external-services-worker",
+      "startup_delay_seconds": 2
+    },
+    {
+      "name": "messages-worker",
+      "primary_queue": "messages-service",
+      "subscribed_queues": [
+        "messages-service"
+      ],
+      "script_path": "messages-worker/messages_worker.py",
+      "args": [
+        "--auto-dsn",
+        "--db-name",
+        "{db}",
+        "--log-dir",
+        "{logdir}"
+      ],
+      "runtime_variables": {
+        "default_ttl_minutes": 15
+      },
+      "seed_schedules": [
+        {
+          "action": "scan_unclassified",
+          "limit": 25,
+          "recurrence_pattern": "hourly",
+          "first_run_immediate": false
+        }
+      ],
+      "log_prefix": "messages-worker",
+      "startup_delay_seconds": 2
+    },
+    {
+      "name": "bookings-worker",
+      "primary_queue": "bookings",
+      "subscribed_queues": [
+        "bookings"
+      ],
+      "script_path": "bookings-worker/bookings_worker.py",
+      "args": [
+        "--auto-dsn",
+        "--db-name",
+        "{db}",
+        "--log-dir",
+        "{logdir}"
+      ],
+      "runtime_variables": {
+        "default_ttl_minutes": 15
+      },
+      "seed_schedules": [
+        {
+          "action": "get_bookings",
+          "limit": 30,
+          "recurrence_pattern": "daily",
+          "time_of_day": "08:00",
+          "timezone": "America/New_York",
+          "first_run_immediate": true,
+          "payload": {
+            "provider_key": "ownerrez",
+            "platform_id": 1,
+            "n_days": 30
+          }
+        },
+        {
+          "action": "get_bookings",
+          "limit": 30,
+          "recurrence_pattern": "daily",
+          "time_of_day": "20:00",
+          "timezone": "America/New_York",
+          "first_run_immediate": false,
+          "payload": {
+            "provider_key": "ownerrez",
+            "platform_id": 1,
+            "n_days": 30
+          }
+        },
+        {
+          "action": "process_checkout",
+          "limit": 100,
+          "recurrence_pattern": "daily",
+          "time_of_day": "10:00",
+          "timezone": "America/New_York",
+          "first_run_immediate": false
+        },
+        {
+          "action": "scan_actives",
+          "limit": 100,
+          "recurrence_pattern": "daily",
+          "time_of_day": "11:00",
+          "timezone": "America/New_York",
+          "first_run_immediate": false,
+          "payload": {
+            "n_days": 28
+          }
+        },
+        {
+          "action": "scan_actives",
+          "limit": 100,
+          "recurrence_pattern": "daily",
+          "time_of_day": "14:00",
+          "timezone": "America/New_York",
+          "first_run_immediate": false,
+          "payload": {
+            "n_days": 28
+          }
+        },
+        {
+          "action": "scan_actives",
+          "limit": 100,
+          "recurrence_pattern": "daily",
+          "time_of_day": "17:00",
+          "timezone": "America/New_York",
+          "first_run_immediate": false,
+          "payload": {
+            "n_days": 28
+          }
+        },
+        {
+          "action": "scan_actives",
+          "limit": 100,
+          "recurrence_pattern": "daily",
+          "time_of_day": "20:00",
+          "timezone": "America/New_York",
+          "first_run_immediate": false,
+          "payload": {
+            "n_days": 28
+          }
+        },
+        {
+          "action": "update_message_threads",
+          "limit": 100,
+          "recurrence_pattern": "hourly",
+          "first_run_immediate": false,
+          "payload": {
+            "n_days": 30
+          }
+        }
+      ],
+      "log_prefix": "bookings-worker",
+      "startup_delay_seconds": 2,
+      "enabled": true
+    },
+    {
+      "name": "property-platform-worker",
+      "primary_queue": "property-platform",
+      "subscribed_queues": [
+        "property-platform"
+      ],
+      "script_path": "property-platform-worker/property_platform_worker.py",
+      "args": [
+        "--auto-dsn",
+        "--db-name",
+        "{db}",
+        "--log-dir",
+        "{logdir}"
+      ],
+      "log_prefix": "property-platform-worker",
+      "startup_delay_seconds": 2,
+      "enabled": true
+    },
+    {
+      "name": "pricing-engine-worker",
+      "primary_queue": "pricing-engine",
+      "subscribed_queues": [
+        "pricing-engine"
+      ],
+      "script_path": "pricing-engine-worker/pricing_engine_worker.py",
+      "args": [
+        "--auto-dsn",
+        "--db-name",
+        "{db}",
+        "--log-dir",
+        "{logdir}"
+      ],
+      "runtime_variables": {
+        "default_ttl_minutes": 60,
+        "by_action": {
+          "get_cat_rule": {
+            "by_scope": {
+              "pricing-engine-plan": 60
+            }
+          }
+        }
+      },
+      "log_prefix": "pricing-engine-worker",
+      "startup_delay_seconds": 2,
+      "enabled": true
+    },
+    {
+      "name": "booking-special-operation-worker",
+      "primary_queue": "booking-special-operation",
+      "subscribed_queues": [
+        "booking-special-operation"
+      ],
+      "script_path": "booking-special-operation-worker/booking_special_operation_worker.py",
+      "args": [
+        "--auto-dsn",
+        "--db-name",
+        "{db}",
+        "--log-dir",
+        "{logdir}"
+      ],
+      "log_prefix": "booking-special-operation-worker",
+      "startup_delay_seconds": 2,
+      "enabled": true
+    },
+    {
+      "name": "task-scheduler-helper",
+      "primary_queue": "task-scheduler-helper",
+      "subscribed_queues": [
+        "task-scheduler-helper"
+      ],
+      "script_path": "task-scheduler-helper-worker/task_scheduler_helper_worker.py",
+      "args": [
+        "--auto-dsn",
+        "--db-name",
+        "{db}",
+        "--log-dir",
+        "{logdir}"
+      ],
+      "log_prefix": "task-scheduler-helper",
+      "startup_delay_seconds": 2,
+      "enabled": true
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+    <section data-panel="enqueue-task" class="panel hidden rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Enqueue Task</h2>
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Create a scheduled task for workers subscribed to the selected queue.</p>
+        </div>
+        <button id="task-enqueue-refresh" class="secondary-btn rounded border px-3 py-1 text-sm">Refresh Options</button>
+      </div>
+      <p id="task-enqueue-status" class="mt-3 min-h-5 text-sm text-slate-600 dark:text-slate-300"></p>
+      <form id="task-enqueue-form" class="mt-3 grid gap-3 text-sm lg:grid-cols-2">
+        <label class="block">
+          <span class="font-semibold text-slate-700 dark:text-slate-200">Queue</span>
+          <select id="task-enqueue-queue" required class="control-surface mt-1 w-full rounded border px-2 py-2"></select>
+        </label>
+        <label class="block">
+          <span class="font-semibold text-slate-700 dark:text-slate-200">Worker</span>
+          <select id="task-enqueue-worker" required class="control-surface mt-1 w-full rounded border px-2 py-2"></select>
+        </label>
+        <label class="block">
+          <span class="font-semibold text-slate-700 dark:text-slate-200">Action</span>
+          <input id="task-enqueue-action" required placeholder="fetch" class="control-surface mt-1 w-full rounded border px-2 py-2">
+        </label>
+        <label class="block">
+          <span class="font-semibold text-slate-700 dark:text-slate-200">Scheduled At</span>
+          <input id="task-enqueue-scheduled-at" type="datetime-local" class="control-surface mt-1 w-full rounded border px-2 py-2">
+        </label>
+        <label class="block">
+          <span class="font-semibold text-slate-700 dark:text-slate-200">Priority</span>
+          <input id="task-enqueue-priority" type="number" min="0" max="100" value="0" required class="control-surface mt-1 w-full rounded border px-2 py-2">
+        </label>
+        <label class="block">
+          <span class="font-semibold text-slate-700 dark:text-slate-200">Max Attempts</span>
+          <input id="task-enqueue-max-attempts" type="number" min="1" max="10" value="3" required class="control-surface mt-1 w-full rounded border px-2 py-2">
+        </label>
+        <label class="block lg:col-span-2">
+          <span class="font-semibold text-slate-700 dark:text-slate-200">Payload JSON</span>
+          <textarea id="task-enqueue-payload" rows="12" required class="control-surface mt-1 w-full rounded border px-2 py-2 font-mono text-xs">{
+  "limit": 25
+}</textarea>
+        </label>
+        <div class="flex flex-wrap items-center gap-2 lg:col-span-2">
+          <button id="task-enqueue-submit" type="submit" class="rounded bg-brand-600 px-3 py-2 text-white">Enqueue Task</button>
+          <button id="task-enqueue-reset" type="button" class="secondary-btn rounded border px-3 py-2">Reset</button>
+        </div>
+      </form>
+    </section>

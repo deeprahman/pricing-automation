@@ -1,0 +1,100 @@
+    .control-surface {
+      border-color: rgb(203 213 225);
+      background-color: rgba(255, 255, 255, 0.96);
+      color: rgb(15 23 42);
+    }
+
+    .control-surface::placeholder {
+      color: rgb(100 116 139);
+    }
+
+    .control-surface.format-invalid {
+      border-color: rgb(225 29 72);
+      box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.16);
+      background-color: rgba(255, 241, 242, 0.95);
+    }
+
+    .secondary-btn {
+      border-color: rgb(203 213 225);
+      background-color: rgba(255, 255, 255, 0.96);
+      color: rgb(51 65 85);
+    }
+
+    .secondary-btn:hover {
+      border-color: rgb(15 118 110);
+      color: rgb(15 118 110);
+    }
+
+    .nav-btn-active {
+      border-color: rgb(15 118 110);
+      background-color: rgb(209 250 229);
+      color: rgb(11 92 86);
+    }
+
+    .panel-table thead {
+      border-color: rgb(226 232 240);
+      color: rgb(71 85 105);
+    }
+
+    .panel-table tbody tr {
+      border-top: 1px solid rgb(226 232 240);
+    }
+
+    .panel-table tbody td,
+    .panel-table tbody th {
+      padding: 0.625rem 0.5rem;
+      vertical-align: top;
+    }
+
+    html.dark .control-surface {
+      border-color: rgb(71 85 105);
+      background-color: rgba(15, 23, 42, 0.92);
+      color: rgb(226 232 240);
+    }
+
+    html.dark .control-surface::placeholder {
+      color: rgb(148 163 184);
+    }
+
+    html.dark .control-surface.format-invalid {
+      border-color: rgb(251 113 133);
+      box-shadow: 0 0 0 2px rgba(251, 113, 133, 0.28);
+      background-color: rgba(69, 10, 10, 0.35);
+    }
+
+    html.dark .secondary-btn {
+      border-color: rgb(71 85 105);
+      background-color: rgba(30, 41, 59, 0.88);
+      color: rgb(226 232 240);
+    }
+
+    html.dark .secondary-btn:hover {
+      border-color: rgb(45 212 191);
+      color: rgb(240 253 250);
+    }
+
+    html.dark .nav-btn-active {
+      border-color: rgb(45 212 191);
+      background-color: rgba(15, 118, 110, 0.38);
+      color: rgb(240 253 250);
+    }
+
+    html.dark .panel-table thead {
+      border-color: rgb(51 65 85);
+      color: rgb(203 213 225);
+    }
+
+    html.dark .panel-table tbody tr {
+      border-top-color: rgb(30 41 59);
+    }
+
+    input[type="checkbox"] {
+      accent-color: #0f766e;
+    }
+
+    .category-scroll-panel {
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+    }

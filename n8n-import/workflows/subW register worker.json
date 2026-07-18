@@ -1,0 +1,302 @@
+{
+  "name": "subW register worker",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"worker_id\": \"test-worker-001\",\n  \"worker_name\": \"Test WOrkflow 001\",\n  \"max-concurrent-tasks\": 10,\n  \"heartbeat_interval\": \"1 minute\",\n  \"subscribed_queue\": [\"test\", \"email\"]\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        -64
+      ],
+      "id": "89cb9ff1-f45f-4dd6-b4be-a7949db1f558",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8be24a67-eb35-4993-a886-096ff6cb5aa9",
+              "name": "worker-id",
+              "value": "={{ $json.worker_id }}",
+              "type": "string"
+            },
+            {
+              "id": "863683ff-875f-4409-b23b-89791e3cc05d",
+              "name": "max-concurrent-tasks",
+              "value": "={{ $json[\"max-concurrent-tasks\"] }}",
+              "type": "number"
+            },
+            {
+              "id": "13b43a28-d0dc-4b52-a312-e81c2fbcdbec",
+              "name": "heartbeat-interval",
+              "value": "={{ $json.heartbeat_interval }}",
+              "type": "string"
+            },
+            {
+              "id": "66987a3a-fb45-42f7-9b68-7f9e98678561",
+              "name": "subscribed-queue",
+              "value": "={{ $json.subscribed_queue }}",
+              "type": "array"
+            },
+            {
+              "id": "e4cd39c0-ce02-492b-acd5-e6f90fe47396",
+              "name": "worker-name",
+              "value": "={{ $json.worker_name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -64
+      ],
+      "id": "84a71ed6-a578-4e3a-84bc-a1e8a96be367",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM register_worker(\n  '{{ $json[\"worker-id\"] }}',\n  '{{ $json[\"worker-name\"] }}',\n  {{ $json[\"max-concurrent-tasks\"] }},\n  '{{ $json[\"heartbeat-interval\"] }}'::INTERVAL,\n  '{{ JSON.stringify($json[\"subscribed-queue\"]) }}'::JSONB\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        448,
+        -64
+      ],
+      "id": "4cc47089-a99a-4065-962d-1f9471ee529d",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "WWSlgNwWnnhIhoMv",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"worker_id\": \"{{ $json.worker_id }}\",\n  \"api_key\": \"{{ $json.api_key }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        -64
+      ],
+      "id": "3cebc2b0-37b4-4315-8c56-749046de2acd",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "6fcs_uGq0D7cLzAVv7yEk",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/6fcs_uGq0D7cLzAVv7yEk",
+          "cachedResultName": "subW build worker object"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "worker_id",
+              "displayName": "worker_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "api_key",
+              "displayName": "api_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        896,
+        -64
+      ],
+      "id": "e7d36943-88ba-482a-9fbf-904f3d358ebe",
+      "name": "Call 'subW build worker object'",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Access the 'metadata' property from the current item\nconst metadata = $json;  // Accessing the 'metadata' from the first item\nconsole.log(metadata);\n// Check if 'metadata' exists, otherwise return an error\nif (metadata) {\n  return [{ json: { metadata } }];\n} else {\n  throw new Error('Metadata is undefined or missing.');\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        -64
+      ],
+      "id": "c1c1efbf-51ee-4f99-b2c6-56c9e7b476ab",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "2ypbt4vHErHfRNCgt6TEp",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/2ypbt4vHErHfRNCgt6TEp",
+          "cachedResultName": "subW set worker metadata"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [
+            "metadata"
+          ],
+          "schema": [
+            {
+              "id": "metadata",
+              "displayName": "metadata",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1312,
+        -64
+      ],
+      "id": "68053074-e548-4f1e-b39a-72b41f6d3fa3",
+      "name": "Call 'subW set worker metadata'"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "worker_id": "test-worker-000",
+          "worker_name": "Test Worker 000",
+          "max-concurrent-tasks": 10,
+          "heartbeat_interval": " 45 second",
+          "subscribed_queue": [
+            "test_short"
+          ]
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Call 'subW build worker object'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'subW build worker object'": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Call 'subW set worker metadata'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "9c091872-67b2-463e-9fde-72b2c448f758",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f94ee6675052c2b68be0785e7c4c1b60b0426d14c775c213c4e38fd0abd72c74"
+  },
+  "id": "fszm2InA4lqCLI3CuXvhs",
+  "tags": []
+}

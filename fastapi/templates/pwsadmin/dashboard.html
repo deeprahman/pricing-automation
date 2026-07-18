@@ -1,0 +1,48 @@
+{% extends "pwsadmin/base.html" %}
+{% block body %}
+  <div class="mx-auto flex max-w-6xl flex-col gap-4 p-4">
+    <header class="rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p class="text-xs uppercase tracking-wide text-brand-600">Dashboard</p>
+          <h1 class="text-2xl font-semibold">PWS Admin Console</h1>
+          <p class="text-sm text-slate-600 dark:text-slate-300">
+            Signed in as <strong>{{ display_name }}</strong> (<code class="font-mono text-xs">{{ email }}</code>)
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <button id="theme-toggle" class="secondary-btn rounded-lg border px-3 py-1 text-sm" aria-label="Switch to dark">Switch to dark</button>
+          <button id="logout-btn" class="rounded-lg border border-rose-200 bg-white/95 px-3 py-1 text-sm text-rose-700 transition hover:border-rose-300 hover:text-rose-800 dark:border-rose-400 dark:bg-slate-800 dark:text-rose-200 dark:hover:border-rose-300 dark:hover:text-rose-100">Logout</button>
+        </div>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-2 text-sm">
+        {% for tab in tabs %}
+        <button
+          id="tab-{{ tab.key }}-trigger"
+          data-registry-nav
+          data-nav="{{ tab.key }}"
+          data-tab-key="{{ tab.key }}"
+          class="nav-btn secondary-btn rounded-lg border px-2 py-1{% if tab.key == active_tab %} nav-btn-active{% endif %}"
+        >{{ tab.label }}</button>
+        {% endfor %}
+      </div>
+      <p id="status" class="mt-2 text-sm text-slate-600 dark:text-slate-300"></p>
+    </header>
+
+    {% for tab in tabs %}
+    <section
+      id="tab-{{ tab.key }}-panel"
+      data-registry-panel
+      data-panel="{{ tab.key }}"
+      data-tab-key="{{ tab.key }}"
+      class="dashboard-tab-panel{% if tab.key != active_tab %} hidden{% endif %}"
+    >
+      {% include tab.template %}
+    </section>
+    {% endfor %}
+  </div>
+  {% include "pwsadmin/partials/global-modals.html" %}
+
+  <script id="pwsadmin-dashboard-manifest" type="application/json">{{ dashboard_manifest_json | safe }}</script>
+  <script type="module" src="/pwsadmin/static/pwsadmin/js/core/app.js"></script>
+{% endblock %}

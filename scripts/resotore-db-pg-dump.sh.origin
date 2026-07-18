@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${DUMP:?Set DUMP first, e.g. export DUMP=/home/deep/pws_backup_test/auto_pws.full.dump}"
+
+DB="auto_pws"
+USER="n8n"
+CONTAINER="n8n-postgres"
+
+echo "Checking dump..."
+pg_restore -l "$DUMP" >/dev/null
+echo "Dump is valid."
+
+echo "Restoring $DUMP to $DB..."
+
+pv "$DUMP" | docker exec -i "$CONTAINER" pg_restore \
+  -w \
+  -U "$USER" \
+  -d "$DB" \
+  --clean \
+  --if-exists \
+  --no-owner \
+  --no-privileges \
+  --verbose
+
+echo "Restore done."

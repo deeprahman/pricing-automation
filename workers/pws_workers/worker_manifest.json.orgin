@@ -1,0 +1,37 @@
+{
+  "runtime_variables": {
+    "default_ttl_minutes": 15
+  },
+  "maintenance": {
+    "reset_interval_seconds": 60,
+    "log_prefix": "worker-maintenance",
+    "actions": [
+      {
+        "name": "small_server_disk_maintenance_run",
+        "enabled": true,
+        "interval_minutes": 60,
+        "payload": {}
+      }
+    ]
+  },
+  "workers": [
+    {
+      "name": "task-scheduler-helper",
+      "primary_queue": "task-scheduler-helper",
+      "subscribed_queues": [
+        "task-scheduler-helper"
+      ],
+      "script_path": "task-scheduler-helper-worker/task_scheduler_helper_worker.py",
+      "args": [
+        "--auto-dsn",
+        "--db-name",
+        "{db}",
+        "--log-dir",
+        "{logdir}"
+      ],
+      "log_prefix": "task-scheduler-helper",
+      "startup_delay_seconds": 2,
+      "enabled": true
+    }
+  ]
+}

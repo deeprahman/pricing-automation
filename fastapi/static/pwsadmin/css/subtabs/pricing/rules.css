@@ -1,0 +1,37 @@
+#subtab-pricing-rules-panel {}
+
+/* Keep mode tabs usable on narrow screens instead of overflowing horizontally. */
+#pricing-mode-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  max-width: 100%;
+}
+
+#pricing-mode-switcher > button {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Prevent long inline technical tokens from forcing horizontal overflow. */
+#pricing-help-simple,
+#pricing-help-moderate,
+#pricing-help-advanced,
+#pricing-simple-wrap,
+#pricing-moderate-wrap,
+#pricing-advanced-wrap {
+  overflow-wrap: anywhere;
+}
+
+#pricing-help-simple :not(pre) > code,
+#pricing-help-moderate :not(pre) > code,
+#pricing-help-advanced :not(pre) > code,
+#pricing-simple-wrap :not(pre) > code,
+#pricing-moderate-wrap :not(pre) > code,
+#pricing-advanced-wrap :not(pre) > code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}

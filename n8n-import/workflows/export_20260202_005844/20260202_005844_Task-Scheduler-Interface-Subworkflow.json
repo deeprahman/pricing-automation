@@ -1,0 +1,1163 @@
+[
+    {
+        "updatedAt": "2026-01-29T00:06:20.871Z",
+        "createdAt": "2026-01-27T18:23:25.365Z",
+        "id": "O_tR9X8q-2HpncmSGgqIS",
+        "name": "Task Scheduler Interface Subworkflow",
+        "description": null,
+        "active": false,
+        "isArchived": false,
+        "nodes": [
+            {
+                "parameters": {
+                    "content": "## ⚙️ Setup Requirements\n\n**Before Using This Workflow:**\n\n1. ✅ PostgreSQL database with secure_task_scheduler.sql schema installed\n\n2. ✅ Configure PostgreSQL credentials on all database nodes\n\n3. ✅ Create initial queues (or use defaults: default, email, payment, reports, maintenance)\n\n4. ✅ Test connection with get_queue_stats\n\n**Documentation:** See TASK_SCHEDULER_SUBWORKFLOW_README.md",
+                    "height": 300,
+                    "width": 360,
+                    "color": 2
+                },
+                "id": "efd8139f-70b6-468c-8c88-55f83fe7b55b",
+                "name": "Sticky Note7",
+                "type": "n8n-nodes-base.stickyNote",
+                "typeVersion": 1,
+                "position": [
+                    1248,
+                    4496
+                ]
+            },
+            {
+                "parameters": {
+                    "content": "## 📋 Task Scheduler Interface\n\n**Entry Point:** Subworkflow\n\n**Expected Input:**\n```json\n{\n  \"call\": \"function_name\",\n  \"args\": { /* function args */ }\n}\n```\n\n**Supported Functions:** 10\n- Task Management (4)\n- Worker Management (3)\n- Queue Management (2)\n- Monitoring (1)",
+                    "height": 300,
+                    "width": 340,
+                    "color": 2
+                },
+                "id": "319f2056-f706-4b6a-95f3-bfbacfaf4397",
+                "name": "Sticky Note",
+                "type": "n8n-nodes-base.stickyNote",
+                "typeVersion": 1,
+                "position": [
+                    1334,
+                    5684
+                ]
+            },
+            {
+                "parameters": {
+                    "content": "## 💡 Common Usage Patterns\n\n**Pattern 1: Producer**\nMain workflow → Execute this subworkflow → enqueue_task\n\n**Pattern 2: Worker**\nPoll loop → dequeue_task → process → complete_task/fail_task → heartbeat\n\n**Pattern 3: Monitor**\nScheduled workflow → get_queue_stats → alert if unhealthy\n\n**Example Call:**\n```json\n{\n  \"call\": \"enqueue_task\",\n  \"args\": {\n    \"api_key\": \"sk_...\",\n    \"task_name\": \"send_email\",\n    \"task_data\": {\"to\": \"user@example.com\"},\n    \"queue_name\": \"emails\",\n    \"priority\": 50\n  }\n}\n```",
+                    "height": 400,
+                    "width": 340
+                },
+                "id": "2db15fea-b22f-4ac6-be72-b1dbbab67f1c",
+                "name": "Sticky Note8",
+                "type": "n8n-nodes-base.stickyNote",
+                "typeVersion": 1,
+                "position": [
+                    1248,
+                    5232
+                ]
+            },
+            {
+                "parameters": {},
+                "id": "2b691061-4029-451e-b223-f99786435c41",
+                "name": "Execute Workflow Trigger",
+                "type": "n8n-nodes-base.executeWorkflowTrigger",
+                "typeVersion": 1,
+                "position": [
+                    1456,
+                    5824
+                ]
+            },
+            {
+                "parameters": {
+                    "content": "## 🔀 Function Router\n\nRoutes incoming requests to the appropriate PostgreSQL function based on the `call` parameter.\n\n**Outputs:**\n- 10 function-specific routes\n- 1 fallback route for errors\n\nUses strict validation with named outputs for clarity.",
+                    "height": 180,
+                    "width": 300
+                },
+                "id": "a7b0a3f5-3018-493d-9458-c34604d4a29f",
+                "name": "Sticky Note1",
+                "type": "n8n-nodes-base.stickyNote",
+                "typeVersion": 1,
+                "position": [
+                    1648,
+                    4848
+                ]
+            },
+            {
+                "parameters": {
+                    "rules": {
+                        "values": [
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 1
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.call }}",
+                                            "rightValue": "enqueue_task",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "id": "837f2977-168f-4969-aca1-af0f317f11aa"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "enqueue_task"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 1
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.call }}",
+                                            "rightValue": "dequeue_task",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "id": "adcbdde5-7ad0-4e11-aa84-d30459f71442"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "dequeue_task"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 1
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.call }}",
+                                            "rightValue": "complete_task",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "id": "c8796a59-6359-4792-a1f7-bf53922cecec"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "complete_task"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 1
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.call }}",
+                                            "rightValue": "fail_task",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "id": "3ce362ef-e6cc-4dcb-917b-dcccdfc7df7d"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "fail_task"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 1
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.call }}",
+                                            "rightValue": "register_worker",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "id": "18a8ff22-092b-47ad-b1c7-f2fd282c5544"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "register_worker"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 1
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.call }}",
+                                            "rightValue": "heartbeat",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "id": "5668b147-a8e3-4e4d-bea0-0bd74efafa50"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "heartbeat"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 1
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.call }}",
+                                            "rightValue": "get_task_status",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "id": "4fd25849-f1ee-4c06-ab67-8d983c599b16"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "get_task_status"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 1
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.call }}",
+                                            "rightValue": "get_queue_stats",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "id": "439425ca-d101-4148-814d-b7f98597d77c"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "get_queue_stats"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 1
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.call }}",
+                                            "rightValue": "update_worker_subscriptions",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "id": "fc054619-e014-4950-b718-1304e3b4083f"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "update_worker_subscriptions"
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 1
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.call }}",
+                                            "rightValue": "create_queue",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "id": "e270de6f-1eaa-441c-9f58-18df60a0bf51"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                },
+                                "renameOutput": true,
+                                "outputKey": "create_queue"
+                            }
+                        ]
+                    },
+                    "options": {
+                        "fallbackOutput": "extra"
+                    }
+                },
+                "id": "1c02f5c3-4929-40bd-88fd-17bd74700d44",
+                "name": "Router",
+                "type": "n8n-nodes-base.switch",
+                "typeVersion": 3,
+                "position": [
+                    1680,
+                    5680
+                ]
+            },
+            {
+                "parameters": {
+                    "content": "## 📝 Task Management\n\n**CRUD Operations for Tasks**\n\n✅ enqueue_task - Add to queue\n📥 dequeue_task - Get next task\n✔️ complete_task - Mark done\n❌ fail_task - Mark failed\n📊 get_task_status - Check status\n\nAll operations require valid API key authentication.",
+                    "height": 240,
+                    "width": 280,
+                    "color": 3
+                },
+                "id": "bad98b21-c0a4-4600-9d3a-788642b1c925",
+                "name": "Sticky Note2",
+                "type": "n8n-nodes-base.stickyNote",
+                "typeVersion": 1,
+                "position": [
+                    2080,
+                    4784
+                ]
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT * FROM enqueue_task(\n  '{{ $json.args.api_key }}',\n  '{{ $json.args.task_name }}',\n  '{{ JSON.stringify($json.args.task_data) }}'::JSONB,\n  '{{ $json.args.task_type || \"immediate\" }}',\n  {{ $json.args.priority || 0 }},\n  {{ $json.args.scheduled_at ? \"'\" + $json.args.scheduled_at + \"'::TIMESTAMPTZ\" : \"NOW()\" }},\n  {{ $json.args.max_attempts || 3 }},\n  {{ $json.args.recurrence_pattern ? \"'\" + $json.args.recurrence_pattern + \"'\" : \"NULL\" }},\n  '{{ $json.args.queue_name || \"default\" }}'\n);",
+                    "options": {}
+                },
+                "id": "bf6a43a6-a695-437e-ab89-3964614675ed",
+                "name": "Enqueue Task",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.4,
+                "position": [
+                    1904,
+                    4864
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT * FROM dequeue_task(\n  '{{ $json.args.api_key }}',\n  '{{ $json.args.lease_duration || \"5 minutes\" }}'::INTERVAL,\n  {{ $json.args.queue_names ? \"ARRAY[\" + $json.args.queue_names.map(q => \"'\" + q + \"'\").join(\",\") + \"]\" : \"NULL\" }}\n);",
+                    "options": {}
+                },
+                "id": "3cae4156-042e-4e7c-b06d-c13cb82a2f82",
+                "name": "Dequeue Task",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.4,
+                "position": [
+                    1904,
+                    5056
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT * FROM complete_task(\n  '{{ $json.args.api_key }}',\n  {{ $json.args.task_id }},\n  {{ $json.args.result_data ? \"'\" + JSON.stringify($json.args.result_data) + \"'::JSONB\" : \"NULL\" }}\n);",
+                    "options": {}
+                },
+                "id": "7a774cf8-ff63-4ea5-a5bc-72310bc63dc3",
+                "name": "Complete Task",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.4,
+                "position": [
+                    1904,
+                    5248
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT * FROM fail_task(\n  '{{ $json.args.api_key }}',\n  {{ $json.args.task_id }},\n  '{{ $json.args.error_message }}',\n  {{ $json.args.retry ? \"true\" : \"false\" }}\n);",
+                    "options": {}
+                },
+                "id": "f51e427c-5040-4776-a5ad-c14195c27899",
+                "name": "Fail Task",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.4,
+                "position": [
+                    1904,
+                    5440
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "content": "## 👷 Worker Management\n\n**Worker Lifecycle Operations**\n\n🆕 register_worker - New worker\n💓 heartbeat - Stay alive\n🔄 update_subscriptions - Change queues\n\nWorkers subscribe to specific queues and poll for tasks from those queues only.",
+                    "height": 220,
+                    "width": 488,
+                    "color": 4
+                },
+                "id": "4eeff41e-0153-471e-b0e2-09c35048ed78",
+                "name": "Sticky Note3",
+                "type": "n8n-nodes-base.stickyNote",
+                "typeVersion": 1,
+                "position": [
+                    2268,
+                    6076
+                ]
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT * FROM register_worker(\n  '{{ $json.args.worker_id }}',\n  '{{ $json.args.worker_name }}',\n  {{ $json.args.max_concurrent_tasks || 5 }},\n  '{{ $json.args.heartbeat_interval || \"30 seconds\" }}'::INTERVAL,\n  {{ $json.args.subscribed_queues ? \"'\" + JSON.stringify($json.args.subscribed_queues) + \"'::JSONB\" : \"'[\\\"default\\\"]'::JSONB\" }}\n);",
+                    "options": {}
+                },
+                "id": "c47ca30f-21c2-46d5-8dc3-ebfa48a387b7",
+                "name": "Register Worker",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.4,
+                "position": [
+                    1904,
+                    5632
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT * FROM worker_heartbeat(\n  '{{ $json.args.api_key }}',\n  {{ $json.args.current_load || 0 }},\n  {{ $json.args.task_id || \"NULL\" }}\n);",
+                    "options": {}
+                },
+                "id": "93935279-3a5d-4191-8f36-4697c3f595d0",
+                "name": "Worker Heartbeat",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.4,
+                "position": [
+                    1904,
+                    5824
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT * FROM get_task_status(\n  '{{ $json.args.api_key }}',\n  {{ $json.args.task_id }}\n);",
+                    "options": {}
+                },
+                "id": "deccb6b0-0e9e-4d8f-ae72-d4147cb03075",
+                "name": "Get Task Status",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.4,
+                "position": [
+                    1904,
+                    6016
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "content": "## 🗂️ Queue & Monitoring\n\n**System Operations**\n\n➕ create_queue - New queue\n📊 get_queue_stats - Health metrics\n\nQueues organize tasks by type (email, payment, reports, etc.). Workers subscribe to queues they can process.",
+                    "height": 200,
+                    "width": 280,
+                    "color": 7
+                },
+                "id": "2f331158-c3f5-46bd-9a44-1458aa078107",
+                "name": "Sticky Note4",
+                "type": "n8n-nodes-base.stickyNote",
+                "typeVersion": 1,
+                "position": [
+                    2080,
+                    5536
+                ]
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT * FROM get_queue_stats_by_queue();",
+                    "options": {}
+                },
+                "id": "1e7f3790-bd47-4347-9f26-ac133089a74c",
+                "name": "Get Queue Stats",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.4,
+                "position": [
+                    1904,
+                    6208
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT * FROM update_worker_subscriptions(\n  '{{ $json.args.api_key }}',\n  '{{ JSON.stringify($json.args.subscribed_queues) }}'::JSONB\n);",
+                    "options": {}
+                },
+                "id": "b7de6933-dbe2-4b31-8292-a819176e0048",
+                "name": "Update Worker Subscriptions",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.4,
+                "position": [
+                    1904,
+                    6400
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT * FROM create_queue(\n  '{{ $json.args.queue_name }}',\n  '{{ $json.args.description || \"\" }}'\n);",
+                    "options": {}
+                },
+                "id": "44ee4703-08a9-4167-b318-589f9460ca22",
+                "name": "Create Queue",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.4,
+                "position": [
+                    1904,
+                    6592
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "content": "## 🔑 Special: Worker Registration Flow\n\n**Auto API Key Storage**\n\nWhen register_worker is called:\n1. PostgreSQL generates API key\n2. Extract API Key node parses it\n3. Save Worker API Key stores hash\n4. Merge combines results\n\n⚠️ IMPORTANT: Save the API key from the response - it's only shown once!",
+                    "height": 240,
+                    "width": 548,
+                    "color": 6
+                },
+                "id": "7d531c57-2614-40f4-826a-e7143169c20b",
+                "name": "Sticky Note5",
+                "type": "n8n-nodes-base.stickyNote",
+                "typeVersion": 1,
+                "position": [
+                    2238,
+                    5456
+                ]
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "INSERT INTO worker_api_keys (worker_id, api_key_hash, api_key_prefix, is_active)\nVALUES (\n  (SELECT worker_id FROM worker_registry WHERE worker_id = '{{ $json.worker_id }}'),\n  encode(digest('{{ $json.api_key }}', 'sha256'), 'hex'),\n  left('{{ $json.api_key }}', 10),\n  true\n)\nON CONFLICT (worker_id) DO UPDATE\nSET api_key_hash = EXCLUDED.api_key_hash,\n    api_key_prefix = EXCLUDED.api_key_prefix,\n    is_active = true,\n    created_at = NOW()\nRETURNING worker_id, api_key_prefix, created_at;",
+                    "options": {}
+                },
+                "id": "6cf62f4c-280c-45d2-acaa-cca349137048",
+                "name": "Save Worker API Key",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.4,
+                "position": [
+                    2352,
+                    5440
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict",
+                            "version": 1
+                        },
+                        "conditions": [
+                            {
+                                "id": "condition1",
+                                "leftValue": "={{ $json.register_worker }}",
+                                "rightValue": "",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "notEmpty"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                },
+                "id": "7b221a00-841d-4d2a-9e1c-7bbae1f63ae0",
+                "name": "Check If Worker Registration",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    2576,
+                    6136
+                ]
+            },
+            {
+                "parameters": {
+                    "jsCode": "// n8n Code node (2.8+)\n\n// First input item\nconst { json } = $input.first();\n\n// Prefer direct fields if present\nlet apiKey = json.api_key ?? json.apiKey ?? null;\nconst workerId =\n  json.worker_id ??\n  json.workerId ??\n  $('Execute Workflow Trigger')?.first()?.json?.args?.worker_id ??\n  null;\n\n// Fallback: register_worker can be an object or string\nif (!apiKey) {\n  const raw = json.register_worker ?? json.registerWorker ?? null;\n\n  if (typeof raw === 'string') {\n    const m = raw.match(/API Key:\\s*(sk_[a-zA-Z0-9]+)/);\n    apiKey = m?.[1] ?? null;\n  } else if (raw && typeof raw === 'object') {\n    apiKey = raw.api_key ?? raw.apiKey ?? null;\n  }\n}\n\nreturn [\n  {\n    json: {\n      worker_id: workerId,\n      api_key: apiKey,\n    },\n  },\n];\n"
+                },
+                "id": "9eacef4f-0faf-49ff-95e0-08f093207c70",
+                "name": "Extract API Key",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    2128,
+                    5536
+                ]
+            },
+            {
+                "parameters": {
+                    "mode": "combine",
+                    "combinationMode": "mergeByPosition",
+                    "options": {}
+                },
+                "id": "0bd0c471-1a54-4f04-9a13-b2dcbe56f212",
+                "name": "Merge Results",
+                "type": "n8n-nodes-base.merge",
+                "typeVersion": 2.1,
+                "position": [
+                    2800,
+                    5632
+                ]
+            },
+            {
+                "parameters": {
+                    "content": "## ⚠️ Error Handling\n\n**Invalid/Missing Function Calls**\n\nIf the 'call' parameter is:\n- Missing\n- Empty\n- Not a valid function name\n\n→ Routes to error handler\n→ Returns helpful error message\n→ Lists all valid function names",
+                    "height": 200,
+                    "width": 280,
+                    "color": 5
+                },
+                "id": "91743345-a8d1-4b2f-8ff1-063d7aec066d",
+                "name": "Sticky Note6",
+                "type": "n8n-nodes-base.stickyNote",
+                "typeVersion": 1,
+                "position": [
+                    2036,
+                    6744
+                ]
+            },
+            {
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict",
+                            "version": 1
+                        },
+                        "conditions": [
+                            {
+                                "id": "condition1",
+                                "leftValue": "={{ $json.call }}",
+                                "rightValue": "",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "isEmpty"
+                                }
+                            }
+                        ],
+                        "combinator": "or"
+                    },
+                    "options": {}
+                },
+                "id": "a39c24a4-a93a-4e9a-8fac-d3c57cc8119c",
+                "name": "Error Handler",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    1904,
+                    6784
+                ]
+            },
+            {
+                "parameters": {
+                    "jsCode": "return {\n  success: false,\n  error: 'Invalid or missing call parameter',\n  message: 'The \"call\" parameter must specify a valid function name',\n  valid_calls: [\n    'enqueue_task',\n    'dequeue_task', \n    'complete_task',\n    'fail_task',\n    'register_worker',\n    'heartbeat',\n    'get_task_status',\n    'get_queue_stats',\n    'update_worker_subscriptions',\n    'create_queue'\n  ]\n};"
+                },
+                "id": "6c96456e-1d94-4ba6-aa46-f41d017e7c8b",
+                "name": "Return Error",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    2128,
+                    6784
+                ]
+            },
+            {
+                "parameters": {
+                    "assignments": {
+                        "assignments": [
+                            {
+                                "id": "bc87913d-fbd2-4f09-b037-104894b4d70f",
+                                "name": "api_key",
+                                "value": "={{ $json.api_key }}",
+                                "type": "string"
+                            },
+                            {
+                                "id": "f1a0bffa-1a2a-424f-8a08-f2d06f56bf73",
+                                "name": "worker_id",
+                                "value": "={{ $json.worker_id }}",
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.set",
+                "typeVersion": 3.4,
+                "position": [
+                    2352,
+                    5968
+                ],
+                "id": "168a469b-d07f-49b5-9b59-ad4c9d98420e",
+                "name": "Edit Fields"
+            },
+            {
+                "parameters": {
+                    "mode": "combine",
+                    "combineBy": "combineByPosition",
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.merge",
+                "typeVersion": 3.2,
+                "position": [
+                    2576,
+                    5536
+                ],
+                "id": "feebc7af-3649-433b-91de-858b73998355",
+                "name": "Merge"
+            }
+        ],
+        "connections": {
+            "Execute Workflow Trigger": {
+                "main": [
+                    [
+                        {
+                            "node": "Router",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Router": {
+                "main": [
+                    [
+                        {
+                            "node": "Enqueue Task",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Dequeue Task",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Complete Task",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Fail Task",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Register Worker",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Worker Heartbeat",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Get Task Status",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Get Queue Stats",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Update Worker Subscriptions",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Create Queue",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Error Handler",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Register Worker": {
+                "main": [
+                    [
+                        {
+                            "node": "Extract API Key",
+                            "type": "main",
+                            "index": 0
+                        },
+                        {
+                            "node": "Check If Worker Registration",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Extract API Key": {
+                "main": [
+                    [
+                        {
+                            "node": "Edit Fields",
+                            "type": "main",
+                            "index": 0
+                        },
+                        {
+                            "node": "Save Worker API Key",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Save Worker API Key": {
+                "main": [
+                    [
+                        {
+                            "node": "Merge",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Check If Worker Registration": {
+                "main": [
+                    [
+                        {
+                            "node": "Merge Results",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Error Handler": {
+                "main": [
+                    [
+                        {
+                            "node": "Return Error",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Edit Fields": {
+                "main": [
+                    [
+                        {
+                            "node": "Merge",
+                            "type": "main",
+                            "index": 1
+                        }
+                    ]
+                ]
+            },
+            "Merge": {
+                "main": [
+                    [
+                        {
+                            "node": "Merge Results",
+                            "type": "main",
+                            "index": 1
+                        }
+                    ]
+                ]
+            }
+        },
+        "settings": {
+            "executionOrder": "v1",
+            "availableInMCP": false
+        },
+        "staticData": null,
+        "meta": {
+            "templateCredsSetupCompleted": true
+        },
+        "pinData": {
+            "Execute Workflow Trigger": [
+                {
+                    "json": {
+                        "context": {
+                            "run_id": "2026-01-28T23:48:14.537Z",
+                            "subworkflow_id": "O_tR9X8q-2HpncmSGgqIS",
+                            "fallback_api_key": "REPLACE_WITH_WORKER_API_KEY",
+                            "queue_name": "test_queue_2026-01-28t23-48-14-537z",
+                            "worker_id": "test_worker_2026-01-28t23-48-14-537z",
+                            "worker_name": "Test Worker 2026-01-28T23:48:14.537Z",
+                            "api_key": "sk_cecedf540dc98079168620298807ba7e22b74284dc28a0524557a796a384eca0",
+                            "task_uuid_1": "937da356-43b7-4801-aa87-886e179476cf",
+                            "task_uuid_2": "1a5a1fb3-e0b1-42f7-b164-13e79208b199",
+                            "task_id_1": "1",
+                            "task_id_2": "2",
+                            "results": [
+                                {
+                                    "name": "create_queue",
+                                    "success": true,
+                                    "expected": "create_queue returns true",
+                                    "actual": {
+                                        "create_queue": true
+                                    },
+                                    "error": null
+                                },
+                                {
+                                    "name": "register_worker",
+                                    "success": true,
+                                    "expected": "api_key returned from register_worker",
+                                    "actual": {
+                                        "worker_id": "test_worker_2026-01-28t23-48-14-537z",
+                                        "api_key_prefix": "sk_cecedf5",
+                                        "created_at": "2026-01-28T23:48:14.652Z",
+                                        "api_key": "sk_cecedf540dc98079168620298807ba7e22b74284dc28a0524557a796a384eca0"
+                                    },
+                                    "error": null,
+                                    "api_key_source": "register_worker"
+                                },
+                                {
+                                    "name": "update_worker_subscriptions",
+                                    "success": true,
+                                    "expected": "update_worker_subscriptions returns true",
+                                    "actual": {
+                                        "update_worker_subscriptions": true
+                                    },
+                                    "error": null
+                                },
+                                {
+                                    "name": "enqueue_task",
+                                    "success": true,
+                                    "expected": "enqueue_task returns uuid",
+                                    "actual": {
+                                        "enqueue_task": "937da356-43b7-4801-aa87-886e179476cf"
+                                    },
+                                    "error": null
+                                },
+                                {
+                                    "name": "dequeue_task",
+                                    "success": true,
+                                    "expected": "dequeue_task returns task_id",
+                                    "actual": {
+                                        "task_id": "1",
+                                        "task_uuid": "937da356-43b7-4801-aa87-886e179476cf",
+                                        "task_name": "test_task_success_2026-01-28T23:48:14.537Z",
+                                        "task_data": {
+                                            "test": "enqueue_task_1",
+                                            "run_id": "2026-01-28T23:48:14.537Z"
+                                        },
+                                        "attempts": 1,
+                                        "max_attempts": 3,
+                                        "queue_name": "test_queue_2026-01-28t23-48-14-537z"
+                                    },
+                                    "error": null
+                                },
+                                {
+                                    "name": "complete_task",
+                                    "success": true,
+                                    "expected": "complete_task returns true",
+                                    "actual": {
+                                        "complete_task": true
+                                    },
+                                    "error": null
+                                },
+                                {
+                                    "name": "enqueue_task_2",
+                                    "success": true,
+                                    "expected": "enqueue_task returns uuid (second task)",
+                                    "actual": {
+                                        "enqueue_task": "1a5a1fb3-e0b1-42f7-b164-13e79208b199"
+                                    },
+                                    "error": null
+                                },
+                                {
+                                    "name": "dequeue_task_2",
+                                    "success": true,
+                                    "expected": "dequeue_task returns task_id (second task)",
+                                    "actual": {
+                                        "task_id": "2",
+                                        "task_uuid": "1a5a1fb3-e0b1-42f7-b164-13e79208b199",
+                                        "task_name": "test_task_fail_2026-01-28T23:48:14.537Z",
+                                        "task_data": {
+                                            "test": "enqueue_task_2",
+                                            "run_id": "2026-01-28T23:48:14.537Z"
+                                        },
+                                        "attempts": 1,
+                                        "max_attempts": 3,
+                                        "queue_name": "test_queue_2026-01-28t23-48-14-537z"
+                                    },
+                                    "error": null
+                                },
+                                {
+                                    "name": "fail_task",
+                                    "success": true,
+                                    "expected": "fail_task returns true",
+                                    "actual": {
+                                        "fail_task": true
+                                    },
+                                    "error": null
+                                },
+                                {
+                                    "name": "worker_heartbeat",
+                                    "success": true,
+                                    "expected": "worker_heartbeat returns true",
+                                    "actual": {
+                                        "worker_heartbeat": true
+                                    },
+                                    "error": null
+                                }
+                            ]
+                        },
+                        "call": "get_task_status",
+                        "args": {
+                            "api_key": "sk_cecedf540dc98079168620298807ba7e22b74284dc28a0524557a796a384eca0",
+                            "task_id": "1"
+                        }
+                    },
+                    "pairedItem": {
+                        "item": 0
+                    }
+                }
+            ]
+        },
+        "versionId": "fc4edfbe-d37e-4ef9-a769-efa697debd68",
+        "activeVersionId": null,
+        "versionCounter": 92,
+        "triggerCount": 0,
+        "tags": [],
+        "shared": [
+            {
+                "updatedAt": "2026-01-27T18:23:25.365Z",
+                "createdAt": "2026-01-27T18:23:25.365Z",
+                "role": "workflow:owner",
+                "workflowId": "O_tR9X8q-2HpncmSGgqIS",
+                "projectId": "vUahvjFlrpBAdiIw",
+                "project": {
+                    "updatedAt": "2026-01-25T22:40:34.965Z",
+                    "createdAt": "2026-01-25T22:36:36.266Z",
+                    "id": "vUahvjFlrpBAdiIw",
+                    "name": "SWARNA RAHMAN <dp.rahman@gmail.com>",
+                    "type": "personal",
+                    "icon": null,
+                    "description": null,
+                    "creatorId": "8423da70-c607-4933-9c9a-d2c97d2ea3f6"
+                }
+            }
+        ]
+    }
+]

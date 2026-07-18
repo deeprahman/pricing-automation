@@ -1,0 +1,583 @@
+    <section data-panel="pricing" class="panel hidden rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+      <div class="flex flex-wrap items-center gap-2 text-sm">
+        <button id="pricing-subtab-rules" class="secondary-btn rounded border px-3 py-1">Rules</button>
+        <button id="pricing-subtab-listings" class="secondary-btn rounded border px-3 py-1">Listings</button>
+      </div>
+      <div id="pricing-subtab-rules-panel" class="mt-3">
+        <div class="flex flex-wrap gap-2 text-sm">
+          <select id="pricing-scope" class="control-surface w-32 rounded border px-2 py-1">
+            <option value="">all scopes</option>
+            <option value="listing">listing</option>
+            <option value="property">property</option>
+            <option value="platform">platform</option>
+            <option value="global">global</option>
+          </select>
+          <input id="pricing-property" placeholder="property_id" class="control-surface w-28 rounded border px-2 py-1">
+          <input id="pricing-platform" placeholder="platform_id" class="control-surface w-28 rounded border px-2 py-1">
+          <input id="pricing-lookup" placeholder="lookup_id" class="control-surface w-28 rounded border px-2 py-1">
+          <input id="pricing-operation" placeholder="operation_code" class="control-surface w-32 rounded border px-2 py-1">
+          <input id="pricing-status" placeholder="status" class="control-surface w-24 rounded border px-2 py-1">
+          <button id="pricing-apply" class="rounded bg-brand-600 px-3 py-1 text-white">Load</button>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <div class="inline-flex rounded-xl border border-slate-200 bg-white/95 p-1 dark:border-slate-600 dark:bg-slate-900/90">
+            <button id="pricing-mode-simple" type="button" class="secondary-btn rounded-lg border px-3 py-1 text-sm font-semibold">Simple</button>
+            <button id="pricing-mode-moderate" type="button" class="secondary-btn rounded-lg border px-3 py-1 text-sm font-semibold">Moderate</button>
+            <button id="pricing-mode-advanced" type="button" class="secondary-btn rounded-lg border px-3 py-1 text-sm font-semibold">Advanced</button>
+          </div>
+          <button id="pricing-reset-editor" type="button" class="secondary-btn rounded-lg border px-3 py-1 text-sm font-semibold">New Rule</button>
+        </div>
+        <details id="pricing-help-simple" class="mt-3 rounded-xl border border-slate-200 bg-slate-50/90 p-3 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200" open>
+        <summary class="cursor-pointer select-none text-sm font-semibold text-slate-800 dark:text-slate-100">Simple Help: build a rule without JSON</summary>
+        <div class="mt-3 space-y-3">
+          <p class="text-slate-600 dark:text-slate-300">
+            Simple mode is for beginners. Fill in normal form fields, choose the rule target scope, and the dashboard will build the JSON rule in the background for you.
+          </p>
+          <div class="grid gap-3 md:grid-cols-3">
+            <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/60">
+              <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">What Simple mode supports</h3>
+              <ul class="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                <li>Core pricing actions only: <code>increase</code>, <code>decrease</code>, <code>set</code>, <code>multiplier</code></li>
+                <li>Date range rules and exact-date rules</li>
+                <li>Scope-aware targets: property + platform, property only, platform only, global, or one linked listing</li>
+                <li>Beginner-friendly create and edit for compatible rules</li>
+              </ul>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/60">
+              <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">How to fill it in</h3>
+              <ol class="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                <li>1. Pick the target scope first.</li>
+                <li>2. Choose what pricing action to apply.</li>
+                <li>3. Choose which booking categories should trigger it.</li>
+                <li>4. Choose either a date range or exact dates.</li>
+                <li>5. Save the rule.</li>
+              </ol>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/60">
+              <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Editing existing rules</h3>
+              <ul class="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                <li>Click a row in the pricing table to load it into the editor.</li>
+                <li>If a rule uses extra JSON-only features, the dashboard will switch you to Advanced mode automatically.</li>
+                <li>Use <code>New Rule</code> to leave edit mode and create a new item.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/60">
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Beginner example</h3>
+            <pre class="control-surface mt-2 overflow-x-auto rounded border p-2 text-xs">Property = Summa St Cottage
+Platform = airbnb
+Action = increase
+Type = percentage
+Amount = 12
+Apply from = departure
+Duration days = 2
+Trigger categories = checkout, possible_stay_extension
+Date scope = date range
+Start date = 2026-01-01
+End date = 2026-12-31
+Priority = 90
+Status = active</pre>
+            <p class="mt-2 text-xs text-slate-600 dark:text-slate-300">
+              Meaning: when one of the selected categories matches for that target, raise the price by 12% for 2 days starting from departure.
+            </p>
+          </div>
+        </div>
+      </details>
+      <details id="pricing-help-moderate" class="mt-3 hidden rounded-xl border border-slate-200 bg-slate-50/90 p-3 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200" open>
+        <summary class="cursor-pointer select-none text-sm font-semibold text-slate-800 dark:text-slate-100">Moderate Help: more rule types without JSON</summary>
+        <div class="mt-3 space-y-3">
+          <p class="text-slate-600 dark:text-slate-300">
+            Moderate mode keeps the beginner-friendly form style, but adds more structured pricing tools like price floors, stay-length rules, availability controls, and day-of-week schedules.
+          </p>
+          <div class="grid gap-3 md:grid-cols-3">
+            <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/60">
+              <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">What Moderate adds</h3>
+              <ul class="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                <li>Pricing controls: <code>min_price</code>, <code>max_price</code>, <code>remove_overrides</code></li>
+                <li>Availability controls: <code>close_dates</code>, <code>open_dates</code></li>
+                <li>Length-of-stay controls: <code>min_stay</code>, <code>max_stay</code></li>
+                <li>Weekly schedules with <code>day_of_week_pattern</code></li>
+              </ul>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/60">
+              <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">How to use it</h3>
+              <ol class="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                <li>1. Pick the target scope and then fill the matching selector fields.</li>
+                <li>2. Choose the structured operation you want.</li>
+                <li>3. Fill only the fields shown for that operation.</li>
+                <li>4. Pick trigger categories and the scope.</li>
+                <li>5. Save without touching raw JSON.</li>
+              </ol>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/60">
+              <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Examples</h3>
+              <ul class="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                <li><code>min_price</code>: never let selected dates drop below <code>140</code></li>
+                <li><code>close_dates</code>: block all selected dates from booking</li>
+                <li><code>min_stay</code>: require at least <code>3</code> nights</li>
+                <li><code>day_of_week_pattern</code>: run every Friday and Saturday only</li>
+              </ul>
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/60">
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">When it switches to Advanced</h3>
+            <p class="mt-2 text-xs text-slate-600 dark:text-slate-300">
+              If a rule contains extra JSON branches or a shape Moderate cannot safely rebuild, the dashboard will move you to Advanced mode automatically so nothing is lost.
+            </p>
+          </div>
+        </div>
+      </details>
+      <details id="pricing-help-advanced" class="mt-3 hidden rounded-xl border border-slate-200 bg-slate-50/90 p-3 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200" open>
+        <summary class="cursor-pointer select-none text-sm font-semibold text-slate-800 dark:text-slate-100">Advanced Help: how this works + what to enter</summary>
+        <div class="mt-3 space-y-3">
+          <p class="text-slate-600 dark:text-slate-300">
+            In this project, a pricing rule tells the SOA/BSO pipeline what to do when a booking matches a category such as <code>potential_extension</code>. The pricing engine now resolves rules in this order: <code>listing</code> -> <code>property</code> -> <code>platform</code> -> <code>global</code>.
+          </p>
+          <div class="grid gap-3 lg:grid-cols-3">
+            <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/60">
+              <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">How the flow works</h3>
+              <ol class="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                <li>1. A booking is categorized, for example <code>potential_extension</code>.</li>
+                <li>2. The pricing worker resolves active rules from the most specific scope down to the broadest one.</li>
+                <li>3. If multiple rules match, the higher <code>priority</code> wins.</li>
+                <li>4. <code>rule_config</code> supplies the category match, operation, and date window used to build the instruction.</li>
+              </ol>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/60">
+              <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Filter fields above</h3>
+              <ul class="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                <li><code>scope</code>: narrow the list to <code>listing</code>, <code>property</code>, <code>platform</code>, or <code>global</code></li>
+                <li><code>property_id</code>: show rules for one property. Example: <code>389550</code></li>
+                <li><code>platform_id</code>: narrow to one platform. Example: <code>432</code> for Airbnb in the demo</li>
+                <li><code>lookup_id</code>: show rules for one linked listing via <code>platform_property_lookup_id</code></li>
+                <li><code>operation_code</code>: find one action type. Example: <code>increase</code></li>
+                <li><code>status</code>: use <code>active</code> to find live rules, or <code>inactive</code> to find saved-but-disabled rules</li>
+              </ul>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/60">
+              <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Important tips</h3>
+              <ul class="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                <li>Listing-scoped rules use <code>platform_property_lookup_id</code> and must leave <code>property_id</code> and <code>platform_id</code> blank.</li>
+                <li>Property rules may keep <code>platform_id</code> blank or optionally narrow the property to one platform.</li>
+                <li>You must give the rule a date scope: exact <code>applicable_dates</code>, a <code>start_date</code> + <code>end_date</code> range, or <code>day_of_week_pattern</code> in Moderate/Advanced mode.</li>
+                <li>The trigger category is inside <code>rule_config.conditions.booking_category.in</code>, not in a separate form field.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/60">
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Field-by-field examples</h3>
+            <ul class="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+              <li><code>rule_uuid</code>: leave empty when creating a new rule; fill it when updating an existing rule. Example: <code>3fa85f64-5717-4562-b3fc-2c963f66afa6</code></li>
+              <li><code>operation_code</code>: the registered action to apply. Demo example: <code>increase</code></li>
+              <li><code>property_id</code>: the property the rule belongs to. Leave it blank for platform, global, or listing scope. Demo example: <code>389550</code></li>
+              <li><code>platform_id</code>: the target platform for that rule. Leave it blank for global rules, and also blank for listing scope. Demo example: <code>432</code></li>
+              <li><code>platform_property_lookup_id</code>: the linked listing target for a listing-scoped rule. Example: <code>42</code></li>
+              <li><code>priority</code>: higher number wins when rules overlap. Demo example: <code>90</code></li>
+              <li><code>status</code>: <code>active</code> means the worker can use it; <code>inactive</code> means keep it saved but ignored.</li>
+              <li><code>rule_config</code>: JSON that defines the subject, operation, apply window, and booking categories. A demo-shaped example is shown below.</li>
+              <li><code>applicable_dates</code>: use this when the rule should hit exact dates only. Example: <code>["2026-02-23","2026-02-24"]</code></li>
+              <li><code>start_date</code>: first day of a date-range rule. Example: <code>2026-01-01</code></li>
+              <li><code>end_date</code>: last day of a date-range rule. Example: <code>2026-12-31</code></li>
+            </ul>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/60">
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Copy/paste example used in the demo pattern</h3>
+            <pre class="control-surface mt-2 overflow-x-auto rounded border p-2 text-xs">rule_uuid = leave empty when creating
+operation_code = increase
+property_id = 389550
+platform_id = 432
+priority = 90
+status = active
+rule_config = {
+  "subject": "price",
+  "operation": { "type": "percentage", "amount": 12 },
+  "apply_window": { "applies_from": "departure", "duration_days": 2 },
+  "conditions": {
+    "booking_category": { "in": ["potential_extension", "extension"] }
+  }
+}
+applicable_dates = leave empty
+start_date = 2026-01-01
+end_date = 2026-12-31</pre>
+            <p class="mt-2 text-xs text-slate-600 dark:text-slate-300">
+              Meaning: for property <code>389550</code> on platform <code>432</code>, if the booking is tagged as <code>potential_extension</code> or <code>extension</code>, increase the price by <code>12%</code> for <code>2</code> days starting from departure.
+            </p>
+            <p class="mt-2 text-xs text-slate-600 dark:text-slate-300">
+              Tip: every form field also has a tooltip. Hover over a field to see format rules and a matching example.
+            </p>
+          </div>
+        </div>
+      </details>
+      <div class="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,28rem)]">
+        <div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Click a pricing rule row to edit it in the current mode. If the rule does not fit that structured mode, the editor will move you to Moderate or Advanced automatically.
+          </p>
+          <table class="panel-table mt-2 w-full text-sm">
+            <thead class="border-b text-left">
+              <tr><th>UUID</th><th>Scope</th><th>Target</th><th>Op</th><th>Status</th><th>Priority</th></tr>
+            </thead>
+            <tbody id="pricing-rows"></tbody>
+          </table>
+        </div>
+        <div class="space-y-3">
+          <div id="pricing-simple-wrap" class="rounded-xl border border-slate-200 bg-white/90 p-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Simple rule builder</h3>
+                <p id="pricing-simple-edit-state" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Creating a new pricing rule.</p>
+              </div>
+            </div>
+            <form id="pricing-simple-form" class="mt-3 space-y-3 text-sm">
+              <input id="pricing-simple-rule-uuid" name="rule_uuid" type="hidden">
+              <div class="grid gap-2 md:grid-cols-2">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Target
+                  <select id="pricing-simple-target-scope" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                    <option value="property_platform">Property + platform</option>
+                    <option value="property">Property only</option>
+                    <option value="platform">Platform only</option>
+                    <option value="global">Global</option>
+                    <option value="listing">Single listing</option>
+                  </select>
+                </label>
+                <div class="rounded-lg border border-slate-200 bg-slate-50/90 p-3 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-300">
+                  Engine scope order: <strong>listing</strong> -> <strong>property</strong> -> <strong>platform</strong> -> <strong>global</strong>.
+                  Use <strong>Single listing</strong> when the rule should target one exact linked listing.
+                </div>
+              </div>
+              <div class="grid gap-2 md:grid-cols-2">
+                <label id="pricing-simple-property-row" class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Property
+                  <select id="pricing-simple-property" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm" required></select>
+                </label>
+                <label id="pricing-simple-platform-row" class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Platform
+                  <select id="pricing-simple-platform" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm" required></select>
+                </label>
+              </div>
+              <label id="pricing-simple-listing-row" class="hidden block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                Listing
+                <select id="pricing-simple-listing" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                  <option value="">Select platform first</option>
+                </select>
+              </label>
+              <div class="grid gap-2 md:grid-cols-2">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Action
+                  <select id="pricing-simple-operation" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm" required>
+                    <option value="increase">increase</option>
+                    <option value="decrease">decrease</option>
+                    <option value="set">set</option>
+                    <option value="multiplier">multiplier</option>
+                  </select>
+                </label>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Type
+                  <select id="pricing-simple-amount-type" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm"></select>
+                </label>
+              </div>
+              <div class="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,9rem)]">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  <span id="pricing-simple-amount-label">Amount</span>
+                  <input id="pricing-simple-amount" type="number" step="0.01" min="0" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm" required>
+                </label>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Duration days
+                  <input id="pricing-simple-duration-days" type="number" min="1" value="1" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm" required>
+                </label>
+              </div>
+              <div class="grid gap-2 md:grid-cols-2">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Apply from
+                  <select id="pricing-simple-applies-from" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                    <option value="departure">departure</option>
+                    <option value="arrival">arrival</option>
+                  </select>
+                </label>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Status
+                  <select id="pricing-simple-status" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                    <option value="active">active</option>
+                    <option value="inactive">inactive</option>
+                    <option value="scheduled">scheduled</option>
+                    <option value="expired">expired</option>
+                    <option value="archived">archived</option>
+                  </select>
+                </label>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Priority
+                  <input id="pricing-simple-priority" type="number" min="0" max="100" value="50" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm" required>
+                </label>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Trigger categories (optional)</p>
+                <div id="pricing-simple-categories" class="category-scroll-panel mt-1 grid gap-2 rounded-lg border border-slate-200 bg-slate-50/90 p-3 text-xs dark:border-slate-700 dark:bg-slate-950/60"></div>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Date scope</p>
+                <div class="mt-1 flex flex-wrap gap-3 text-xs text-slate-600 dark:text-slate-300">
+                  <label class="inline-flex items-center gap-2">
+                    <input type="radio" name="pricing_simple_date_scope" value="range" checked>
+                    <span>Date range</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2">
+                    <input type="radio" name="pricing_simple_date_scope" value="exact">
+                    <span>Exact dates</span>
+                  </label>
+                </div>
+              </div>
+              <div id="pricing-simple-range-fields" class="grid gap-2 md:grid-cols-2">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Start date
+                  <input id="pricing-simple-start-date" type="date" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                </label>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  End date
+                  <input id="pricing-simple-end-date" type="date" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                </label>
+              </div>
+              <div id="pricing-simple-exact-fields" class="hidden rounded-lg border border-slate-200 bg-slate-50/90 p-3 dark:border-slate-700 dark:bg-slate-950/60">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Exact dates</p>
+                  <button id="pricing-simple-add-date" type="button" class="secondary-btn rounded border px-3 py-1 text-xs font-semibold">Add date</button>
+                </div>
+                <div id="pricing-simple-exact-dates" class="mt-2 space-y-2"></div>
+              </div>
+              <button class="w-full rounded bg-brand-600 px-3 py-2 text-sm font-semibold text-white">Save Simple Rule</button>
+            </form>
+          </div>
+          <div id="pricing-moderate-wrap" class="hidden rounded-xl border border-slate-200 bg-white/90 p-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Moderate rule builder</h3>
+                <p id="pricing-moderate-edit-state" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Creating a new pricing rule.</p>
+              </div>
+            </div>
+            <form id="pricing-moderate-form" class="mt-3 space-y-3 text-sm">
+              <input id="pricing-moderate-rule-uuid" name="rule_uuid" type="hidden">
+              <div class="grid gap-2 md:grid-cols-2">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Target
+                  <select id="pricing-moderate-target-scope" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                    <option value="property_platform">Property + platform</option>
+                    <option value="property">Property only</option>
+                    <option value="platform">Platform only</option>
+                    <option value="global">Global</option>
+                    <option value="listing">Single listing</option>
+                  </select>
+                </label>
+                <div class="rounded-lg border border-slate-200 bg-slate-50/90 p-3 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-300">
+                  Moderate mode supports the same target hierarchy as the pricing engine, including a single listing via <code>platform_property_lookup_id</code>.
+                </div>
+              </div>
+              <div class="grid gap-2 md:grid-cols-2">
+                <label id="pricing-moderate-property-row" class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Property
+                  <select id="pricing-moderate-property" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm" required></select>
+                </label>
+                <label id="pricing-moderate-platform-row" class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Platform
+                  <select id="pricing-moderate-platform" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm" required></select>
+                </label>
+              </div>
+              <label id="pricing-moderate-listing-row" class="hidden block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                Listing
+                <select id="pricing-moderate-listing" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                  <option value="">Select platform first</option>
+                </select>
+              </label>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Operation
+                  <select id="pricing-moderate-operation" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm" required>
+                    <optgroup label="Pricing">
+                      <option value="increase">increase</option>
+                      <option value="decrease">decrease</option>
+                      <option value="set">set</option>
+                      <option value="multiplier">multiplier</option>
+                      <option value="min_price">min_price</option>
+                      <option value="max_price">max_price</option>
+                      <option value="remove_overrides">remove_overrides</option>
+                    </optgroup>
+                    <optgroup label="Availability">
+                      <option value="close_dates">close_dates</option>
+                      <option value="open_dates">open_dates</option>
+                    </optgroup>
+                    <optgroup label="Length of stay">
+                      <option value="min_stay">min_stay</option>
+                      <option value="max_stay">max_stay</option>
+                    </optgroup>
+                  </select>
+                </label>
+              </div>
+              <div id="pricing-moderate-amount-type-row">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Value type
+                  <select id="pricing-moderate-amount-type" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm"></select>
+                </label>
+              </div>
+              <div id="pricing-moderate-amount-row">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  <span id="pricing-moderate-amount-label">Amount</span>
+                  <input id="pricing-moderate-amount" type="number" step="0.01" min="0" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                </label>
+              </div>
+              <div id="pricing-moderate-apply-window-row" class="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,9rem)]">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Apply from
+                  <select id="pricing-moderate-applies-from" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                    <option value="departure">departure</option>
+                    <option value="arrival">arrival</option>
+                  </select>
+                </label>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Duration days
+                  <input id="pricing-moderate-duration-days" type="number" min="1" value="1" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                </label>
+              </div>
+              <div class="grid gap-2 md:grid-cols-2">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Status
+                  <select id="pricing-moderate-status" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                    <option value="active">active</option>
+                    <option value="inactive">inactive</option>
+                    <option value="scheduled">scheduled</option>
+                    <option value="expired">expired</option>
+                    <option value="archived">archived</option>
+                  </select>
+                </label>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Priority
+                  <input id="pricing-moderate-priority" type="number" min="0" max="100" value="50" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm" required>
+                </label>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Trigger categories</p>
+                <div id="pricing-moderate-categories" class="category-scroll-panel mt-1 grid gap-2 rounded-lg border border-slate-200 bg-slate-50/90 p-3 text-xs dark:border-slate-700 dark:bg-slate-950/60"></div>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Scope</p>
+                <div class="mt-1 flex flex-wrap gap-3 text-xs text-slate-600 dark:text-slate-300">
+                  <label class="inline-flex items-center gap-2">
+                    <input type="radio" name="pricing_moderate_date_scope" value="range" checked>
+                    <span>Date range</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2">
+                    <input type="radio" name="pricing_moderate_date_scope" value="exact">
+                    <span>Exact dates</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2">
+                    <input type="radio" name="pricing_moderate_date_scope" value="dow">
+                    <span>Days of week</span>
+                  </label>
+                </div>
+              </div>
+              <div id="pricing-moderate-range-fields" class="grid gap-2 md:grid-cols-2">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Start date
+                  <input id="pricing-moderate-start-date" type="date" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                </label>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  End date
+                  <input id="pricing-moderate-end-date" type="date" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm">
+                </label>
+              </div>
+              <div id="pricing-moderate-exact-fields" class="hidden rounded-lg border border-slate-200 bg-slate-50/90 p-3 dark:border-slate-700 dark:bg-slate-950/60">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Exact dates</p>
+                  <button id="pricing-moderate-add-date" type="button" class="secondary-btn rounded border px-3 py-1 text-xs font-semibold">Add date</button>
+                </div>
+                <div id="pricing-moderate-exact-dates" class="mt-2 space-y-2"></div>
+              </div>
+              <div id="pricing-moderate-dow-fields" class="hidden rounded-lg border border-slate-200 bg-slate-50/90 p-3 dark:border-slate-700 dark:bg-slate-950/60">
+                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Days of week</p>
+                <div class="mt-2 grid gap-2 sm:grid-cols-2">
+                  <label class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white/90 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/70"><input class="pricing-moderate-dow-day" type="checkbox" value="1"><span>Monday</span></label>
+                  <label class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white/90 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/70"><input class="pricing-moderate-dow-day" type="checkbox" value="2"><span>Tuesday</span></label>
+                  <label class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white/90 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/70"><input class="pricing-moderate-dow-day" type="checkbox" value="4"><span>Wednesday</span></label>
+                  <label class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white/90 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/70"><input class="pricing-moderate-dow-day" type="checkbox" value="8"><span>Thursday</span></label>
+                  <label class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white/90 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/70"><input class="pricing-moderate-dow-day" type="checkbox" value="16"><span>Friday</span></label>
+                  <label class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white/90 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/70"><input class="pricing-moderate-dow-day" type="checkbox" value="32"><span>Saturday</span></label>
+                  <label class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white/90 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/70"><input class="pricing-moderate-dow-day" type="checkbox" value="64"><span>Sunday</span></label>
+                </div>
+                <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400">Example: Friday + Saturday stores <code>48</code>; Saturday + Sunday stores <code>96</code>.</p>
+              </div>
+              <div class="rounded-lg border border-slate-200 bg-slate-50/90 p-3 dark:border-slate-700 dark:bg-slate-950/60">
+                <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  <input id="pricing-moderate-season-enabled" type="checkbox">
+                  <span>Enable season window</span>
+                </label>
+                <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Optional filter layered on top of the selected date scope.</p>
+                <div id="pricing-moderate-season-fields" class="hidden mt-3 grid gap-2 md:grid-cols-3">
+                  <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                    Start MM-DD
+                    <input id="pricing-moderate-season-start-mmdd" type="text" inputmode="numeric" placeholder="12-10" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm" disabled>
+                  </label>
+                  <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                    End MM-DD
+                    <input id="pricing-moderate-season-end-mmdd" type="text" inputmode="numeric" placeholder="03-21" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm" disabled>
+                  </label>
+                  <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                    Applies to
+                    <select id="pricing-moderate-season-applies-to" class="control-surface mt-1 w-full rounded border px-2 py-2 text-sm" disabled>
+                      <option value="target_date">target_date</option>
+                      <option value="arrival_date">arrival_date</option>
+                      <option value="departure_date">departure_date</option>
+                    </select>
+                  </label>
+                </div>
+                <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400">Use month-day values only. Wrapping windows like <code>12-10</code> to <code>03-21</code> are valid.</p>
+              </div>
+              <button class="w-full rounded bg-brand-600 px-3 py-2 text-sm font-semibold text-white">Save Moderate Rule</button>
+            </form>
+          </div>
+          <div id="pricing-advanced-wrap" class="hidden rounded-xl border border-slate-200 bg-white/90 p-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Advanced JSON editor</h3>
+                <p id="pricing-advanced-edit-state" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Create a new rule or click a row to load one for editing.</p>
+              </div>
+            </div>
+            <form id="pricing-form-advanced" class="mt-3 space-y-2 text-sm">
+              <input id="pricing-rule-uuid" name="rule_uuid" placeholder="rule_uuid (update)" class="control-surface w-full rounded border px-2 py-1">
+              <input name="operation_code" placeholder="operation_code" required class="control-surface w-full rounded border px-2 py-1">
+              <input name="property_id" placeholder="property_id" class="control-surface w-full rounded border px-2 py-1">
+              <input name="platform_id" placeholder="platform_id" class="control-surface w-full rounded border px-2 py-1">
+              <input name="platform_property_lookup_id" placeholder="platform_property_lookup_id" class="control-surface w-full rounded border px-2 py-1">
+              <input name="priority" type="number" min="0" max="100" placeholder="priority" class="control-surface w-full rounded border px-2 py-1">
+              <input name="status" placeholder="status" class="control-surface w-full rounded border px-2 py-1">
+              <textarea name="rule_config" placeholder='rule_config JSON' class="control-surface h-28 w-full rounded border px-2 py-1 font-mono text-xs" required></textarea>
+              <textarea name="applicable_dates" placeholder='applicable_dates ["2026-04-01"]' class="control-surface h-16 w-full rounded border px-2 py-1 font-mono text-xs"></textarea>
+              <div class="grid gap-2 md:grid-cols-2">
+                <input name="start_date" placeholder="start_date" class="control-surface rounded border px-2 py-1">
+                <input name="end_date" placeholder="end_date" class="control-surface rounded border px-2 py-1">
+              </div>
+              <input name="day_of_week_pattern" type="number" min="0" max="127" placeholder="day_of_week_pattern (0-127)" class="control-surface w-full rounded border px-2 py-1">
+              <button class="w-full rounded bg-brand-600 px-3 py-2 text-sm font-semibold text-white">Save Advanced Rule</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      </div>
+      <div id="pricing-subtab-listings-panel" class="mt-3 hidden">
+        <div class="rounded-lg border border-slate-200 bg-white/85 p-3 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
+          Listing scope rules now attach to one linked listing through <code>platform_property_lookup_id</code>. Pick a row below to start a new listing-scoped rule without copying lookup IDs by hand.
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+          <select id="pricing-listings-platform-filter" class="control-surface w-56 rounded border px-2 py-1"></select>
+          <select id="pricing-listings-property-filter" class="control-surface w-56 rounded border px-2 py-1"></select>
+          <button id="pricing-listings-load" class="rounded bg-brand-600 px-3 py-1 text-white">Load Listings</button>
+        </div>
+        <div class="mt-3 overflow-x-auto">
+          <table class="panel-table w-full min-w-[980px] text-sm">
+            <thead class="border-b text-left">
+              <tr><th>Lookup</th><th>Platform</th><th>Listing ID</th><th>Listing</th><th>Property</th><th>Use</th></tr>
+            </thead>
+            <tbody id="pricing-listings-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>

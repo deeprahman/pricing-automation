@@ -1,0 +1,63 @@
+{
+    "guest": {
+        "first_name": "AVERY",
+        "id": 720000017,
+        "last_name": "CLARK"
+    },
+    "items": [
+        {
+            "body": "Reservation Confirmation\n\nDates & Details:\nCheck-in: Mar 22, 2026 at 4:00 PM\nCheck-out: Mar 27, 2026 at 10:00 AM\nNights: 5\nGuests: 4\n\nIf anything is incorrect, please let me know ASAP so I can update it before arrival.\n\nAddress:\n812 Olive Ave, Lake Worth, FL 33460\nhttps://www.google.com/maps/place/26.61512,-80.05781\n\nParking:\nStreet parking is available on a first-come basis. Driveway parking is limited to registered vehicles.\n\nWIFI:\nNetwork name: GuestNet\nPassword: Welcome2026\nHouse Rules:\nNo smoking or parties/events\nQuiet hours: 11:00 PM - 8:00 AM\n",
+            "date_utc": "2026-03-07T15:00:00Z",
+            "from_contact_id": 610000017,
+            "from_role": "owner",
+            "id": 96000170,
+            "is_draft": false,
+            "thread_id": 91000017
+        },
+        {
+            "body": "Hi,\n\nThanks for booking with us! Your door code is 4017. The code activates at 4 PM on check-in day. Please use the smart lock at the main entrance and message us if you have any trouble.",
+            "date_utc": "2026-03-07T17:00:00Z",
+            "from_contact_id": 610000017,
+            "from_role": "owner",
+            "id": 96000171,
+            "is_draft": false,
+            "thread_id": 91000017
+        },
+        {
+            "body": "Hi, just confirming this trip is for a work project near the port. I will need reliable WiFi for calls each evening.",
+            "date_utc": "2026-03-07T20:00:00Z",
+            "from_contact_id": 720000017,
+            "from_role": "guest",
+            "id": 96000174,
+            "is_draft": false,
+            "thread_id": 91000017
+        },
+        {
+            "body": "No problem. The desk in the living room has a surge protector and we average 300 Mbps down. Let us know if you need a monitor.",
+            "date_utc": "2026-03-07T22:00:00Z",
+            "from_contact_id": 610005017,
+            "from_role": "co_host",
+            "id": 96000176,
+            "is_draft": false,
+            "thread_id": 91000017
+        },
+        {
+            "body": "Please send a quick message after you arrive so we can make sure everything is perfect for your stay.",
+            "date_utc": "2026-03-08T16:00:00Z",
+            "from_contact_id": 610005017,
+            "from_role": "co_host",
+            "id": 96000178,
+            "is_draft": false,
+            "thread_id": 91000017
+        }
+    ],
+    "limit": 5,
+    "offset": 0,
+    "thread": {
+        "booking_id": 51000017,
+        "id": 91000017,
+        "property_id": 480001,
+        "type": "channel",
+        "channel": "vrbo"
+    }
+}

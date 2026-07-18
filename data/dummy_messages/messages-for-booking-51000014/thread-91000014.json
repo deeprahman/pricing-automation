@@ -1,0 +1,54 @@
+{
+    "guest": {
+        "first_name": "SAM",
+        "id": 720000014,
+        "last_name": "LEE"
+    },
+    "items": [
+        {
+            "body": "Reservation Confirmation\n\nDates & Details:\nCheck-in: Mar 19, 2026 at 4:00 PM\nCheck-out: Mar 24, 2026 at 10:00 AM\nNights: 5\nGuests: 4\n\nIf anything is incorrect, please let me know ASAP so I can update it before arrival.\n\nAddress:\n150 Sunset Ave, Palm Beach, FL 33480\nhttps://www.google.com/maps/place/26.72010,-80.03819\n\nParking:\nStreet parking is available on a first-come basis. Driveway parking is limited to registered vehicles.\n\nWIFI:\nNetwork name: WorkTripWiFi\nPassword: QuietHours\nHouse Rules:\nNo smoking or parties/events\nQuiet hours: 11:00 PM - 8:00 AM\n",
+            "date_utc": "2026-03-04T15:00:00Z",
+            "from_contact_id": 610000014,
+            "from_role": "owner",
+            "id": 96000140,
+            "is_draft": false,
+            "thread_id": 91000014
+        },
+        {
+            "body": "Hi,\n\nThanks for booking with us! Your door code is 4014. The code activates at 4 PM on check-in day. Please use the smart lock at the main entrance and message us if you have any trouble.",
+            "date_utc": "2026-03-04T17:00:00Z",
+            "from_contact_id": 610000014,
+            "from_role": "owner",
+            "id": 96000141,
+            "is_draft": false,
+            "thread_id": 91000014
+        },
+        {
+            "body": "Please send a quick message after you arrive so we can make sure everything is perfect for your stay.",
+            "date_utc": "2026-03-05T16:00:00Z",
+            "from_contact_id": 610005014,
+            "from_role": "co_host",
+            "id": 96000146,
+            "is_draft": false,
+            "thread_id": 91000014
+        },
+        {
+            "body": "Reminder: check-out is Mar 24, 2026 at 10:00 AM. Please load the dishwasher and start it, place used towels in the tub, and lock the door on your way out.",
+            "date_utc": "2026-03-06T18:00:00Z",
+            "from_contact_id": 610000014,
+            "from_role": "owner",
+            "id": 96000148,
+            "is_draft": false,
+            "thread_id": 91000014
+        }
+    ],
+    "limit": 4,
+    "offset": 0,
+    "thread": {
+        "booking_id": 51000014,
+        "id": 91000014,
+        "property_id": 480006,
+        "type": "channel",
+        "channel": "vrbo"
+    }
+}

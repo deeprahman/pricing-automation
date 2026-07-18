@@ -1,0 +1,1271 @@
+[
+    {
+        "updatedAt": "2026-02-01T06:14:19.017Z",
+        "createdAt": "2026-02-01T00:23:58.656Z",
+        "id": "gAaVz2ymEGWty1PfRrhY2",
+        "name": "Service Worker - Generic Template (Long Task, Exec Trigger)",
+        "description": null,
+        "active": false,
+        "isArchived": false,
+        "nodes": [
+            {
+                "parameters": {},
+                "id": "a15edb70-5951-41db-a981-ef616990b42a",
+                "name": "Main Loop",
+                "type": "n8n-nodes-base.executeWorkflowTrigger",
+                "typeVersion": 1,
+                "position": [
+                    -10752,
+                    1192
+                ]
+            },
+            {
+                "parameters": {
+                    "assignments": {
+                        "assignments": [
+                            {
+                                "id": "service-id",
+                                "name": "serviceId",
+                                "value": "={{ $json.serviceId || 'service-worker-default' }}",
+                                "type": "string"
+                            },
+                            {
+                                "id": "api-key",
+                                "name": "apiKey",
+                                "value": "={{ $json.apiKey || $env.SERVICE_WORKER_API_KEY }}",
+                                "type": "string"
+                            },
+                            {
+                                "id": "heartbeat-ms",
+                                "name": "heartbeatEveryMs",
+                                "value": "={{ $json.heartbeatEveryMs || 30000 }}",
+                                "type": "number"
+                            },
+                            {
+                                "id": "heartbeat-interval",
+                                "name": "heartbeatInterval",
+                                "value": "={{ $json.heartbeatInterval || '30 seconds' }}",
+                                "type": "string"
+                            },
+                            {
+                                "id": "current-load",
+                                "name": "currentLoad",
+                                "value": "={{ $json.currentLoad || 0 }}",
+                                "type": "number"
+                            },
+                            {
+                                "id": "lease-duration",
+                                "name": "leaseDuration",
+                                "value": "={{ $json.leaseDuration || '5 minutes' }}",
+                                "type": "string"
+                            },
+                            {
+                                "id": "queue-names",
+                                "name": "queueNames",
+                                "value": "={{ ($json.queueNames && $json.queueNames.length) ? $json.queueNames : ['default'] }}",
+                                "type": "array"
+                            },
+                            {
+                                "id": "backoff-ms",
+                                "name": "backoffMs",
+                                "value": "={{ $json.backoffMs || 10000 }}",
+                                "type": "number"
+                            },
+                            {
+                                "id": "poll-wait-ms",
+                                "name": "pollWaitMs",
+                                "value": "={{ $json.pollWaitMs || 5000 }}",
+                                "type": "number"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "id": "73b63315-fc9e-4cb8-b997-0c2e8d4798c0",
+                "name": "Worker Config",
+                "type": "n8n-nodes-base.set",
+                "typeVersion": 3.4,
+                "position": [
+                    -10528,
+                    1192
+                ]
+            },
+            {
+                "parameters": {
+                    "assignments": {
+                        "assignments": [
+                            {
+                                "id": "service-id",
+                                "name": "serviceId",
+                                "value": "={{ $json.serviceId || 'service-worker-default' }}",
+                                "type": "string"
+                            },
+                            {
+                                "id": "api-key",
+                                "name": "apiKey",
+                                "value": "={{ $json.apiKey || $env.SERVICE_WORKER_API_KEY }}",
+                                "type": "string"
+                            },
+                            {
+                                "id": "heartbeat-ms",
+                                "name": "heartbeatEveryMs",
+                                "value": "={{ $json.heartbeatEveryMs || 30000 }}",
+                                "type": "number"
+                            },
+                            {
+                                "id": "heartbeat-interval",
+                                "name": "heartbeatInterval",
+                                "value": "={{ $json.heartbeatInterval || '30 seconds' }}",
+                                "type": "string"
+                            },
+                            {
+                                "id": "current-load",
+                                "name": "currentLoad",
+                                "value": "={{ $json.currentLoad || 0 }}",
+                                "type": "number"
+                            },
+                            {
+                                "id": "lease-duration",
+                                "name": "leaseDuration",
+                                "value": "={{ $json.leaseDuration || '5 minutes' }}",
+                                "type": "string"
+                            },
+                            {
+                                "id": "queue-names",
+                                "name": "queueNames",
+                                "value": "={{ ($json.queueNames && $json.queueNames.length) ? $json.queueNames : ['default'] }}",
+                                "type": "array"
+                            },
+                            {
+                                "id": "backoff-ms",
+                                "name": "backoffMs",
+                                "value": "={{ $json.backoffMs || 10000 }}",
+                                "type": "number"
+                            },
+                            {
+                                "id": "poll-wait-ms",
+                                "name": "pollWaitMs",
+                                "value": "={{ $json.pollWaitMs || 5000 }}",
+                                "type": "number"
+                            },
+                            {
+                                "id": "last-heartbeat",
+                                "name": "lastHeartbeat",
+                                "value": "={{ $getWorkflowStaticData('global').lastHeartbeat || 0 }}",
+                                "type": "number"
+                            },
+                            {
+                                "id": "current-task",
+                                "name": "currentTaskId",
+                                "value": "={{ $getWorkflowStaticData('global').currentTaskId || null }}",
+                                "type": "number"
+                            },
+                            {
+                                "id": "error-backoff",
+                                "name": "errorBackoff",
+                                "value": "={{ $getWorkflowStaticData('global').errorBackoff || false }}",
+                                "type": "boolean"
+                            },
+                            {
+                                "id": "backoff-until",
+                                "name": "backoffUntil",
+                                "value": "={{ $getWorkflowStaticData('global').backoffUntil || 0 }}",
+                                "type": "number"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "id": "ad002388-bb0e-4118-a5ae-43d5bace80a2",
+                "name": "Load Worker State",
+                "type": "n8n-nodes-base.set",
+                "typeVersion": 3.4,
+                "position": [
+                    -10304,
+                    1192
+                ]
+            },
+            {
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict",
+                            "version": 1
+                        },
+                        "conditions": [
+                            {
+                                "id": "in-backoff",
+                                "leftValue": "={{ $json.errorBackoff && Date.now() < $json.backoffUntil }}",
+                                "rightValue": "true",
+                                "operator": {
+                                    "type": "boolean",
+                                    "operation": "true",
+                                    "singleValue": true
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                },
+                "id": "77f1cc20-ec24-45fa-8e7b-d74912589b04",
+                "name": "In Error Backoff?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    -10080,
+                    1192
+                ]
+            },
+            {
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict",
+                            "version": 1
+                        },
+                        "conditions": [
+                            {
+                                "id": "heartbeat-check",
+                                "leftValue": "={{ Date.now() - $json.lastHeartbeat > $json.heartbeatEveryMs }}",
+                                "rightValue": "true",
+                                "operator": {
+                                    "type": "boolean",
+                                    "operation": "true",
+                                    "singleValue": true
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                },
+                "id": "e263fd96-282c-4391-bfe0-ce6436eb1291",
+                "name": "Heartbeat Due?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    -9856,
+                    1192
+                ]
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT worker_heartbeat(\n  '{{ $('Worker Config').item.json.apiKey }}',\n  {{ $('Worker Config').item.json.currentLoad || 0 }},\n  '{{ $('Worker Config').item.json.heartbeatInterval || \"30 seconds\" }}'::INTERVAL\n) AS worker_heartbeat;",
+                    "options": {}
+                },
+                "id": "3ddedcc1-7ef5-41a5-9543-3e1af3026870",
+                "name": "Send Worker Heartbeat",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.5,
+                "position": [
+                    -9632,
+                    1120
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                },
+                "continueOnFail": true
+            },
+            {
+                "parameters": {
+                    "jsCode": "const state = $getWorkflowStaticData('global');\nstate.lastHeartbeat = Date.now();\nreturn $input.all();"
+                },
+                "id": "467f07ac-a547-4822-8cbd-086c10d7d888",
+                "name": "Update Heartbeat Time",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    -9408,
+                    1120
+                ]
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT * FROM dequeue_task(\n  '{{ $('Worker Config').item.json.apiKey }}',\n  '{{ $('Worker Config').item.json.leaseDuration || \"5 minutes\" }}'::INTERVAL,\n  {{ ($('Worker Config').item.json.queueNames && $('Worker Config').item.json.queueNames.length) ? \"ARRAY[\" + $('Worker Config').item.json.queueNames.map(q => \"'\" + q + \"'\").join(\",\") + \"]\" : \"ARRAY['default']\" }}\n);",
+                    "options": {}
+                },
+                "id": "02539e7c-2b3d-4365-9963-c42bcc59bfe5",
+                "name": "Poll Task",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.5,
+                "position": [
+                    -9184,
+                    1192
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                },
+                "continueOnFail": true
+            },
+            {
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict",
+                            "version": 1
+                        },
+                        "conditions": [
+                            {
+                                "id": "task-exists",
+                                "leftValue": "={{ $json.task_id }}",
+                                "rightValue": "",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "notEmpty",
+                                    "singleValue": true
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                },
+                "id": "921df8c8-0a99-4a88-bd24-7773917952a1",
+                "name": "Task Found?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    -8960,
+                    1192
+                ]
+            },
+            {
+                "parameters": {
+                    "jsCode": "const waitMs = $('Worker Config').item.json.pollWaitMs || 5000;\nawait new Promise(resolve => setTimeout(resolve, waitMs));\nreturn $input.all();"
+                },
+                "id": "23ff7847-bff4-40a4-a2b1-36cb6c96cece",
+                "name": "Wait (pollWaitMs)",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    -8736,
+                    1288
+                ]
+            },
+            {
+                "parameters": {
+                    "assignments": {
+                        "assignments": [
+                            {
+                                "id": "task-id",
+                                "name": "taskId",
+                                "value": "={{ $json.task_id }}",
+                                "type": "number"
+                            },
+                            {
+                                "id": "task-name",
+                                "name": "taskName",
+                                "value": "={{ $json.task_name }}",
+                                "type": "string"
+                            },
+                            {
+                                "id": "task-data",
+                                "name": "taskData",
+                                "value": "={{ $json.task_data }}",
+                                "type": "object"
+                            },
+                            {
+                                "id": "queue",
+                                "name": "queueName",
+                                "value": "={{ $json.queue_name }}",
+                                "type": "string"
+                            },
+                            {
+                                "id": "attempts",
+                                "name": "attemptNumber",
+                                "value": "={{ $json.attempts }}",
+                                "type": "number"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "id": "9a24786f-5656-4d87-afb5-2532890bda58",
+                "name": "Parse Task Data",
+                "type": "n8n-nodes-base.set",
+                "typeVersion": 3.4,
+                "position": [
+                    -8736,
+                    832
+                ]
+            },
+            {
+                "parameters": {
+                    "jsCode": "const state = $getWorkflowStaticData('global');\nstate.currentTaskId = $input.item.json.taskId;\nreturn $input.all();"
+                },
+                "id": "ee3503d5-90e2-4982-9825-87e16fa72ab0",
+                "name": "Set current_task_id",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    -8512,
+                    832
+                ]
+            },
+            {
+                "parameters": {
+                    "rules": {
+                        "values": [
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 2
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.taskName }}",
+                                            "rightValue": "task_example_a",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "id": "78839b83-cfe2-47df-b4bd-f35eebd45fc5"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                }
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 2
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.taskName }}",
+                                            "rightValue": "task_example_b",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "id": "0f0d3871-7e46-4658-b892-a0044701a2f5"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                }
+                            },
+                            {
+                                "conditions": {
+                                    "options": {
+                                        "caseSensitive": true,
+                                        "leftValue": "",
+                                        "typeValidation": "strict",
+                                        "version": 2
+                                    },
+                                    "conditions": [
+                                        {
+                                            "leftValue": "={{ $json.taskName }}",
+                                            "rightValue": "task_long_batch",
+                                            "operator": {
+                                                "type": "string",
+                                                "operation": "equals"
+                                            },
+                                            "id": "059903cf-af0a-49ce-b485-97f30d93a912"
+                                        }
+                                    ],
+                                    "combinator": "and"
+                                }
+                            }
+                        ]
+                    },
+                    "options": {
+                        "fallbackOutput": 3
+                    }
+                },
+                "id": "d1a14ad0-acc1-438d-82db-769f709b9c90",
+                "name": "Route by Task Name",
+                "type": "n8n-nodes-base.switch",
+                "typeVersion": 3.2,
+                "position": [
+                    -8288,
+                    816
+                ]
+            },
+            {
+                "parameters": {
+                    "jsCode": "// Example handler A\n// TODO: implement the task using $json.taskData\nreturn $input.all();"
+                },
+                "id": "e99f08b2-8473-4b38-bc74-01c4ebae5839",
+                "name": "task_example_a",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    -8064,
+                    688
+                ]
+            },
+            {
+                "parameters": {
+                    "jsCode": "// Example handler B\n// TODO: implement the task using $json.taskData\nreturn $input.all();"
+                },
+                "id": "0115409f-4dfe-4b35-a04e-b5a307f58bf7",
+                "name": "task_example_b",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    -8064,
+                    880
+                ]
+            },
+            {
+                "parameters": {
+                    "assignments": {
+                        "assignments": [
+                            {
+                                "id": "error-data",
+                                "name": "errorMessage",
+                                "value": "={{ `Unknown task: ${$json.taskName}` }}",
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "id": "3e2f7462-ce0b-4560-8dee-38358879beb3",
+                "name": "Raise ValueError",
+                "type": "n8n-nodes-base.set",
+                "typeVersion": 3.4,
+                "position": [
+                    -7840,
+                    1456
+                ]
+            },
+            {
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict",
+                            "version": 1
+                        },
+                        "conditions": [
+                            {
+                                "id": "check-success",
+                                "leftValue": "={{ $json.error }}",
+                                "rightValue": "",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "isEmpty"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                },
+                "id": "685ca48b-122d-4bd8-9d79-5b789349208b",
+                "name": "Task Success?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    -7840,
+                    880
+                ]
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT complete_task(\n  '{{ $('Worker Config').item.json.apiKey }}',\n  {{ $json.taskId || $('Parse Task Data').item.json.taskId }},\n  to_jsonb(json_build_object(\n    'result', 'ok',\n    'completed_at', '{{ new Date().toISOString() }}'\n  ))\n) AS complete_task;",
+                    "options": {}
+                },
+                "id": "41cb57fc-62b0-4849-a39b-d7be7502838f",
+                "name": "complete_task",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.5,
+                "position": [
+                    -7616,
+                    736
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                },
+                "continueOnFail": true
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT fail_task(\n  '{{ $('Worker Config').item.json.apiKey }}',\n  {{ $json.taskId || $('Parse Task Data').item.json.taskId }},\n  '{{ String($json.errorMessage || $json.error?.message || \"Task failed\").replace(/'/g, \"''\") }}'\n) AS fail_task;",
+                    "options": {}
+                },
+                "id": "10ea27ac-6044-4ce1-b102-0ff9fedbdc4e",
+                "name": "fail_task",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.5,
+                "position": [
+                    -7616,
+                    928
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                },
+                "continueOnFail": true
+            },
+            {
+                "parameters": {
+                    "jsCode": "const state = $getWorkflowStaticData('global');\nstate.currentTaskId = null;\nstate.errorBackoff = false;\nreturn $input.all();"
+                },
+                "id": "4b88126a-70d7-48a1-ba03-2455593a5163",
+                "name": "Clear current_task_id",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    -7392,
+                    880
+                ]
+            },
+            {
+                "parameters": {
+                    "content": "## Template Customization (Exec Trigger)\n\n1) Call this workflow via **Execute Workflow** and pass config fields.\n2) Replace task_example_* handlers with your task implementations.\n3) Add/remove routes in **Route by Task Name**.\n\nPostgres functions assumed:\n- worker_heartbeat(api_key, current_load, heartbeat_interval)\n- dequeue_task(api_key, lease_duration, queue_names)\n- heartbeat_task(api_key, task_id, extend_by)\n- complete_task(api_key, task_id, result_json)\n- fail_task(api_key, task_id, error_msg)",
+                    "height": 350,
+                    "width": 420,
+                    "color": 4
+                },
+                "id": "aa8165d0-c3e6-4975-9661-897603a4feac",
+                "name": "Template Notes",
+                "type": "n8n-nodes-base.stickyNote",
+                "typeVersion": 1,
+                "position": [
+                    -11120,
+                    608
+                ]
+            },
+            {
+                "parameters": {
+                    "content": "## Task Routing\n\n**Output 0:** task_example_a\n**Output 1:** task_example_b\n**Output 2:** task_long_batch\n**Output 3 (fallback):** Unknown task -> fail_task",
+                    "height": 240,
+                    "width": 360,
+                    "color": 5
+                },
+                "id": "16037c10-7ece-493b-a2a3-39a442607a7e",
+                "name": "Routing",
+                "type": "n8n-nodes-base.stickyNote",
+                "typeVersion": 1,
+                "position": [
+                    -8848,
+                    400
+                ]
+            },
+            {
+                "parameters": {
+                    "jsCode": "const item = $input.item;\nconst taskData = item.json.taskData || {};\nconst units = Array.isArray(taskData.units)\n  ? taskData.units\n  : Array.from({ length: taskData.totalUnits || 0 }, (_, i) => ({ index: i }));\nconst batchSize = taskData.batchSize || 10;\n\nif (!units.length) {\n  // No units provided; return a single placeholder item\n  return [{ json: { ...item.json, unitIndex: 0, totalUnits: 0, batchSize } }];\n}\n\nreturn units.map((unit, idx) => ({\n  json: {\n    ...item.json,\n    unit,\n    unitIndex: idx,\n    totalUnits: units.length,\n    batchSize\n  }\n}));\n"
+                },
+                "id": "bd7e9fde-58f2-489d-ac5f-01c1ef3229cc",
+                "name": "Prepare Units",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    -8064,
+                    1264
+                ]
+            },
+            {
+                "parameters": {
+                    "batchSize": "={{ $json.batchSize || 10 }}",
+                    "options": {}
+                },
+                "id": "a6069751-2098-4612-943e-451d53e67ead",
+                "name": "Batch Units (n)",
+                "type": "n8n-nodes-base.splitInBatches",
+                "typeVersion": 1,
+                "position": [
+                    -7840,
+                    1264
+                ]
+            },
+            {
+                "parameters": {
+                    "jsCode": "const items = $input.all();\nconst started = Date.now();\n// TODO: Process each unit in this batch\n// Example: call an API, transform data, write to DB, etc.\nconst durationMs = Date.now() - started;\nfor (const item of items) {\n  item.json.batchDurationMs = durationMs;\n}\nreturn items;\n"
+                },
+                "id": "e6da8551-fec2-431e-b07b-cb99c82ca0fd",
+                "name": "Process Batch (n units)",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    -7616,
+                    1120
+                ]
+            },
+            {
+                "parameters": {
+                    "jsCode": "const items = $input.all();\nconst now = Date.now();\nfor (const item of items) {\n  const taskData = item.json.taskData || {};\n  const leaseExpiresAt = taskData.leaseExpiresAt || taskData.lease_expires_at || item.json.leaseExpiresAt || null;\n  const remainingMs = leaseExpiresAt ? new Date(leaseExpiresAt).getTime() - now : null;\n  const batchMs = item.json.batchDurationMs || 0;\n  const bufferMs = taskData.leaseBufferMs || Math.max(5000, batchMs);\n  const thresholdMs = batchMs + bufferMs;\n  item.json.remainingLeaseMs = remainingMs;\n  item.json.heartbeatThresholdMs = thresholdMs;\n  item.json.shouldExtendLease = remainingMs === null ? true : remainingMs < thresholdMs;\n  item.json.extendByInterval = taskData.extendByInterval || '5 minutes';\n}\nreturn items;\n"
+                },
+                "id": "966e215e-8cf7-4fd9-8d4d-9333d599e420",
+                "name": "Lease Check (threshold)",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    -7392,
+                    1120
+                ]
+            },
+            {
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict"
+                        },
+                        "conditions": [
+                            {
+                                "id": "extend-lease",
+                                "leftValue": "={{ $json.shouldExtendLease }}",
+                                "rightValue": "true",
+                                "operator": {
+                                    "type": "boolean",
+                                    "operation": "true"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                },
+                "id": "fe8c9287-e7aa-47f8-bf93-f943f46cf29e",
+                "name": "Extend Lease?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    -7168,
+                    1120
+                ]
+            },
+            {
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "SELECT heartbeat_task(\n  '{{ $('Worker Config').item.json.apiKey }}',\n  {{ $json.taskId || $('Parse Task Data').item.json.taskId }},\n  '{{ $json.extendByInterval || \"5 minutes\" }}'::INTERVAL\n);",
+                    "options": {}
+                },
+                "id": "023021c7-cbb9-44a3-b8f8-5f020c7963af",
+                "name": "heartbeat_task (extend lease)",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.5,
+                "position": [
+                    -6944,
+                    1216
+                ],
+                "credentials": {
+                    "postgres": {
+                        "id": "DaS7mZvyZ9LN6V5S",
+                        "name": "Postgress-n8n-db"
+                    }
+                },
+                "continueOnFail": true
+            },
+            {
+                "parameters": {
+                    "mode": "raw",
+                    "jsonOutput": "={{ (() => {\n  const taskId = $json.taskId ?? $json.task_id ?? $('Parse Task Data').item?.json?.taskId ?? null;\n  return { result: 'long_task_completed', taskId };\n})() }}",
+                    "options": {}
+                },
+                "id": "89a0adcc-2bd2-4167-87ac-1671b79978ed",
+                "name": "Long Task Done",
+                "type": "n8n-nodes-base.set",
+                "typeVersion": 3.4,
+                "position": [
+                    -8064,
+                    1456
+                ]
+            },
+            {
+                "parameters": {
+                    "content": "## Long Task Handler (Heartbeat)\n\n**Task Name:** task_long_batch\n- Splits task into units\n- Processes units in batches\n- Checks remaining lease time\n- Extends lease via heartbeat_task when needed\n\n**Expected taskData fields (optional):**\n- units: array of units to process\n- totalUnits: number (if units not provided)\n- batchSize: number\n- leaseExpiresAt / lease_expires_at: ISO timestamp\n- leaseBufferMs: number\n- extendByInterval: interval string (e.g., '5 minutes')",
+                    "height": 360,
+                    "width": 420,
+                    "color": 6
+                },
+                "id": "b2dab222-9813-4212-a13c-b2fd0d92dc0e",
+                "name": "Long Task Notes",
+                "type": "n8n-nodes-base.stickyNote",
+                "typeVersion": 1,
+                "position": [
+                    -8688,
+                    1536
+                ]
+            }
+        ],
+        "connections": {
+            "Main Loop": {
+                "main": [
+                    [
+                        {
+                            "node": "Worker Config",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Worker Config": {
+                "main": [
+                    [
+                        {
+                            "node": "Load Worker State",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Load Worker State": {
+                "main": [
+                    [
+                        {
+                            "node": "In Error Backoff?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "In Error Backoff?": {
+                "main": [
+                    [],
+                    [
+                        {
+                            "node": "Heartbeat Due?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Heartbeat Due?": {
+                "main": [
+                    [
+                        {
+                            "node": "Send Worker Heartbeat",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Poll Task",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Send Worker Heartbeat": {
+                "main": [
+                    [
+                        {
+                            "node": "Update Heartbeat Time",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Update Heartbeat Time": {
+                "main": [
+                    [
+                        {
+                            "node": "Poll Task",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Poll Task": {
+                "main": [
+                    [
+                        {
+                            "node": "Task Found?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Task Found?": {
+                "main": [
+                    [
+                        {
+                            "node": "Parse Task Data",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Wait (pollWaitMs)",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Parse Task Data": {
+                "main": [
+                    [
+                        {
+                            "node": "Set current_task_id",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Set current_task_id": {
+                "main": [
+                    [
+                        {
+                            "node": "Route by Task Name",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Route by Task Name": {
+                "main": [
+                    [
+                        {
+                            "node": "task_example_a",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "task_example_b",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Prepare Units",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "task_example_a": {
+                "main": [
+                    [
+                        {
+                            "node": "Task Success?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "task_example_b": {
+                "main": [
+                    [
+                        {
+                            "node": "Task Success?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Raise ValueError": {
+                "main": [
+                    [
+                        {
+                            "node": "fail_task",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Task Success?": {
+                "main": [
+                    [
+                        {
+                            "node": "complete_task",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "fail_task",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "complete_task": {
+                "main": [
+                    [
+                        {
+                            "node": "Clear current_task_id",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "fail_task": {
+                "main": [
+                    [
+                        {
+                            "node": "Clear current_task_id",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Prepare Units": {
+                "main": [
+                    [
+                        {
+                            "node": "Batch Units (n)",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Batch Units (n)": {
+                "main": [
+                    [
+                        {
+                            "node": "Process Batch (n units)",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Process Batch (n units)": {
+                "main": [
+                    [
+                        {
+                            "node": "Lease Check (threshold)",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Lease Check (threshold)": {
+                "main": [
+                    [
+                        {
+                            "node": "Extend Lease?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Extend Lease?": {
+                "main": [
+                    [
+                        {
+                            "node": "heartbeat_task (extend lease)",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Batch Units (n)",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "heartbeat_task (extend lease)": {
+                "main": [
+                    [
+                        {
+                            "node": "Batch Units (n)",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Long Task Done": {
+                "main": [
+                    [
+                        {
+                            "node": "Task Success?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            }
+        },
+        "settings": {
+            "executionOrder": "v1",
+            "availableInMCP": false
+        },
+        "staticData": null,
+        "meta": {
+            "templateCredsSetupCompleted": true
+        },
+        "pinData": {
+            "Main Loop": [
+                {
+                    "json": {
+                        "context": {
+                            "run_id": "2026-02-01T06:04:53.101Z",
+                            "worker_workflow_id": "gAaVz2ymEGWty1PfRrhY2",
+                            "queue_name": "test_queue_2026-02-01t06-04-53-101z",
+                            "worker_id": "test_worker_2026-02-01t06-04-53-101z",
+                            "worker_name": "Test Worker 2026-02-01T06:04:53.101Z",
+                            "api_key": "sk_6d08feaaeb17eef700aeb463301bc5a5c9e534f7bb999ef8e5d0cf4edf18cda1",
+                            "task_uuid_a": "fa9fa43a-cbe6-4b0b-9638-e3c895197a68",
+                            "task_uuid_long": "a609d2aa-13b9-4409-a37c-3ab01b8400a6",
+                            "task_uuid_b": "ead2f3e8-12f4-4b2c-9fc6-7989c935773e",
+                            "results": [
+                                {
+                                    "name": "create_queue",
+                                    "success": true,
+                                    "expected": "create_queue returns true",
+                                    "actual": {
+                                        "create_queue": true
+                                    },
+                                    "error": null
+                                },
+                                {
+                                    "name": "register_worker",
+                                    "success": true,
+                                    "expected": "api_key returned from register_worker",
+                                    "actual": {
+                                        "worker_id": "test_worker_2026-02-01t06-04-53-101z",
+                                        "api_key": "sk_6d08feaaeb17eef700aeb463301bc5a5c9e534f7bb999ef8e5d0cf4edf18cda1",
+                                        "success": true
+                                    },
+                                    "error": null
+                                },
+                                {
+                                    "name": "enqueue_task_a",
+                                    "success": true,
+                                    "expected": "enqueue_task returns uuid",
+                                    "actual": {
+                                        "task_uuid": "fa9fa43a-cbe6-4b0b-9638-e3c895197a68"
+                                    },
+                                    "error": null
+                                },
+                                {
+                                    "name": "enqueue_task_long",
+                                    "success": true,
+                                    "expected": "enqueue_task returns uuid (long task)",
+                                    "actual": {
+                                        "task_uuid": "a609d2aa-13b9-4409-a37c-3ab01b8400a6"
+                                    },
+                                    "error": null
+                                },
+                                {
+                                    "name": "enqueue_task_b",
+                                    "success": true,
+                                    "expected": "enqueue_task returns uuid (task B)",
+                                    "actual": {
+                                        "task_uuid": "ead2f3e8-12f4-4b2c-9fc6-7989c935773e"
+                                    },
+                                    "error": null
+                                }
+                            ]
+                        },
+                        "serviceId": "test_worker_2026-02-01t06-04-53-101z",
+                        "apiKey": "sk_6d08feaaeb17eef700aeb463301bc5a5c9e534f7bb999ef8e5d0cf4edf18cda1",
+                        "queueNames": [
+                            "test_queue_2026-02-01t06-04-53-101z"
+                        ],
+                        "leaseDuration": "1 minute",
+                        "pollWaitMs": 0,
+                        "heartbeatEveryMs": 0,
+                        "heartbeatInterval": "30 seconds",
+                        "currentLoad": 0
+                    }
+                }
+            ]
+        },
+        "versionId": "d2231620-b595-4c6d-9780-1ce612745a85",
+        "activeVersionId": null,
+        "versionCounter": 77,
+        "triggerCount": 0,
+        "tags": [
+            {
+                "updatedAt": "2026-01-31T23:25:50.416Z",
+                "createdAt": "2026-01-31T23:25:50.416Z",
+                "id": "Vj3cv1bZRkaJIGkG",
+                "name": "template"
+            },
+            {
+                "updatedAt": "2026-01-31T23:25:50.428Z",
+                "createdAt": "2026-01-31T23:25:50.428Z",
+                "id": "nSfiasOgScwoCiY4",
+                "name": "long-task"
+            },
+            {
+                "updatedAt": "2026-01-31T23:25:50.434Z",
+                "createdAt": "2026-01-31T23:25:50.434Z",
+                "id": "2pSy7ZEqWNOk7SLV",
+                "name": "service-worker"
+            },
+            {
+                "updatedAt": "2026-02-01T00:21:32.881Z",
+                "createdAt": "2026-02-01T00:21:32.881Z",
+                "id": "jL6Wm80B8XwwwSrB",
+                "name": "exec-trigger"
+            }
+        ],
+        "shared": [
+            {
+                "updatedAt": "2026-02-01T00:23:58.656Z",
+                "createdAt": "2026-02-01T00:23:58.656Z",
+                "role": "workflow:owner",
+                "workflowId": "gAaVz2ymEGWty1PfRrhY2",
+                "projectId": "vUahvjFlrpBAdiIw",
+                "project": {
+                    "updatedAt": "2026-01-25T22:40:34.965Z",
+                    "createdAt": "2026-01-25T22:36:36.266Z",
+                    "id": "vUahvjFlrpBAdiIw",
+                    "name": "SWARNA RAHMAN <dp.rahman@gmail.com>",
+                    "type": "personal",
+                    "icon": null,
+                    "description": null,
+                    "creatorId": "8423da70-c607-4933-9c9a-d2c97d2ea3f6"
+                }
+            }
+        ]
+    }
+]

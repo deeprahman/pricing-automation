@@ -1,0 +1,56 @@
+{
+  "name": "subW Metadata Formatter",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Access the 'metadata' property from the current item\nconst metadata = $json;  // Accessing the 'metadata' from the first item\nconsole.log(metadata);\n// Check if 'metadata' exists, otherwise return an error\nif (metadata) {\n  return [{ json: { metadata } }];\n} else {\n  throw new Error('Metadata is undefined or missing.');\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        -144
+      ],
+      "id": "6e642970-4ea5-401f-9e24-4b7498f6a09d",
+      "name": "format metadata"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "f1f00b83-0d0a-49f3-b84c-4e5154bca69e",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        1568,
+        -144
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "format metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "472f853e-8a9f-46dc-a029-df28bf69f353",
+  "meta": {
+    "instanceId": "f94ee6675052c2b68be0785e7c4c1b60b0426d14c775c213c4e38fd0abd72c74"
+  },
+  "id": "df2CmoxWTZFsHblh",
+  "tags": []
+}

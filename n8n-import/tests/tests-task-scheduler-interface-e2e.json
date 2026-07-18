@@ -1,0 +1,718 @@
+{
+  "name": "Tests - Task Scheduler Interface E2E",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## ✅ Task Scheduler Interface E2E Tests\n\n**Before running:**\n1) Set `subworkflow_id` in **Init Test Context** to the ID of `Task Scheduler Interface Subworkflow`.\n2) (Optional) Set `fallback_api_key` if register_worker does not return an API key.\n3) Ensure Postgres is running with `secure_task_scheduler.sql` installed.\n\n**Output:** Final node returns a summary with per-test success/failure details.",
+        "height": 260,
+        "width": 420,
+        "color": 2
+      },
+      "id": "sticky-tests-instructions",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1000,
+        -240
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1000,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const runId = new Date().toISOString();\nconst runIdSafe = runId.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');\nconst queueName = `test_queue_${runIdSafe.slice(0, 24)}`;\nconst workerId = `test_worker_${runIdSafe.slice(0, 24)}`;\nconst workerName = `Test Worker ${runId}`;\n\nconst context = {\n  run_id: runId,\n  subworkflow_id: 'REPLACE_WITH_SUBWORKFLOW_ID',\n  fallback_api_key: 'REPLACE_WITH_WORKER_API_KEY',\n  queue_name: queueName,\n  worker_id: workerId,\n  worker_name: workerName,\n  api_key: null,\n  task_uuid_1: null,\n  task_uuid_2: null,\n  task_id_1: null,\n  task_id_2: null,\n  results: []\n};\n\nreturn [{\n  json: {\n    context,\n    call: 'create_queue',\n    args: {\n      queue_name: queueName,\n      description: `Test queue for run ${runId}`\n    }\n  }\n}];"
+      },
+      "id": "init-test-context",
+      "name": "Init Test Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.subworkflow_id }}"
+      },
+      "id": "call-create-queue",
+      "name": "Call Create Queue",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('Init Test Context')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.create_queue === true || result.create_queue === 't' || result.create_queue === 1;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'create_queue',\n  success: ok && !error,\n  expected: 'create_queue returns true',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{\n  json: {\n    context,\n    call: 'register_worker',\n    args: {\n      worker_id: context.worker_id,\n      worker_name: context.worker_name,\n      max_concurrent_tasks: 3,\n      heartbeat_interval: '30 seconds',\n      subscribed_queues: ['default', context.queue_name]\n    }\n  }\n}];"
+      },
+      "id": "after-create-queue",
+      "name": "After Create Queue",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.subworkflow_id }}"
+      },
+      "id": "call-register-worker",
+      "name": "Call Register Worker",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Create Queue')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\n\nlet apiKey = result.api_key;\nif (!apiKey && typeof result.register_worker === 'string') {\n  const match = result.register_worker.match(/sk_[a-zA-Z0-9]+/);\n  if (match) apiKey = match[0];\n}\n\nconst usedApiKey = apiKey || prev.fallback_api_key || null;\nconst ok = !!apiKey;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'register_worker',\n  success: ok && !error,\n  expected: 'api_key returned from register_worker',\n  actual: result,\n  error,\n  api_key_source: apiKey ? 'register_worker' : 'fallback'\n};\n\nconst context = { ...prev, api_key: usedApiKey, results: [...prev.results, testResult] };\n\nreturn [{\n  json: {\n    context,\n    call: 'update_worker_subscriptions',\n    args: {\n      api_key: context.api_key,\n      subscribed_queues: ['default', context.queue_name, 'email']\n    }\n  }\n}];"
+      },
+      "id": "after-register-worker",
+      "name": "After Register Worker",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.subworkflow_id }}"
+      },
+      "id": "call-update-subs",
+      "name": "Call Update Subscriptions",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Register Worker')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.update_worker_subscriptions === true || result.update_worker_subscriptions === 't' || result.update_worker_subscriptions === 1;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'update_worker_subscriptions',\n  success: ok && !error,\n  expected: 'update_worker_subscriptions returns true',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{\n  json: {\n    context,\n    call: 'enqueue_task',\n    args: {\n      api_key: context.api_key,\n      task_name: `test_task_success_${context.run_id}`,\n      task_data: { run_id: context.run_id, test: 'enqueue_task_1' },\n      queue_name: context.queue_name,\n      priority: 10\n    }\n  }\n}];"
+      },
+      "id": "after-update-subs",
+      "name": "After Update Subscriptions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.subworkflow_id }}"
+      },
+      "id": "call-enqueue-1",
+      "name": "Call Enqueue Task 1",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        600,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Update Subscriptions')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst taskUuid = result.enqueue_task || result.task_uuid || null;\nconst ok = typeof taskUuid === 'string' && taskUuid.length >= 10;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'enqueue_task',\n  success: ok && !error,\n  expected: 'enqueue_task returns uuid',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, task_uuid_1: taskUuid, results: [...prev.results, testResult] };\n\nreturn [{\n  json: {\n    context,\n    call: 'dequeue_task',\n    args: {\n      api_key: context.api_key,\n      lease_duration: '5 minutes',\n      queue_names: [context.queue_name]\n    }\n  }\n}];"
+      },
+      "id": "after-enqueue-1",
+      "name": "After Enqueue Task 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.subworkflow_id }}"
+      },
+      "id": "call-dequeue-1",
+      "name": "Call Dequeue Task 1",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Enqueue Task 1')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst taskId = result.task_id || result.id || null;\nconst ok = typeof taskId === 'number' || (typeof taskId === 'string' && taskId !== '');\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'dequeue_task',\n  success: ok && !error,\n  expected: 'dequeue_task returns task_id',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, task_id_1: taskId, results: [...prev.results, testResult] };\n\nreturn [{\n  json: {\n    context,\n    call: 'complete_task',\n    args: {\n      api_key: context.api_key,\n      task_id: context.task_id_1,\n      result_data: { status: 'success', run_id: context.run_id }\n    }\n  }\n}];"
+      },
+      "id": "after-dequeue-1",
+      "name": "After Dequeue Task 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.subworkflow_id }}"
+      },
+      "id": "call-complete-task",
+      "name": "Call Complete Task",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Dequeue Task 1')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.complete_task === true || result.complete_task === 't' || result.complete_task === 1;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'complete_task',\n  success: ok && !error,\n  expected: 'complete_task returns true',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{\n  json: {\n    context,\n    call: 'enqueue_task',\n    args: {\n      api_key: context.api_key,\n      task_name: `test_task_fail_${context.run_id}`,\n      task_data: { run_id: context.run_id, test: 'enqueue_task_2' },\n      queue_name: context.queue_name,\n      priority: 5\n    }\n  }\n}];"
+      },
+      "id": "after-complete-task",
+      "name": "After Complete Task",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.subworkflow_id }}"
+      },
+      "id": "call-enqueue-2",
+      "name": "Call Enqueue Task 2",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Complete Task')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst taskUuid = result.enqueue_task || result.task_uuid || null;\nconst ok = typeof taskUuid === 'string' && taskUuid.length >= 10;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'enqueue_task_2',\n  success: ok && !error,\n  expected: 'enqueue_task returns uuid (second task)',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, task_uuid_2: taskUuid, results: [...prev.results, testResult] };\n\nreturn [{\n  json: {\n    context,\n    call: 'dequeue_task',\n    args: {\n      api_key: context.api_key,\n      lease_duration: '5 minutes',\n      queue_names: [context.queue_name]\n    }\n  }\n}];"
+      },
+      "id": "after-enqueue-2",
+      "name": "After Enqueue Task 2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.subworkflow_id }}"
+      },
+      "id": "call-dequeue-2",
+      "name": "Call Dequeue Task 2",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Enqueue Task 2')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst taskId = result.task_id || result.id || null;\nconst ok = typeof taskId === 'number' || (typeof taskId === 'string' && taskId !== '');\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'dequeue_task_2',\n  success: ok && !error,\n  expected: 'dequeue_task returns task_id (second task)',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, task_id_2: taskId, results: [...prev.results, testResult] };\n\nreturn [{\n  json: {\n    context,\n    call: 'fail_task',\n    args: {\n      api_key: context.api_key,\n      task_id: context.task_id_2,\n      error_message: 'Intentional failure for test coverage',\n      retry: true\n    }\n  }\n}];"
+      },
+      "id": "after-dequeue-2",
+      "name": "After Dequeue Task 2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.subworkflow_id }}"
+      },
+      "id": "call-fail-task",
+      "name": "Call Fail Task",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        2600,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Dequeue Task 2')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.fail_task === true || result.fail_task === 't' || result.fail_task === 1;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'fail_task',\n  success: ok && !error,\n  expected: 'fail_task returns true',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{\n  json: {\n    context,\n    call: 'heartbeat',\n    args: {\n      api_key: context.api_key,\n      current_load: 0\n    }\n  }\n}];"
+      },
+      "id": "after-fail-task",
+      "name": "After Fail Task",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.subworkflow_id }}"
+      },
+      "id": "call-worker-heartbeat",
+      "name": "Call Worker Heartbeat",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        3000,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Fail Task')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.worker_heartbeat === true || result.worker_heartbeat === 't' || result.worker_heartbeat === 1;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'worker_heartbeat',\n  success: ok && !error,\n  expected: 'worker_heartbeat returns true',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{\n  json: {\n    context,\n    call: 'get_task_status',\n    args: {\n      api_key: context.api_key,\n      task_id: context.task_id_1\n    }\n  }\n}];"
+      },
+      "id": "after-worker-heartbeat",
+      "name": "After Worker Heartbeat",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.subworkflow_id }}"
+      },
+      "id": "call-get-task-status",
+      "name": "Call Get Task Status",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        3400,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Worker Heartbeat')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = !!(result.status || result.task_uuid || result.id || result.task_id || result.get_task_status);\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'get_task_status',\n  success: ok && !error,\n  expected: 'task status record returned',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{\n  json: {\n    context,\n    call: 'get_queue_stats',\n    args: {}\n  }\n}];"
+      },
+      "id": "after-get-task-status",
+      "name": "After Get Task Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.subworkflow_id }}"
+      },
+      "id": "call-get-queue-stats",
+      "name": "Call Get Queue Stats",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        3800,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Get Task Status')[0].json.context;\nconst items = $input.all();\nconst queueNames = items.map(i => i.json.queue_name).filter(Boolean);\nconst ok = queueNames.length > 0;\nconst error = items[0]?.json?.error || items[0]?.json?.message || null;\n\nconst testResult = {\n  name: 'get_queue_stats',\n  success: ok && !error,\n  expected: 'queue stats returned',\n  actual: items.map(i => i.json),\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{\n  json: {\n    context,\n    call: '',\n    args: {}\n  }\n}];"
+      },
+      "id": "after-get-queue-stats",
+      "name": "After Get Queue Stats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4000,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.subworkflow_id }}"
+      },
+      "id": "call-missing-call",
+      "name": "Call Missing Call",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        4200,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Get Queue Stats')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.success === false && String(result.error || '').toLowerCase().includes('invalid');\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'missing_call',\n  success: ok,\n  expected: 'error response for missing call',\n  actual: result,\n  error\n};\n\nconst results = [...prev.results, testResult];\nconst passed = results.filter(r => r.success).length;\nconst failed = results.length - passed;\n\nreturn [{\n  json: {\n    run_id: prev.run_id,\n    queue_name: prev.queue_name,\n    worker_id: prev.worker_id,\n    api_key_prefix: prev.api_key ? String(prev.api_key).slice(0, 10) : null,\n    summary: {\n      total: results.length,\n      passed,\n      failed\n    },\n    results\n  }\n}];"
+      },
+      "id": "finalize-results",
+      "name": "Finalize Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4400,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Init Test Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Test Context": {
+      "main": [
+        [
+          {
+            "node": "Call Create Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Create Queue": {
+      "main": [
+        [
+          {
+            "node": "After Create Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Create Queue": {
+      "main": [
+        [
+          {
+            "node": "Call Register Worker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Register Worker": {
+      "main": [
+        [
+          {
+            "node": "After Register Worker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Register Worker": {
+      "main": [
+        [
+          {
+            "node": "Call Update Subscriptions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Update Subscriptions": {
+      "main": [
+        [
+          {
+            "node": "After Update Subscriptions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Update Subscriptions": {
+      "main": [
+        [
+          {
+            "node": "Call Enqueue Task 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Enqueue Task 1": {
+      "main": [
+        [
+          {
+            "node": "After Enqueue Task 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Enqueue Task 1": {
+      "main": [
+        [
+          {
+            "node": "Call Dequeue Task 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Dequeue Task 1": {
+      "main": [
+        [
+          {
+            "node": "After Dequeue Task 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Dequeue Task 1": {
+      "main": [
+        [
+          {
+            "node": "Call Complete Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Complete Task": {
+      "main": [
+        [
+          {
+            "node": "After Complete Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Complete Task": {
+      "main": [
+        [
+          {
+            "node": "Call Enqueue Task 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Enqueue Task 2": {
+      "main": [
+        [
+          {
+            "node": "After Enqueue Task 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Enqueue Task 2": {
+      "main": [
+        [
+          {
+            "node": "Call Dequeue Task 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Dequeue Task 2": {
+      "main": [
+        [
+          {
+            "node": "After Dequeue Task 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Dequeue Task 2": {
+      "main": [
+        [
+          {
+            "node": "Call Fail Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Fail Task": {
+      "main": [
+        [
+          {
+            "node": "After Fail Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Fail Task": {
+      "main": [
+        [
+          {
+            "node": "Call Worker Heartbeat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Worker Heartbeat": {
+      "main": [
+        [
+          {
+            "node": "After Worker Heartbeat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Worker Heartbeat": {
+      "main": [
+        [
+          {
+            "node": "Call Get Task Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Get Task Status": {
+      "main": [
+        [
+          {
+            "node": "After Get Task Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Get Task Status": {
+      "main": [
+        [
+          {
+            "node": "Call Get Queue Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Get Queue Stats": {
+      "main": [
+        [
+          {
+            "node": "After Get Queue Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Get Queue Stats": {
+      "main": [
+        [
+          {
+            "node": "Call Missing Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Missing Call": {
+      "main": [
+        [
+          {
+            "node": "Finalize Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "00000000-0000-0000-0000-000000000001",
+  "meta": {
+    "instanceId": "tests-instance"
+  },
+  "id": "1",
+  "tags": []
+}

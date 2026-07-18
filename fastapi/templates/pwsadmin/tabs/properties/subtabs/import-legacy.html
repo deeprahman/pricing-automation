@@ -1,0 +1,27 @@
+        <div class="rounded-lg border border-slate-200 bg-white/85 p-3 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
+          Selection order: <strong>PMS</strong> -> <strong>OTA (OTP)</strong> -> <strong>DPT</strong>. Fetch and import in that order.
+          <div id="property-stage-buttons" class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+            <button type="button" class="property-stage-btn secondary-btn rounded border px-2 py-1" data-stage="pms">1. PMS</button>
+            <button type="button" class="property-stage-btn secondary-btn rounded border px-2 py-1" data-stage="ota">2. OTA</button>
+            <button type="button" class="property-stage-btn secondary-btn rounded border px-2 py-1" data-stage="dpt">3. DPT</button>
+          </div>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+          <select id="platform-select" class="control-surface w-56 rounded border px-2 py-1"></select>
+          <button id="remote-fetch" class="rounded bg-brand-600 px-3 py-1 text-white">Fetch All</button>
+          <button id="remote-import" class="secondary-btn rounded border px-3 py-1">Import Selected</button>
+        </div>
+        <p id="property-stage-hint" class="mt-2 text-xs text-slate-600 dark:text-slate-300"></p>
+        <div class="mt-3 overflow-x-auto text-sm">
+          <table class="panel-table w-full min-w-[1080px]">
+            <thead id="remote-columns-head" class="border-b text-left"></thead>
+            <tbody id="remote-rows"></tbody>
+          </table>
+        </div>
+        <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-300">
+          <div id="remote-pagination-status">Page 1 of 1 - 0 properties</div>
+          <div class="flex items-center gap-2">
+            <button id="remote-page-prev" class="secondary-btn rounded border px-2 py-1">Prev</button>
+            <button id="remote-page-next" class="secondary-btn rounded border px-2 py-1">Next</button>
+          </div>
+        </div>

@@ -1,0 +1,173 @@
+services:
+  postgres:
+    build:
+      context: ./postgres
+    restart: unless-stopped
+    container_name: n8n-postgres
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_cron
+      -c cron.database_name=${POSTGRES_DB}
+      -c timezone=Asia/Dhaka
+      -c log_timezone=Asia/Dhaka
+      -c shared_buffers=256MB
+      -c effective_cache_size=512MB
+      -c work_mem=16MB
+      -c maintenance_work_mem=64MB
+      -c max_connections=50
+      -c wal_buffers=16MB
+      -c checkpoint_completion_target=0.9
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c log_min_duration_statement=1000
+      -c log_checkpoints=on
+      -c log_connections=off
+      -c log_disconnections=off
+      -c log_lock_waits=on
+      -c deadlock_timeout=1s
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - SCHEMA_DB=${SCHEMA_DB:-auto_pws}
+      - ADMIN_PWS_DB=${ADMIN_PWS_DB:-admin_pws}
+      - TZ=${TZ:-Asia/Dhaka}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schemas:/schemas:ro
+      - ./postgres/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    mem_limit: 512m
+    mem_reservation: 256m
+    networks:
+      - n8n_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  workers:
+    build:
+      context: .
+      dockerfile: workers/Dockerfile
+    restart: unless-stopped
+    container_name: workers
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - SCHEMA_DB=${SCHEMA_DB:-auto_pws}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - TZ=${TZ:-Asia/Dhaka}
+      - PYTHONPATH=/workspace:/workspace/workers
+      - WORKER_DB_NAME=${WORKER_DB_NAME:-}
+      - WORKER_DEBUG_WORKER=${WORKER_DEBUG_WORKER:-}
+      - WORKER_DISABLE_MAINTENANCE=${WORKER_DISABLE_MAINTENANCE:-0}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_LLM_MODEL=${OPENAI_LLM_MODEL:-gpt-5-nano}
+      - SECRET_ENCRYPTION_KEY=${SECRET_ENCRYPTION_KEY:-}
+      - SECRET_ENCRYPTION_KEY_ID=${SECRET_ENCRYPTION_KEY_ID:-}
+      - SECRETS_ENCRYPTION_KEY=${SECRETS_ENCRYPTION_KEY:-}
+      - SECRETS_ENCRYPTION_KEY_ID=${SECRETS_ENCRYPTION_KEY_ID:-}
+      - SECRETS_KEY_ID=${SECRETS_KEY_ID:-}
+      - OWNERREZ_BEARER_TOKEN=${OWNERREZ_BEARER_TOKEN:-}
+      - OWNERREZ_API_BASE_URL=${OWNERREZ_API_BASE_URL:-https://api.ownerrez.com/v2}
+      - OWNERREZ_CA_BUNDLE=${OWNERREZ_CA_BUNDLE:-}
+    working_dir: /workspace
+    volumes:
+      - ./workers/pws_workers:/workspace/workers/pws_workers
+      - ./tests:/workspace/tests
+      - ./schemas:/workspace/schemas:ro
+      - ./message_classification_agent_instructioin:/workspace/message_classification_agent_instructioin:ro
+      - ./output:/workspace/output
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 400m
+    mem_reservation: 256m
+    networks:
+      - n8n_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  fastapi:
+    build:
+      context: ./fastapi
+    restart: unless-stopped
+    container_name: landing-fastapi
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - ADMIN_PWS_DB=${ADMIN_PWS_DB:-admin_pws}
+      - AUTO_PWS_DB=${AUTO_PWS_DB:-auto_pws}
+      - SECRETS_ENCRYPTION_KEY=${SECRETS_ENCRYPTION_KEY:-}
+      - SECRET_ENCRYPTION_KEY=${SECRET_ENCRYPTION_KEY:-}
+      - SECRETS_ENCRYPTION_KEY_ID=${SECRETS_ENCRYPTION_KEY_ID:-}
+      - SECRETS_KEY_ID=${SECRETS_KEY_ID:-}
+      - SECRET_KEY=${SECRET_KEY}
+      - SESSION_SECRET_KEY=${SESSION_SECRET_KEY}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      - TZ=${TZ:-Asia/Dhaka}
+    expose:
+      - "8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 200m
+    mem_reservation: 64m
+    networks:
+      - n8n_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    container_name: n8n-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN}
+      - BASE_DOMAIN=${BASE_DOMAIN}
+      - SSL_CERT=${SSL_CERT}
+      - SSL_KEY=${SSL_KEY}
+      - TZ=${TZ:-Asia/Dhaka}
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./static:/var/www/static:ro
+    depends_on:
+      - fastapi
+    mem_limit: 50m
+    mem_reservation: 20m
+    networks:
+      - n8n_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+volumes:
+  postgres_data: {}
+
+networks:
+  n8n_network:
+    driver: bridge

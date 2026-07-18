@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Palm Wave Stays | OAuth 2 Authorization</title>
+  <meta name="description" content="OAuth 2 authorization landing page for Palm Wave Stays automations on auto.palmwavestays.com." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: light;
+      --main-font: "Quicksand", "Trebuchet MS", "Segoe UI", sans-serif;
+      --heading-font: "Quicksand", "Trebuchet MS", "Segoe UI", sans-serif;
+      --text-color: #757575;
+      --primary-color: #55af55;
+      --heading-color: #00810b;
+      --muted-text-color: #959595;
+      --link-color: #00810b;
+      --heading-link-color: #55af55;
+      --bg-cream: #f8f7f2;
+      --bg-green: #e4f1e6;
+      --panel: #ffffff;
+      --panel-soft: #f2f6f1;
+      --border: #d8e2d2;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--main-font);
+      color: var(--text-color);
+      background:
+        radial-gradient(900px 600px at 10% -10%, #dfeee1 0%, transparent 55%),
+        radial-gradient(700px 500px at 90% 10%, #eef6ec 0%, transparent 55%),
+        var(--bg-cream);
+    }
+
+    a {
+      color: var(--link-color);
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: var(--heading-link-color);
+    }
+
+    header {
+      position: relative;
+      z-index: 2;
+    }
+
+    .top-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 20px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4efe1;
+    }
+
+    .top-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .top-links a {
+      color: var(--heading-color);
+    }
+
+    .top-cta {
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 1px solid var(--primary-color);
+      color: var(--heading-color);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .top-cta:hover {
+      background: var(--primary-color);
+      color: #ffffff;
+    }
+
+    .nav-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 20px;
+      background: rgba(255, 255, 255, 0.94);
+      border-bottom: 1px solid #e8f0e6;
+      backdrop-filter: blur(6px);
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo img {
+      width: 140px;
+      height: auto;
+      display: block;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .nav-links a {
+      color: var(--text-color);
+    }
+
+    .hero {
+      position: relative;
+      padding: 64px 20px 40px;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.25)),
+        url("https://uc.orez.io/f/a8ce5ca623de4addb6954dafdb03dcd9") center / cover no-repeat;
+      filter: saturate(1.1);
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      gap: 32px;
+    }
+
+    .hero-copy {
+      color: #ffffff;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.12);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+    }
+
+    .hero-copy h1 {
+      margin: 18px 0 12px;
+      font-size: clamp(32px, 4vw, 52px);
+      line-height: 1.1;
+      color: #ffffff;
+    }
+
+    .hero-copy p {
+      margin: 0 0 22px;
+      font-size: 18px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.9);
+      max-width: 560px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: #ffffff;
+      border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+      background: #3f9a45;
+      border-color: #3f9a45;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .trust-row span {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .hero-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      color: var(--text-color);
+    }
+
+    .hero-card h2 {
+      margin: 0 0 10px;
+      color: var(--heading-color);
+      font-size: 22px;
+    }
+
+    .hero-card p {
+      margin: 0 0 18px;
+      line-height: 1.6;
+      color: var(--muted-text-color);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .info-item {
+      background: var(--panel-soft);
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+
+    .info-item span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted-text-color);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    .info-item code {
+      display: block;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      color: #223025;
+      word-break: break-all;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+    }
+
+    .content {
+      max-width: 1100px;
+      margin: 0 auto 60px;
+      padding: 0 20px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .details-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      color: var(--heading-color);
+      font-size: 22px;
+    }
+
+    .card p {
+      margin: 0 0 12px;
+      line-height: 1.7;
+    }
+
+    .steps {
+      margin: 0;
+      padding-left: 18px;
+      line-height: 1.8;
+    }
+
+    .steps li {
+      margin-bottom: 8px;
+    }
+
+    .bullets {
+      margin: 0;
+      padding-left: 18px;
+      line-height: 1.8;
+    }
+
+    .support {
+      margin: 0 auto 70px;
+      padding: 0 20px;
+      max-width: 1100px;
+    }
+
+    .support-inner {
+      background: linear-gradient(135deg, #ffffff 0%, #eef6ec 100%);
+      border: 1px solid #dbe7d8;
+      border-radius: 24px;
+      padding: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .support-inner h2 {
+      margin: 0 0 8px;
+      color: var(--heading-color);
+      font-size: 24px;
+    }
+
+    .support-inner p {
+      margin: 0;
+      color: var(--text-color);
+    }
+
+    .site-footer {
+      background: #ffffff;
+      border-top: 1px solid #e6efe3;
+      padding: 36px 20px 28px;
+      color: var(--text-color);
+    }
+
+    .footer-grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      gap: 24px;
+    }
+
+    .footer-col h3 {
+      margin: 0 0 12px;
+      color: var(--heading-color);
+      font-size: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .footer-col p {
+      margin: 0 0 10px;
+      line-height: 1.6;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .footer-col li {
+      margin-bottom: 8px;
+    }
+
+    .footer-bottom {
+      max-width: 1100px;
+      margin: 26px auto 0;
+      padding-top: 18px;
+      border-top: 1px solid #e6efe3;
+      font-size: 13px;
+      text-align: center;
+      color: var(--muted-text-color);
+    }
+
+    @media (min-width: 820px) {
+      .hero-inner {
+        grid-template-columns: 1.1fr 0.9fr;
+        align-items: center;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .details-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .footer-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .nav-links {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="top-line">
+      <div class="top-links">
+        <a href="tel:(561) 725-9561">Call (561) 725-9561</a>
+        <a href="mailto:info@palmwavestays.com">info@palmwavestays.com</a>
+      </div>
+      <a class="top-cta" href="https://palmwavestays.com/book" target="_blank" rel="noopener">Book Now</a>
+    </div>
+    <div class="nav-line">
+      <a class="logo" href="https://palmwavestays.com" target="_blank" rel="noopener">
+        <img src="https://uc.orez.io/f/4412ddf06ebb4736b85c384458973e24" alt="Palm Wave Stays logo" />
+      </a>
+      <nav class="nav-links">
+        <a href="https://palmwavestays.com" target="_blank" rel="noopener">Home</a>
+        <a href="https://palmwavestays.com/properties/?or_location=%5B%22USA%22%2C%22FL%22%2C%22WEST+PALM+BEACH%22%5D" target="_blank" rel="noopener">Properties</a>
+        <a href="https://palmwavestays.com/reviews" target="_blank" rel="noopener">Reviews</a>
+        <a href="https://palmwavestays.com/policies-573994959" target="_blank" rel="noopener">Policies</a>
+        <a href="https://palmwavestays.com/about-573995119" target="_blank" rel="noopener">About-Us</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <span class="eyebrow">Palm Wave Stays</span>
+        <h1>OAuth 2 Authorization for Automation</h1>
+        <p>
+          This landing page powers secure OAuth 2 authorization on
+          auto.palmwavestays.com/hom for Palm Wave Stays integrations. Use it to connect
+          your automation platform while keeping credentials protected.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#connection-details">Continue Authorization</a>
+          <a class="btn btn-ghost" href="https://palmwavestays.com" target="_blank" rel="noopener">Visit Main Site</a>
+        </div>
+        <div class="trust-row">
+          <span>Secure OAuth 2</span>
+          <span>Revocable Access</span>
+          <span>Minimal Permissions</span>
+        </div>
+      </div>
+
+      <div class="hero-card" id="connection-details">
+        <h2>Connection Details</h2>
+        <p>Use the values below when configuring n8n or another OAuth client.</p>
+        <div class="info-grid">
+          <div class="info-item">
+            <span>Redirect URL</span>
+            <code>https://auto.palmwavestays.com/rest/oauth2-credential/callback</code>
+          </div>
+          <div class="info-item">
+            <span>Webhook URL</span>
+            <code>https://auto.palmwavestays.com/webhook/</code>
+          </div>
+          <div class="info-item">
+            <span>From n8n env</span>
+            <code>N8N_EDITOR_BASE_URL=https://auto.palmwavestays.com</code>
+          </div>
+          <div class="info-item">
+            <span>From n8n env</span>
+            <code>WEBHOOK_URL=https://auto.palmwavestays.com/webhook/</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <section class="content">
+      <div class="details-grid">
+        <article class="card">
+          <h2>Why this page exists</h2>
+          <p>
+            Palm Wave Stays automations use OAuth 2 so third-party tools can access only
+            what you approve. This page confirms the official URLs, branding, and purpose
+            for the auto.palmwavestays.com OAuth flow.
+          </p>
+          <p>
+            No bookings or payments are created from this page. It only supports secure
+            authorization.
+          </p>
+        </article>
+
+        <article class="card">
+          <h2>Authorization steps</h2>
+          <ol class="steps">
+            <li>Select "Connect Palm Wave Stays" inside your automation tool.</li>
+            <li>Sign in and approve access on the Palm Wave Stays consent screen.</li>
+            <li>Return to your tool to complete the connection and save tokens.</li>
+          </ol>
+        </article>
+
+        <article class="card">
+          <h2>Security notes</h2>
+          <ul class="bullets">
+            <li>Tokens are stored by your automation tool, not on this page.</li>
+            <li>Access can be revoked at any time from the tool settings.</li>
+            <li>We request only the permissions needed for the workflow.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="support">
+      <div class="support-inner">
+        <div>
+          <h2>Need help connecting?</h2>
+          <p>Email or call us and we will get your automation running.</p>
+        </div>
+        <a class="btn btn-primary" href="mailto:info@palmwavestays.com">Contact Support</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h3>Palm Wave Stays</h3>
+        <p>In the USA's best locations, we offer secluded stays with amazing amenities at a convenient price.</p>
+        <p><a href="mailto:info@palmwavestays.com">info@palmwavestays.com</a></p>
+        <p><a href="tel:(561) 725-9561">(561) 725-9561</a></p>
+      </div>
+      <div class="footer-col">
+        <h3>Navigation</h3>
+        <ul>
+          <li><a href="https://palmwavestays.com" target="_blank" rel="noopener">Home</a></li>
+          <li><a href="https://palmwavestays.com/properties?or_location=%5B%22USA%22%2C%22FL%22%2C%22WEST+PALM+BEACH%22%5D" target="_blank" rel="noopener">Properties</a></li>
+          <li><a href="https://palmwavestays.com/map" target="_blank" rel="noopener">Map</a></li>
+          <li><a href="https://palmwavestays.com/reviews" target="_blank" rel="noopener">Reviews</a></li>
+          <li><a href="https://palmwavestays.com/policies-573994959" target="_blank" rel="noopener">Policies</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Contact Us On</h3>
+        <ul>
+          <li><a href="https://www.facebook.com/palmwavestays" target="_blank" rel="noopener">Facebook</a></li>
+          <li><a href="https://www.instagram.com/palmwavestays" target="_blank" rel="noopener">Instagram</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>We Accept</h3>
+        <img src="https://uc.orez.io/f/3b7ed24dc6bf4e39accae0b82983a5f1" alt="Mastercard, Visa, Discover" width="140" height="92" />
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 PM Company LLC | (561) 725-9561 | info@palmwavestays.com
+    </div>
+  </footer>
+</body>
+</html>

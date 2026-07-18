@@ -1,0 +1,98 @@
+<div class="panel worker-manager-panel rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Worker Manager State</h2>
+      <p id="worker-manager-checked-at" class="mt-1 text-xs text-slate-500 dark:text-slate-400"></p>
+    </div>
+    <button id="worker-manager-refresh" type="button" class="rounded bg-brand-600 px-3 py-1 text-sm text-white">Refresh</button>
+  </div>
+
+  <div id="worker-manager-alert" class="mt-3 hidden rounded border px-3 py-2 text-sm"></div>
+
+  <section class="worker-manager-section mt-4">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-2 dark:border-slate-700">
+      <div>
+        <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Manual Cleanup</h3>
+        <p id="worker-manager-cleanup-status" class="mt-1 text-xs text-slate-500 dark:text-slate-400"></p>
+      </div>
+      <span id="worker-manager-cleanup-admin-state" class="worker-manager-pill">Admin only</span>
+    </div>
+    <div class="worker-manager-cleanup-grid mt-3">
+      <button type="button" class="worker-manager-cleanup-btn" data-cleanup-action="clear-audit-log">Clear Audit Log</button>
+      <button type="button" class="worker-manager-cleanup-btn" data-cleanup-action="shrink-unclassified-messages">Shrink Unclassified Messages</button>
+      <button type="button" class="worker-manager-cleanup-btn" data-cleanup-action="clear-inactive-workers">Clear Inactive Workers</button>
+      <button type="button" class="worker-manager-cleanup-btn" data-cleanup-action="clear-inactive-worker-metadata">Clear Inactive Worker Metadata</button>
+      <button type="button" class="worker-manager-cleanup-btn" data-cleanup-action="clear-completed-failed-tasks">Clear Completed / Failed Tasks</button>
+      <button type="button" class="worker-manager-cleanup-btn" data-cleanup-action="clear-task-metadata-history">Clear Task Metadata History</button>
+      <button type="button" class="worker-manager-cleanup-btn" data-cleanup-action="clear-llm-usage">Clear LLM Usage</button>
+      <div class="worker-manager-cleanup-date">
+        <label for="worker-manager-log-before-date" class="text-xs font-semibold text-slate-600 dark:text-slate-300">Logs before</label>
+        <input id="worker-manager-log-before-date" type="date" class="control-surface rounded border px-2 py-1 text-sm" />
+        <button type="button" class="worker-manager-cleanup-btn" data-cleanup-action="clear-logs-before-date">Clear Logs</button>
+      </div>
+    </div>
+    <pre id="worker-manager-cleanup-result" class="worker-manager-cleanup-result mt-3 hidden"></pre>
+  </section>
+
+  <div class="mt-4 grid gap-4 lg:grid-cols-2">
+    <section class="worker-manager-section">
+      <div class="flex items-center justify-between gap-3 border-b border-slate-200 pb-2 dark:border-slate-700">
+        <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Supervisor</h3>
+        <span id="worker-manager-supervisor-status" class="worker-manager-pill">Unknown</span>
+      </div>
+      <dl id="worker-manager-supervisor-details" class="worker-manager-detail-list mt-3"></dl>
+    </section>
+
+    <section class="worker-manager-section">
+      <div class="flex items-center justify-between gap-3 border-b border-slate-200 pb-2 dark:border-slate-700">
+        <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Maintenance</h3>
+        <span id="worker-manager-maintenance-status" class="worker-manager-pill">Unknown</span>
+      </div>
+      <dl id="worker-manager-maintenance-details" class="worker-manager-detail-list mt-3"></dl>
+    </section>
+  </div>
+
+  <div class="mt-5 grid gap-4 xl:grid-cols-3">
+    <section class="worker-manager-section xl:col-span-1">
+      <h3 class="border-b border-slate-200 pb-2 text-sm font-semibold text-slate-800 dark:border-slate-700 dark:text-slate-100">Active Workers</h3>
+      <div id="worker-manager-worker-summary" class="worker-manager-stat-grid mt-3"></div>
+    </section>
+
+    <section class="worker-manager-section xl:col-span-2">
+      <h3 class="border-b border-slate-200 pb-2 text-sm font-semibold text-slate-800 dark:border-slate-700 dark:text-slate-100">Disk Guard</h3>
+      <div id="worker-manager-disk-summary" class="worker-manager-stat-grid mt-3"></div>
+    </section>
+  </div>
+
+  <div class="mt-5 grid gap-4 xl:grid-cols-2">
+    <section>
+      <div class="mb-2 flex items-center justify-between gap-2">
+        <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Audit Activity</h3>
+        <span class="text-xs text-slate-500 dark:text-slate-400">Last hour</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="panel-table min-w-full text-sm">
+          <thead class="border-b text-left">
+            <tr><th>Operation</th><th>5 min</th><th>1 hour</th></tr>
+          </thead>
+          <tbody id="worker-manager-audit-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="mb-2 flex items-center justify-between gap-2">
+        <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Table Growth</h3>
+        <span class="text-xs text-slate-500 dark:text-slate-400">High churn tables</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="panel-table min-w-full text-sm">
+          <thead class="border-b text-left">
+            <tr><th>Table</th><th>Size</th><th>Live</th><th>Dead</th></tr>
+          </thead>
+          <tbody id="worker-manager-growth-rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>

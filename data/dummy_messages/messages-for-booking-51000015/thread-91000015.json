@@ -1,0 +1,44 @@
+{
+    "guest": {
+        "first_name": "MORGAN",
+        "id": 720000015,
+        "last_name": "DIAZ"
+    },
+    "items": [
+        {
+            "body": "Reservation Confirmation\n\nDates & Details:\nCheck-in: Mar 20, 2026 at 4:00 PM\nCheck-out: Mar 23, 2026 at 10:00 AM\nNights: 3\nGuests: 2\n\nIf anything is incorrect, please let me know ASAP so I can update it before arrival.\n\nAddress:\n419 Summa St, West Palm Beach, FL 33405\nhttps://www.google.com/maps/place/26.65103,-80.05702\n\nParking:\nStreet parking is available on a first-come basis. Driveway parking is limited to registered vehicles.\n\nWIFI:\nNetwork name: SeabreezeStay\nPassword: ShellsAndSand\nHouse Rules:\nNo smoking or parties/events\nQuiet hours: 11:00 PM - 8:00 AM\n",
+            "date_utc": "2026-03-05T15:00:00Z",
+            "from_contact_id": 610000015,
+            "from_role": "owner",
+            "id": 96000150,
+            "is_draft": false,
+            "thread_id": 91000015
+        },
+        {
+            "body": "Hi,\n\nThanks for booking with us! Your door code is 4015. The code activates at 4 PM on check-in day. Please use the smart lock at the main entrance and message us if you have any trouble.",
+            "date_utc": "2026-03-05T17:00:00Z",
+            "from_contact_id": 610000015,
+            "from_role": "owner",
+            "id": 96000151,
+            "is_draft": false,
+            "thread_id": 91000015
+        },
+        {
+            "body": "Please send a quick message after you arrive so we can make sure everything is perfect for your stay.",
+            "date_utc": "2026-03-06T16:00:00Z",
+            "from_contact_id": 610005015,
+            "from_role": "co_host",
+            "id": 96000156,
+            "is_draft": false,
+            "thread_id": 91000015
+        }
+    ],
+    "limit": 3,
+    "offset": 0,
+    "thread": {
+        "booking_id": 51000015,
+        "id": 91000015,
+        "property_id": 480007,
+        "type": "sms"
+    }
+}

@@ -1,0 +1,362 @@
+{
+  "name": "Task Scheduler - Random Enqueue Producer",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "e56ac341-f653-4c3f-b18c-a4e434188565",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"workflow_id\": \"REPLACE_WITH_TASK_SCHEDULER_SUBWORKFLOW_ID\",\n  \"api_key\": \"REPLACE_WITH_WORKER_API_KEY\",\n  \"queue_name\": \"default\",\n  \"tasks_per_type\": 3,\n  \"min_delay_ms\": 250,\n  \"max_delay_ms\": 1500\n}"
+      },
+      "id": "7797a977-c830-4b95-b699-41c968b8e95e",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1248,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Configure Input\n\nUpdate `workflow_id` (Task Scheduler Interface subworkflow ID) and `api_key` before running.\n\nThis workflow enqueues `task_short_*`, `task_medium_*`, `task_long_*` in random order with random delay between each enqueue.",
+        "height": 260,
+        "width": 440,
+        "color": 2
+      },
+      "id": "f4263fbc-f9d0-49a5-b64c-c4f383d3dd7f",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1256,
+        -232
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "17fe0287-6a7b-4e67-9309-2dd7b2ca5d1f",
+              "name": "workflow_id",
+              "value": "REPLACE_WITH_TASK_SCHEDULER_SUBWORKFLOW_ID",
+              "type": "string"
+            },
+            {
+              "id": "eb097ef5-cd22-4bb9-aa57-b05fa29631fc",
+              "name": "api_key",
+              "value": "REPLACE_WITH_WORKER_API_KEY",
+              "type": "string"
+            },
+            {
+              "id": "4fa75d31-5d22-4d3a-bfdd-12c9e0e680d3",
+              "name": "queue_name",
+              "value": "default",
+              "type": "string"
+            },
+            {
+              "id": "84ce07a7-5fb8-4c86-ad8d-9739f1172678",
+              "name": "tasks_per_type",
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "f2f0d437-11b8-40ff-ab7b-30df806290ec",
+              "name": "min_delay_ms",
+              "value": 250,
+              "type": "number"
+            },
+            {
+              "id": "c019f21c-b6bb-4935-bd3e-c134e05b4bcf",
+              "name": "max_delay_ms",
+              "value": 1500,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6c1fda76-f9d4-456b-b6cf-5f0422fd3f4a",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1024,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst workflowId = String(input.workflow_id ?? '').trim();\nconst apiKey = String(input.api_key ?? '').trim();\n\nif (!workflowId || workflowId.includes('REPLACE_WITH')) {\n  throw new Error('workflow_id is required. Update the Config node.');\n}\n\nif (!apiKey || apiKey.includes('REPLACE_WITH')) {\n  throw new Error('api_key is required. Update the Config node.');\n}\n\nconst queueName = String(input.queue_name || 'default');\nconst tasksPerType = Math.max(1, Number(input.tasks_per_type || 1));\nconst minDelayMs = Math.floor(Math.max(0, Number(input.min_delay_ms || 0)));\nconst maxDelayMs = Math.floor(Math.max(minDelayMs, Number(input.max_delay_ms || minDelayMs)));\nconst runId = new Date().toISOString();\n\nconst taskTypes = [\n  { kind: 'short', priority: 20, expectedDurationMs: 750 },\n  { kind: 'medium', priority: 50, expectedDurationMs: 5000 },\n  { kind: 'long', priority: 80, expectedDurationMs: 15000 }\n];\n\nconst tasks = [];\nfor (const type of taskTypes) {\n  for (let i = 1; i <= tasksPerType; i++) {\n    tasks.push({\n      workflow_id: workflowId,\n      api_key: apiKey,\n      queue_name: queueName,\n      min_delay_ms: minDelayMs,\n      max_delay_ms: maxDelayMs,\n      run_id: runId,\n      task_type: type.kind,\n      task_name: `task_${type.kind}_${i}`,\n      priority: type.priority,\n      task_data: {\n        workflow_id: workflowId,\n        run_id: runId,\n        task_type: type.kind,\n        task_index: i,\n        expected_duration_ms: type.expectedDurationMs,\n        payload: {\n          source: 'task-scheduler-random-enqueue-producer',\n          schema_version: 1,\n          note: 'consistent_task_data_shape'\n        }\n      }\n    });\n  }\n}\n\nfor (let i = tasks.length - 1; i > 0; i--) {\n  const j = Math.floor(Math.random() * (i + 1));\n  [tasks[i], tasks[j]] = [tasks[j], tasks[i]];\n}\n\nconst state = $getWorkflowStaticData('global');\nstate.current_run_id = runId;\nstate.dispatches = [];\n\nreturn tasks.map((task, index) => ({\n  json: {\n    ...task,\n    enqueue_order: index + 1,\n    total_tasks: tasks.length\n  }\n}));"
+      },
+      "id": "75f8f2b7-c784-438d-9262-b4f8e18b447c",
+      "name": "Build Randomized Tasks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "9be2af65-71a5-4262-865d-92faeeb83321",
+      "name": "Split Tasks",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst min = Math.floor(Math.max(0, Number(item.min_delay_ms || 0)));\nconst max = Math.floor(Math.max(min, Number(item.max_delay_ms || min)));\nconst delayMs = item.enqueue_order === 1 ? 0 : Math.floor(Math.random() * (max - min + 1)) + min;\n\nif (delayMs > 0) {\n  await new Promise(resolve => setTimeout(resolve, delayMs));\n}\n\nreturn [{\n  json: {\n    ...item,\n    delay_ms: delayMs,\n    delay_applied_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "e266a53f-a06a-4eb5-ac9c-f4e50fcc28aa",
+      "name": "Random Delay",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nreturn [{\n  json: {\n    ...item,\n    call: 'enqueue_task',\n    args: {\n      api_key: item.api_key,\n      task_name: item.task_name,\n      task_data: item.task_data,\n      task_type: 'immediate',\n      priority: item.priority,\n      queue_name: item.queue_name\n    }\n  }\n}];"
+      },
+      "id": "8956d2a5-9a78-44d0-a28f-97de89f74ce2",
+      "name": "Build Enqueue Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.workflow_id }}",
+        "options": {}
+      },
+      "id": "0ec3e955-372e-4f3f-9054-e78015e2682b",
+      "name": "Call Scheduler Subworkflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        112,
+        96
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const request = $('Build Enqueue Request').item.json;\nconst response = $input.first().json ?? {};\nconst taskUuid = response.enqueue_task || response.task_uuid || null;\n\nconst splitNode = $('Split Tasks');\nconst isLastItem = splitNode.context?.noItemsLeft === true;\n\nconst state = $getWorkflowStaticData('global');\nif (!Array.isArray(state.dispatches) || state.current_run_id !== request.run_id) {\n  state.current_run_id = request.run_id;\n  state.dispatches = [];\n}\n\nstate.dispatches.push({\n  enqueue_order: request.enqueue_order,\n  task_name: request.task_name,\n  task_type: request.task_type,\n  delay_ms: request.delay_ms,\n  task_uuid: taskUuid,\n  raw_response: response\n});\n\nreturn [{\n  json: {\n    ...request,\n    task_uuid: taskUuid,\n    is_last_item: isLastItem,\n    dispatched_count: state.dispatches.length\n  }\n}];"
+      },
+      "id": "7d60ce95-a5c4-4f4b-85d4-a2a9aa9b4cc9",
+      "name": "Track Dispatch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "68259126-b126-4a7e-a80b-c8f34ff6de64",
+              "leftValue": "={{ $json.is_last_item }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "656e9bfa-0614-4490-b6eb-92006836e7b4",
+      "name": "All Tasks Dispatched?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        560,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst state = $getWorkflowStaticData('global');\nconst dispatches = Array.isArray(state.dispatches) ? state.dispatches : [];\nconst successCount = dispatches.filter(d => typeof d.task_uuid === 'string' && d.task_uuid.length > 0).length;\n\nreturn [{\n  json: {\n    run_id: item.run_id,\n    workflow_id: item.workflow_id,\n    queue_name: item.queue_name,\n    total_tasks: dispatches.length,\n    success_count: successCount,\n    failed_count: dispatches.length - successCount,\n    dispatches\n  }\n}];"
+      },
+      "id": "06e84e6f-1355-4f77-90f4-7f918c97b8c6",
+      "name": "Final Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        784,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Build Randomized Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Build Randomized Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Randomized Tasks": {
+      "main": [
+        [
+          {
+            "node": "Split Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Tasks": {
+      "main": [
+        [
+          {
+            "node": "Random Delay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Random Delay": {
+      "main": [
+        [
+          {
+            "node": "Build Enqueue Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Enqueue Request": {
+      "main": [
+        [
+          {
+            "node": "Call Scheduler Subworkflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Scheduler Subworkflow": {
+      "main": [
+        [
+          {
+            "node": "Track Dispatch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Track Dispatch": {
+      "main": [
+        [
+          {
+            "node": "All Tasks Dispatched?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "All Tasks Dispatched?": {
+      "main": [
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Summary": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "30293f9c-fb44-4b9f-bf09-b4d85f3dce33",
+  "meta": {
+    "instanceId": "f94ee6675052c2b68be0785e7c4c1b60b0426d14c775c213c4e38fd0abd72c74"
+  },
+  "tags": []
+}

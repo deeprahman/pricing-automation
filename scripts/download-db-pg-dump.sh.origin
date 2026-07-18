@@ -1,0 +1,18 @@
+HOST="auto.palmwavestays.com"
+SSH_KEY="/home/deep/.ssh/aws-lightsail-mumbai.pem"
+SSH_USER="ubuntu"
+
+DB="auto_pws"
+DB_USER="n8n"
+CONTAINER="n8n-postgres"
+
+TS="$(date +%Y%m%d-%H%M%S)"
+#BACKUP_DIR="$HOME/pws_backups/db-download-${DB}-${TS}"
+BACKUP_DIR="./backups/pws_backups/db-download-${DB}-${TS}"
+DUMP="$BACKUP_DIR/${DB}.full.dump"
+
+mkdir -p "$BACKUP_DIR"
+
+ssh -i "$SSH_KEY" "$SSH_USER@$HOST" \
+  "docker exec $CONTAINER pg_dump -w -U $DB_USER -d $DB -F c -Z 6 --no-owner --no-privileges" \
+  | pv > "$DUMP"

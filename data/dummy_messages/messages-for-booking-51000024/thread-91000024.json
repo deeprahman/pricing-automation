@@ -1,0 +1,62 @@
+{
+    "guest": {
+        "first_name": "SAM",
+        "id": 720000024,
+        "last_name": "LEE"
+    },
+    "items": [
+        {
+            "body": "Reservation Confirmation\n\nDates & Details:\nCheck-in: Mar 29, 2026 at 4:00 PM\nCheck-out: Apr 01, 2026 at 10:00 AM\nNights: 3\nGuests: 2\n\nIf anything is incorrect, please let me know ASAP so I can update it before arrival.\n\nAddress:\n150 Sunset Ave, Palm Beach, FL 33480\nhttps://www.google.com/maps/place/26.72010,-80.03819\n\nParking:\nStreet parking is available on a first-come basis. Driveway parking is limited to registered vehicles.\n\nWIFI:\nNetwork name: WorkTripWiFi\nPassword: QuietHours\nHouse Rules:\nNo smoking or parties/events\nQuiet hours: 11:00 PM - 8:00 AM\n",
+            "date_utc": "2026-03-14T15:00:00Z",
+            "from_contact_id": 610000024,
+            "from_role": "owner",
+            "id": 96000240,
+            "is_draft": false,
+            "thread_id": 91000024
+        },
+        {
+            "body": "Hi,\n\nThanks for booking with us! Your door code is 4024. The code activates at 4 PM on check-in day. Please use the smart lock at the main entrance and message us if you have any trouble.",
+            "date_utc": "2026-03-14T17:00:00Z",
+            "from_contact_id": 610000024,
+            "from_role": "owner",
+            "id": 96000241,
+            "is_draft": false,
+            "thread_id": 91000024
+        },
+        {
+            "body": "Hello, we booked this stay because my mother has a follow-up treatment at St. Mary's Medical Center. We may need a quiet afternoon to rest after the procedure.",
+            "date_utc": "2026-03-14T20:00:00Z",
+            "from_contact_id": 720000024,
+            "from_role": "guest",
+            "id": 96000242,
+            "is_draft": false,
+            "thread_id": 91000024
+        },
+        {
+            "body": "Understood. We will keep things quiet and can provide extra pillows if needed. Wishing a smooth appointment.",
+            "date_utc": "2026-03-14T22:00:00Z",
+            "from_contact_id": 610005024,
+            "from_role": "co_host",
+            "id": 96000243,
+            "is_draft": false,
+            "thread_id": 91000024
+        },
+        {
+            "body": "Please send a quick message after you arrive so we can make sure everything is perfect for your stay.",
+            "date_utc": "2026-03-15T16:00:00Z",
+            "from_contact_id": 610005024,
+            "from_role": "co_host",
+            "id": 96000248,
+            "is_draft": false,
+            "thread_id": 91000024
+        }
+    ],
+    "limit": 5,
+    "offset": 0,
+    "thread": {
+        "booking_id": 51000024,
+        "id": 91000024,
+        "property_id": 480000,
+        "type": "sms"
+    }
+}

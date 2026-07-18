@@ -1,0 +1,195 @@
+#tab-worker-manager-panel .worker-manager-section {
+  min-width: 0;
+}
+
+#tab-worker-manager-panel .worker-manager-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  border-radius: 999px;
+  border: 1px solid rgb(203 213 225);
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgb(71 85 105);
+  background: rgb(248 250 252);
+}
+
+#tab-worker-manager-panel .worker-manager-pill-ok {
+  border-color: rgb(20 184 166);
+  color: rgb(17 94 89);
+  background: rgb(204 251 241);
+}
+
+#tab-worker-manager-panel .worker-manager-pill-warn {
+  border-color: rgb(245 158 11);
+  color: rgb(146 64 14);
+  background: rgb(254 243 199);
+}
+
+#tab-worker-manager-panel .worker-manager-pill-bad {
+  border-color: rgb(244 63 94);
+  color: rgb(159 18 57);
+  background: rgb(255 228 230);
+}
+
+#tab-worker-manager-panel .worker-manager-detail-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+#tab-worker-manager-panel .worker-manager-detail-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.55fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+}
+
+#tab-worker-manager-panel .worker-manager-detail-row dt {
+  color: rgb(100 116 139);
+  font-size: 0.75rem;
+}
+
+#tab-worker-manager-panel .worker-manager-detail-row dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: rgb(15 23 42);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+#tab-worker-manager-panel .worker-manager-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.75rem;
+}
+
+#tab-worker-manager-panel .worker-manager-stat {
+  border-left: 3px solid rgb(20 184 166);
+  padding-left: 0.75rem;
+}
+
+#tab-worker-manager-panel .worker-manager-stat-label {
+  color: rgb(100 116 139);
+  font-size: 0.75rem;
+}
+
+#tab-worker-manager-panel .worker-manager-stat-value {
+  margin-top: 0.125rem;
+  color: rgb(15 23 42);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+#tab-worker-manager-panel .worker-manager-cleanup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.75rem;
+}
+
+#tab-worker-manager-panel .worker-manager-cleanup-btn {
+  min-height: 2.25rem;
+  border-radius: 0.375rem;
+  border: 1px solid rgb(203 213 225);
+  background: rgb(255 255 255);
+  padding: 0.5rem 0.75rem;
+  color: rgb(51 65 85);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+#tab-worker-manager-panel .worker-manager-cleanup-btn:hover:not(:disabled) {
+  border-color: rgb(13 104 97);
+  color: rgb(13 104 97);
+}
+
+#tab-worker-manager-panel .worker-manager-cleanup-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+#tab-worker-manager-panel .worker-manager-cleanup-date {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.4rem 0.5rem;
+  align-items: end;
+}
+
+#tab-worker-manager-panel .worker-manager-cleanup-date label {
+  grid-column: 1 / -1;
+}
+
+#tab-worker-manager-panel .worker-manager-cleanup-result {
+  max-height: 11rem;
+  overflow: auto;
+  border-radius: 0.375rem;
+  border: 1px solid rgb(203 213 225);
+  background: rgb(248 250 252);
+  padding: 0.75rem;
+  color: rgb(51 65 85);
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+}
+
+html.dark #tab-worker-manager-panel .worker-manager-pill {
+  border-color: rgb(71 85 105);
+  color: rgb(203 213 225);
+  background: rgb(30 41 59);
+}
+
+html.dark #tab-worker-manager-panel .worker-manager-pill-ok {
+  border-color: rgb(45 212 191);
+  color: rgb(204 251 241);
+  background: rgba(20, 184, 166, 0.18);
+}
+
+html.dark #tab-worker-manager-panel .worker-manager-pill-warn {
+  border-color: rgb(251 191 36);
+  color: rgb(254 243 199);
+  background: rgba(245, 158, 11, 0.18);
+}
+
+html.dark #tab-worker-manager-panel .worker-manager-pill-bad {
+  border-color: rgb(251 113 133);
+  color: rgb(255 228 230);
+  background: rgba(244, 63, 94, 0.18);
+}
+
+html.dark #tab-worker-manager-panel .worker-manager-detail-row dt,
+html.dark #tab-worker-manager-panel .worker-manager-stat-label {
+  color: rgb(148 163 184);
+}
+
+html.dark #tab-worker-manager-panel .worker-manager-detail-row dd,
+html.dark #tab-worker-manager-panel .worker-manager-stat-value {
+  color: rgb(241 245 249);
+}
+
+html.dark #tab-worker-manager-panel .worker-manager-cleanup-btn {
+  border-color: rgb(71 85 105);
+  background: rgb(15 23 42);
+  color: rgb(226 232 240);
+}
+
+html.dark #tab-worker-manager-panel .worker-manager-cleanup-btn:hover:not(:disabled) {
+  border-color: rgb(45 212 191);
+  color: rgb(153 246 228);
+}
+
+html.dark #tab-worker-manager-panel .worker-manager-cleanup-result {
+  border-color: rgb(71 85 105);
+  background: rgb(15 23 42);
+  color: rgb(226 232 240);
+}
+
+@media (max-width: 640px) {
+  #tab-worker-manager-panel .worker-manager-detail-row {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+
+  #tab-worker-manager-panel .worker-manager-cleanup-date {
+    grid-template-columns: 1fr;
+  }
+}

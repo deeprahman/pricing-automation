@@ -1,0 +1,690 @@
+{
+  "name": "Tests - Service Worker Template (Exec Trigger) E2E",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Service Worker Template (Exec Trigger) E2E Tests\n\n**Before running:**\n1) Import `service-worker-template-generic-longtask-exec.json`\n2) Set `worker_workflow_id` in **Init Test Context** to that workflow's ID\n3) Ensure Postgres is running with `secure_task_scheduler.sql` installed\n4) Configure Postgres credentials for all DB nodes (Worker PostgreSQL)\n\n**What this tests:**\n- enqueue tasks\n- execute worker subworkflow 3 times\n- verify tasks are completed\n\n**Output:** Final node returns a summary with per-test results.",
+        "height": 300,
+        "width": 500,
+        "color": 2
+      },
+      "id": "sticky-tests-instructions",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1000,
+        -240
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1000,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const runId = new Date().toISOString();\nconst runIdSafe = runId.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');\nconst queueName = `test_queue_${runIdSafe.slice(0, 24)}`;\nconst workerId = `test_worker_${runIdSafe.slice(0, 24)}`;\nconst workerName = `Test Worker ${runId}`;\n\nconst context = {\n  run_id: runId,\n  worker_workflow_id: 'REPLACE_WITH_WORKFLOW_ID',\n  queue_name: queueName,\n  worker_id: workerId,\n  worker_name: workerName,\n  api_key: null,\n  task_uuid_a: null,\n  task_uuid_long: null,\n  task_uuid_b: null,\n  results: []\n};\n\nreturn [{ json: { context } }];"
+      },
+      "id": "init-test-context",
+      "name": "Init Test Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT create_queue('{{ $json.context.queue_name }}', '{{ 'Test queue for run ' + $json.context.run_id }}') AS create_queue;"
+      },
+      "id": "create-queue",
+      "name": "Create Queue",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -600,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('Init Test Context')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.create_queue === true || result.create_queue === 't' || result.create_queue === 1;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'create_queue',\n  success: ok && !error,\n  expected: 'create_queue returns true',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-create-queue",
+      "name": "After Create Queue",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM register_worker('{{ $json.context.worker_id }}', '{{ $json.context.worker_name }}', 3, '30 seconds'::INTERVAL, to_jsonb(ARRAY['default', '{{ $json.context.queue_name }}']::text[]));"
+      },
+      "id": "register-worker",
+      "name": "Register Worker",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -200,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Create Queue')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst apiKey = result.api_key || null;\nconst ok = !!apiKey;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'register_worker',\n  success: ok && !error,\n  expected: 'api_key returned from register_worker',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, api_key: apiKey || prev.api_key, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-register-worker",
+      "name": "After Register Worker",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT enqueue_task(\n  p_api_key := '{{ $json.context.api_key }}',\n  p_task_name := 'task_example_a',\n  p_task_data := to_jsonb(json_build_object('run_id', '{{ $json.context.run_id }}', 'test', 'task_a')),\n  p_priority := 10,\n  p_queue_name := '{{ $json.context.queue_name }}'\n) AS task_uuid;"
+      },
+      "id": "enqueue-task-a",
+      "name": "Enqueue Task A",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        200,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Register Worker')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst taskUuid = result.task_uuid || result.enqueue_task || null;\nconst ok = typeof taskUuid === 'string' && taskUuid.length >= 10;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'enqueue_task_a',\n  success: ok && !error,\n  expected: 'enqueue_task returns uuid',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, task_uuid_a: taskUuid, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-enqueue-task-a",
+      "name": "After Enqueue Task A",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT enqueue_task(\n  p_api_key := '{{ $json.context.api_key }}',\n  p_task_name := 'task_long_batch',\n  p_task_data := to_jsonb(json_build_object(\n    'run_id', '{{ $json.context.run_id }}',\n    'units', json_build_array(1,2,3,4,5),\n    'batchSize', 2,\n    'leaseBufferMs', 2000,\n    'extendByInterval', '5 minutes'\n  )),\n  p_priority := 20,\n  p_queue_name := '{{ $json.context.queue_name }}'\n) AS task_uuid;"
+      },
+      "id": "enqueue-task-long",
+      "name": "Enqueue Long Task",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        600,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Enqueue Task A')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst taskUuid = result.task_uuid || result.enqueue_task || null;\nconst ok = typeof taskUuid === 'string' && taskUuid.length >= 10;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'enqueue_task_long',\n  success: ok && !error,\n  expected: 'enqueue_task returns uuid (long task)',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, task_uuid_long: taskUuid, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-enqueue-task-long",
+      "name": "After Enqueue Long Task",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT enqueue_task(\n  p_api_key := '{{ $json.context.api_key }}',\n  p_task_name := 'task_example_b',\n  p_task_data := to_jsonb(json_build_object('run_id', '{{ $json.context.run_id }}', 'test', 'task_b')),\n  p_priority := 5,\n  p_queue_name := '{{ $json.context.queue_name }}'\n) AS task_uuid;"
+      },
+      "id": "enqueue-task-b",
+      "name": "Enqueue Task B",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1000,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Enqueue Long Task')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst taskUuid = result.task_uuid || result.enqueue_task || null;\nconst ok = typeof taskUuid === 'string' && taskUuid.length >= 10;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'enqueue_task_b',\n  success: ok && !error,\n  expected: 'enqueue_task returns uuid (task B)',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, task_uuid_b: taskUuid, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-enqueue-task-b",
+      "name": "After Enqueue Task B",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const context = $items('After Enqueue Task B')[0].json.context;\nreturn [{\n  json: {\n    context,\n    serviceId: context.worker_id,\n    apiKey: context.api_key,\n    queueNames: [context.queue_name],\n    leaseDuration: '1 minute',\n    pollWaitMs: 0,\n    heartbeatEveryMs: 0,\n    heartbeatInterval: '30 seconds',\n    currentLoad: 0\n  }\n}];"
+      },
+      "id": "prepare-worker-input-1",
+      "name": "Prepare Worker Input 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.worker_workflow_id }}"
+      },
+      "id": "call-worker-1",
+      "name": "Call Worker Run 1",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const context = $items('After Enqueue Task B')[0].json.context;\nreturn [{\n  json: {\n    context,\n    serviceId: context.worker_id,\n    apiKey: context.api_key,\n    queueNames: [context.queue_name],\n    leaseDuration: '1 minute',\n    pollWaitMs: 0,\n    heartbeatEveryMs: 0,\n    heartbeatInterval: '30 seconds',\n    currentLoad: 0\n  }\n}];"
+      },
+      "id": "prepare-worker-input-2",
+      "name": "Prepare Worker Input 2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.worker_workflow_id }}"
+      },
+      "id": "call-worker-2",
+      "name": "Call Worker Run 2",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const context = $items('After Enqueue Task B')[0].json.context;\nreturn [{\n  json: {\n    context,\n    serviceId: context.worker_id,\n    apiKey: context.api_key,\n    queueNames: [context.queue_name],\n    leaseDuration: '1 minute',\n    pollWaitMs: 0,\n    heartbeatEveryMs: 0,\n    heartbeatInterval: '30 seconds',\n    currentLoad: 0\n  }\n}];"
+      },
+      "id": "prepare-worker-input-3",
+      "name": "Prepare Worker Input 3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $json.context.worker_workflow_id }}"
+      },
+      "id": "call-worker-3",
+      "name": "Call Worker Run 3",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        0
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const context = $items('After Enqueue Task B')[0].json.context;\nreturn [{ json: { context } }];"
+      },
+      "id": "rehydrate-context",
+      "name": "Rehydrate Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, task_uuid, status, last_error FROM task_queue WHERE task_uuid = '{{ $json.context.task_uuid_a }}'::UUID;"
+      },
+      "id": "status-task-a",
+      "name": "Get Task A Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2800,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('Rehydrate Context')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.status === 'completed';\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'task_example_a_status',\n  success: ok && !error,\n  expected: 'status completed',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\nreturn [{ json: { context } }];"
+      },
+      "id": "after-status-a",
+      "name": "After Task A Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3000,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, task_uuid, status, last_error FROM task_queue WHERE task_uuid = '{{ $json.context.task_uuid_long }}'::UUID;"
+      },
+      "id": "status-task-long",
+      "name": "Get Long Task Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        3200,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Task A Status')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.status === 'completed';\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'task_long_batch_status',\n  success: ok && !error,\n  expected: 'status completed',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\nreturn [{ json: { context } }];"
+      },
+      "id": "after-status-long",
+      "name": "After Long Task Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, task_uuid, status, last_error FROM task_queue WHERE task_uuid = '{{ $json.context.task_uuid_b }}'::UUID;"
+      },
+      "id": "status-task-b",
+      "name": "Get Task B Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        3600,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Long Task Status')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.status === 'completed';\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'task_example_b_status',\n  success: ok && !error,\n  expected: 'status completed',\n  actual: result,\n  error\n};\n\nconst results = [...prev.results, testResult];\nconst passed = results.filter(r => r.success).length;\nconst failed = results.length - passed;\n\nreturn [{\n  json: {\n    run_id: prev.run_id,\n    queue_name: prev.queue_name,\n    worker_id: prev.worker_id,\n    api_key_prefix: prev.api_key ? String(prev.api_key).slice(0, 10) : null,\n    summary: { total: results.length, passed, failed },\n    results\n  }\n}];"
+      },
+      "id": "finalize-results",
+      "name": "Finalize Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3800,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Init Test Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Test Context": {
+      "main": [
+        [
+          {
+            "node": "Create Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Queue": {
+      "main": [
+        [
+          {
+            "node": "After Create Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Create Queue": {
+      "main": [
+        [
+          {
+            "node": "Register Worker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register Worker": {
+      "main": [
+        [
+          {
+            "node": "After Register Worker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Register Worker": {
+      "main": [
+        [
+          {
+            "node": "Enqueue Task A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enqueue Task A": {
+      "main": [
+        [
+          {
+            "node": "After Enqueue Task A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Enqueue Task A": {
+      "main": [
+        [
+          {
+            "node": "Enqueue Long Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enqueue Long Task": {
+      "main": [
+        [
+          {
+            "node": "After Enqueue Long Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Enqueue Long Task": {
+      "main": [
+        [
+          {
+            "node": "Enqueue Task B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enqueue Task B": {
+      "main": [
+        [
+          {
+            "node": "After Enqueue Task B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Enqueue Task B": {
+      "main": [
+        [
+          {
+            "node": "Prepare Worker Input 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Worker Input 1": {
+      "main": [
+        [
+          {
+            "node": "Call Worker Run 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Worker Run 1": {
+      "main": [
+        [
+          {
+            "node": "Prepare Worker Input 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Worker Input 2": {
+      "main": [
+        [
+          {
+            "node": "Call Worker Run 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Worker Run 2": {
+      "main": [
+        [
+          {
+            "node": "Prepare Worker Input 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Worker Input 3": {
+      "main": [
+        [
+          {
+            "node": "Call Worker Run 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Worker Run 3": {
+      "main": [
+        [
+          {
+            "node": "Rehydrate Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rehydrate Context": {
+      "main": [
+        [
+          {
+            "node": "Get Task A Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Task A Status": {
+      "main": [
+        [
+          {
+            "node": "After Task A Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Task A Status": {
+      "main": [
+        [
+          {
+            "node": "Get Long Task Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Long Task Status": {
+      "main": [
+        [
+          {
+            "node": "After Long Task Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Long Task Status": {
+      "main": [
+        [
+          {
+            "node": "Get Task B Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Task B Status": {
+      "main": [
+        [
+          {
+            "node": "Finalize Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "00000000-0000-0000-0000-000000000003",
+  "meta": {
+    "instanceId": "tests-instance"
+  },
+  "id": "3",
+  "tags": []
+}

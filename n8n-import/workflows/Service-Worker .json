@@ -1,0 +1,1304 @@
+{
+  "name": "Service-Worker",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "[\n  {\n    \"default_lease_duration\": \"5 minutes\",\n    \"max_retry_delay\": \"1 hour\",\n    \"cleanup_retention\": \"30 days\",\n    \"worker_timeout\": \"10 minutes\",\n    \"max_concurrent_tasks_per_worker\": 10,\n    \"rate_limit_enqueue\": 1000,\n    \"rate_limit_dequeue\": 1000,\n    \"max_task_data_size_kb\": 100,\n    \"enable_queue_isolation\": true,\n    \"metadata_retention_days\": 90,\n    \"metadata_max_size_kb\": 100,\n    \"metadata_default_merge\": \"deep\",\n    \"metadata_history_enabled\": true,\n    \"id\": \"43\",\n    \"worker_id\": \"test-worker-000\",\n    \"worker_name\": \"Test Worker 000\",\n    \"worker_type\": null,\n    \"subscribed_queues\": [\n      \"test_short\"\n    ],\n    \"max_concurrent_tasks\": 10,\n    \"current_load\": 0,\n    \"cpu_weight\": 1,\n    \"memory_weight\": 1,\n    \"specializations\": [],\n    \"last_seen_at\": \"2026-02-15T11:04:04.016Z\",\n    \"is_active\": true,\n    \"heartbeat_interval\": {\n      \"seconds\": 45\n    },\n    \"expected_next_heartbeat\": \"2026-02-15T11:04:49.016Z\",\n    \"tasks_completed\": \"0\",\n    \"tasks_failed\": \"0\",\n    \"total_processing_time\": {},\n    \"created_at\": \"2026-02-15T11:02:07.874Z\",\n    \"updated_at\": \"2026-02-15T11:04:04.016Z\"\n  }\n]"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -992,
+        256
+      ],
+      "id": "93fa9c60-3f5f-403c-be2a-50261a0891c9",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b9cbe4ff-dba0-4c17-82ec-9163caa02854",
+              "name": "serviceId",
+              "value": "={{ $json.get_worker_metadata.serviceId || 'worker-' + Date.now() }}",
+              "type": "string"
+            },
+            {
+              "id": "844f26f7-57c8-49e2-9d96-f9cefef4e808",
+              "name": "api_key",
+              "value": "={{ $json.get_worker_metadata.api_key }}",
+              "type": "string"
+            },
+            {
+              "id": "b9e1669f-52f8-44e6-9cd1-3051f894d1ef",
+              "name": "heartbeatInterval",
+              "value": "={{ Math.max(5000,$json.get_worker_metadata.heartbeatEveryMs  || 30000) }}",
+              "type": "string"
+            },
+            {
+              "id": "22dda738-a3f0-4ee2-9d07-ceb8163e2db7",
+              "name": "leaseDuration",
+              "value": "={{ $json.get_worker_metadata.leaseDuration  || '5 minutes' }}",
+              "type": "string"
+            },
+            {
+              "id": "d3a70f1b-8bc4-49fe-9c2f-1a84dd7778a6",
+              "name": "queueNames",
+              "value": "={{ $json.queueNames }}",
+              "type": "array"
+            },
+            {
+              "id": "430b8c69-8790-4962-8120-b1ba61df9644",
+              "name": "maxConcurrentTasks",
+              "value": "={{ $json.maxConcurrentTasks || 5 }}",
+              "type": "number"
+            },
+            {
+              "id": "2a65033a-64bc-4021-a977-b373ad02b0e7",
+              "name": "backoffBaseMs",
+              "value": "={{ $json.backoffBaseMs || 5000 }}",
+              "type": "string"
+            },
+            {
+              "id": "2130b20f-c62c-4bee-a3b9-4ee04e54750f",
+              "name": "backoffMaxMs",
+              "value": "={{ $json.backoffMaxMs || 300000 }}",
+              "type": "string"
+            },
+            {
+              "id": "5fe653ed-0763-4f95-adb7-b7532333da9b",
+              "name": "pollWaitMs",
+              "value": "={{ Math.max(1000, $json.pollWaitMs || 5000) }}",
+              "type": "number"
+            },
+            {
+              "id": "b8b9e88b-4cc6-4718-bf02-47e3b0ff6e0a",
+              "name": "taskTimeoutMs",
+              "value": "={{ $json.taskTimeoutMs || 600000 }}",
+              "type": "number"
+            },
+            {
+              "id": "3556809a-397d-4e98-a18f-d14430416987",
+              "name": "enableGracefulShutdown",
+              "value": "={{ $json.enableGracefulShutdown !== false }}",
+              "type": "string"
+            },
+            {
+              "id": "287b813b-2c93-49dc-8aed-c309091b49fe",
+              "name": "metricsReportInterval",
+              "value": "={{ $json.metricsReportInterval || 50 }}",
+              "type": "string"
+            },
+            {
+              "id": "d90aa359-2b2d-4bd5-83c9-d7e8f545b35c",
+              "name": "heartbeatEveryMs",
+              "value": "={{ $json.heartbeatEveryMs }}",
+              "type": "number"
+            },
+            {
+              "id": "7d3d6aff-158d-4942-9099-a90d77b39c1f",
+              "name": "maxRuntimeMs",
+              "value": "={{ $json.maxRuntimeMs }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        64
+      ],
+      "id": "cc2e7f99-7f11-4921-8792-62bf563e281f",
+      "name": "worker config"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.metadata; // Access the first item of the array\nconst config = input;\n\n\n// Check if the 'config' exists before proceeding\nif (!config) {\n  throw new Error('get_worker_metadata is missing or not properly structured');\n}\n\n// Check if the 'config' exists before proceeding\nif (!config) {\n  throw new Error('get_worker_metadata is missing or not properly structured');\n}\n\n// Treat null/undefined/empty string as \"no api key\"\nconst noApiKey =\n  config.api_key === null ||\n  config.api_key === undefined ||\n  (typeof config.api_key === 'string' && config.api_key.trim() === '');\n\n// Ensure that `queueNames` is an array\nconst queueNames = Array.isArray(config.queueNames) ? config.queueNames : (config.queueNames ? [config.queueNames] : []);\n\n// Condition to check if runDuration is greater than 3 minutes and currentLoad is 0\nconst isRunDurationGreaterThan3Minutes = config.runDuration > 180000; // 180000 ms = 3 minutes\nconst isCurrentLoadZero = config.currentLoad === 0;\n\n// If either no API key or the new condition applies, registration is needed\nif (noApiKey || (isRunDurationGreaterThan3Minutes && isCurrentLoadZero)) {\n  const registrationData = {\n    workerId: config.serviceId,\n    queueNames: queueNames, // Now using the properly formatted array\n    maxConcurrentTasks: Number(config.maxConcurrentTasks ?? 1),\n    heartbeatInterval: config.heartbeatInterval, // keep original form if you need it\n  };\n\n  return [\n    {\n      json: {\n        ...config,\n        needsRegistration: true,\n        registrationData,\n      },\n    },\n  ];\n}\n\n// Otherwise, skip registration\nreturn [\n  {\n    json: {\n      ...config,\n      needsRegistration: false,\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        256
+      ],
+      "id": "211a7264-8e95-4903-a562-7759f854df04",
+      "name": "check registration"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1bcb7775-ce73-4614-a425-9656fa92c22e",
+              "leftValue": "={{ $json.needsRegistration }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        256
+      ],
+      "id": "dd0efd8f-517c-4821-997b-c27f7a6873b6",
+      "name": "Registration Needed"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM register_worker(\n  '{{ $json.registrationData.workerId }}',\n  '{{ $json.registrationData.workerId }}',\n  {{ $json.registrationData.maxConcurrentTasks }},\n  '{{ $json.registrationData.heartbeatInterval }}'::INTERVAL,\n  '{{ JSON.stringify($json.registrationData.queueNames) }}'::JSONB\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        896,
+        48
+      ],
+      "id": "a659eb70-6f47-44c8-a607-cd287dc3912d",
+      "name": "register worker",
+      "credentials": {
+        "postgres": {
+          "id": "WWSlgNwWnnhIhoMv",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $input.item.json;\n\n// Use \"now\" as startTime unless caller provided one.\n// If you want startTime to persist across the workflow, pass it forward in JSON.\nconst now = Date.now();\nconst startTime = typeof config.startTime === 'number' ? config.startTime : now;\n\n// If you want these to persist across the workflow, pass them forward too.\n// Otherwise they default each run.\nconst lastHeartbeat = typeof config.lastHeartbeat === 'number' ? config.lastHeartbeat : 0;\nconst currentTaskId = config.currentTaskId ?? null;\nconst errorBackoff = typeof config.errorBackoff === 'boolean' ? config.errorBackoff : false;\nconst backoffUntil = typeof config.backoffUntil === 'number' ? config.backoffUntil : 0;\nconst consecutiveErrors = typeof config.consecutiveErrors === 'number' ? config.consecutiveErrors : 0;\nconst tasksProcessed = typeof config.tasksProcessed === 'number' ? config.tasksProcessed : 0;\nconst tasksFailed = typeof config.tasksFailed === 'number' ? config.tasksFailed : 0;\nconst batchHistory = Array.isArray(config.batchHistory) ? config.batchHistory : [];\n\n// Current load can only be derived from input (or an external DB query).\nconst currentLoad = currentTaskId ? 1 : 0;\n\n// Shutdown checks\nconst runDuration = now - startTime;\nconst shouldShutdownByTime = runDuration > Number(config.maxRuntimeMs ?? 0);\n\n// Graceful shutdown file check (optional)\nlet shutdownRequested = false;\nif (String(config.enableGracefulShutdown).toLowerCase() === 'true' || config.enableGracefulShutdown === true) {\n  try {\n    const fs = require('fs');\n    shutdownRequested = fs.existsSync(`/tmp/worker_shutdown_${config.serviceId}`);\n  } catch (e) {\n    // ignore\n  }\n}\n\nconst shouldShutdown = shouldShutdownByTime || shutdownRequested;\n\nreturn [\n  {\n    json: {\n      ...config,\n\n      // state values (carried forward in JSON)\n      startTime,\n      lastHeartbeat,\n      currentTaskId,\n      currentLoad,\n      errorBackoff,\n      backoffUntil,\n      consecutiveErrors,\n      tasksProcessed,\n      tasksFailed,\n      batchHistory,\n\n      // derived values\n      runDuration,\n      shouldShutdown,\n      shutdownReason: shouldShutdownByTime\n        ? 'max_runtime'\n        : shutdownRequested\n          ? 'graceful_shutdown'\n          : null,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        144
+      ],
+      "id": "b5227844-13d0-458c-8d3f-246df01325da",
+      "name": "load worker state"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log shutdown and cleanup\nconst state = $getWorkflowStaticData('global');\nconst item = $input.item.json;\n\nconst successRate = state.tasksProcessed > 0 \n  ? ((state.tasksProcessed - state.tasksFailed) / state.tasksProcessed * 100).toFixed(2) + '%'\n  : 'N/A';\n\nconsole.log('=================================');\nconsole.log('WORKER SHUTTING DOWN');\nconsole.log('=================================');\nconsole.log('Reason:', item.shutdownReason);\nconsole.log('Uptime:', Math.floor(item.runDuration / 1000) + 's');\nconsole.log('Tasks Processed:', state.tasksProcessed);\nconsole.log('Tasks Failed:', state.tasksFailed);\nconsole.log('Success Rate:', successRate);\nconsole.log('Current Load:', item.currentLoad);\nconsole.log('=================================');\n\n// Clear shutdown signal file\nif (item.enableGracefulShutdown) {\n  try {\n    const fs = require('fs');\n    const shutdownFile = '/tmp/worker_shutdown_' + item.serviceId;\n    if (fs.existsSync(shutdownFile)) {\n      fs.unlinkSync(shutdownFile);\n      console.log('✓ Shutdown signal file cleared');\n    }\n  } catch (e) {\n    console.error('Failed to clear shutdown signal:', e.message);\n  }\n}\n\n// Reset state for next run\nstate.initialized = false;\nstate.workerRegistered = false;\n\nconsole.log('Worker shutdown complete.');\n\nreturn [];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        16
+      ],
+      "id": "44a12eb7-310c-4d6a-8113-3afe9d65f733",
+      "name": "Graceful Shutdown"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Validate queues exist and worker has access\nSELECT \n  array_agg(qr.queue_name) as valid_queues,\n  array_agg(qr.queue_name) FILTER (WHERE qr.is_active = FALSE) as inactive_queues,\n  COUNT(qr.queue_name) as found_count\nFROM unnest(ARRAY[{{ $json.queueNames.map(q => \"'\" + q + \"'\").join(',') }}]) AS requested(queue_name)\nLEFT JOIN queue_registry qr ON qr.queue_name = requested.queue_name;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2240,
+        208
+      ],
+      "id": "99f36048-704c-49f3-87a3-ae52ac016caf",
+      "name": "validate queue",
+      "credentials": {
+        "postgres": {
+          "id": "WWSlgNwWnnhIhoMv",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "634819f3-070a-47c4-86a4-df6e4093fe74",
+              "leftValue": "={{ $json.valid_queues && $json.valid_queues.filter(q => q !== null).length > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2688,
+        208
+      ],
+      "id": "c5b2b258-24cc-4a43-a12d-5c5be4604636",
+      "name": "queue valid"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced queue validation failure handling\nconst state = $getWorkflowStaticData('global');\nconst item = $input.item.json;\nconst config = $('Worker Config').item.json;\n\nconst requestedQueues = config.queueNames;\nconst inactiveQueues = item.inactive_queues || [];\nconst validQueues = (item.valid_queues || []).filter(q => q !== null);\nconst missingQueues = requestedQueues.filter(q => !validQueues.includes(q));\n\nconsole.error('=================================');\nconsole.error('QUEUE VALIDATION FAILED');\nconsole.error('=================================');\nconsole.error('Requested:', requestedQueues);\nconsole.error('Missing:', missingQueues);\nconsole.error('Inactive:', inactiveQueues);\nconsole.error('=================================');\n\n// Determine backoff strategy\nlet backoffMs;\n\nif (inactiveQueues.length > 0 && missingQueues.length === 0) {\n  // Queues exist but are inactive - shorter backoff\n  console.warn('Queues are temporarily inactive, will retry soon');\n  backoffMs = Math.min(30000, config.backoffBaseMs); // 30 seconds max\n} else if (missingQueues.length > 0) {\n  // Queues don't exist - longer backoff\n  console.error('Queues do not exist - check configuration');\n  backoffMs = config.backoffMaxMs; // Maximum backoff\n} else {\n  // Unknown error\n  backoffMs = config.backoffBaseMs * Math.pow(2, state.consecutiveErrors);\n}\n\nbackoffMs = Math.min(config.backoffMaxMs, backoffMs);\n\nstate.errorBackoff = true;\nstate.backoffUntil = Date.now() + backoffMs;\nstate.consecutiveErrors++;\n\nconsole.error('Entering backoff for', backoffMs, 'ms');\n\nreturn [];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2912,
+        304
+      ],
+      "id": "1881d1c1-23c1-48f6-bbaf-9dd05e067208",
+      "name": "queue validation failed"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "166bc46d-ac96-46c8-a116-3be84c55ff76",
+              "leftValue": "={{ $json.errorBackoff && Date.now() < $json.backoffUntil }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3136,
+        112
+      ],
+      "id": "eaa9ad17-5f16-4562-a5a4-467da2f51e95",
+      "name": "error backoff"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Wait during backoff period\nconst state = $getWorkflowStaticData('global');\nconst waitMs = Math.max(1000, state.backoffUntil - Date.now());\n\nconsole.log('In error backoff, waiting:', {\n  waitMs: waitMs,\n  consecutiveErrors: state.consecutiveErrors,\n  backoffUntil: new Date(state.backoffUntil).toISOString()\n});\n\nawait new Promise(resolve => setTimeout(resolve, waitMs));\n\n// Clear backoff if time has passed\nif (Date.now() >= state.backoffUntil) {\n  console.log('Backoff period ended, resuming normal operation');\n  state.errorBackoff = false;\n}\n\nreturn [];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3360,
+        -80
+      ],
+      "id": "8ffec7e5-2eb8-4b35-abdf-4da164d88665",
+      "name": "Wait backoff period"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Promote scheduled tasks to pending\nUPDATE task_queue\nSET status = 'pending', updated_at = NOW()\nWHERE status = 'scheduled'\nAND scheduled_at <= NOW()\nAND queue_name = ANY(ARRAY[{{ $('worker config').item.json.queueNames.map(q => \"'\" + q + \"'\").join(\",\") }}]);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3360,
+        352
+      ],
+      "id": "86080939-f3ad-446a-8c3c-23ca6b2e4f0b",
+      "name": "Promote Scheduled Tasks",
+      "credentials": {
+        "postgres": {
+          "id": "WWSlgNwWnnhIhoMv",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "91501149-50ce-48d8-b887-39b68231f02c",
+              "leftValue": "={{ Date.now() - $json.lastHeartbeat > $json.heartbeatEveryMs }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3360,
+        112
+      ],
+      "id": "4ddc144c-f4d1-47c4-9563-dd151215b452",
+      "name": "heartbeat due"
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $( 'load worker state' ).item.json;\nconsole.log(config);\nconfig.lastHeartbeat = Date.now();\n\nconsole.log('✓ Heartbeat sent - Load:', $input.item.json.currentLoad || 0);\n\nreturn [{\n  json: {\n    ...config\n    \n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4032,
+        48
+      ],
+      "id": "cb5d29d8-41de-449d-b7de-5d21b6dd5a28",
+      "name": "update heartbeat time"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM dequeue_task(\n  '{{ $json.api_key }}',\n  '{{ $json.leaseDuration }}'::INTERVAL,\n  ARRAY[{{ $json.queueNames.map(q => \"'\" + q + \"'\").join(\",\") }}]\n) AS task;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4256,
+        112
+      ],
+      "id": "e132bfba-d8a2-4be7-85ea-8b9019bd52f2",
+      "name": "poll task",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "WWSlgNwWnnhIhoMv",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT worker_heartbeat(\n  '{{ $json.api_key }}',\n  {{ $json.currentLoad || 0 }},\n  '{{ $('worker config').item.json.heartbeatInterval }}'::INTERVAL\n) AS worker_heartbeat;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3584,
+        48
+      ],
+      "id": "f831dd40-4a81-4255-9762-9791269361e0",
+      "name": "Send Worker Heartbeat",
+      "credentials": {
+        "postgres": {
+          "id": "WWSlgNwWnnhIhoMv",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9a669619-39e7-45a9-a4f3-78e2ca56240a",
+              "leftValue": "={{ $json.task_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "33f39906-6423-4143-964a-8955b78fca27",
+              "leftValue": "={{ $json.task_uuid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4480,
+        112
+      ],
+      "id": "cb67224c-4608-4710-86d4-dc21ed6ba05a",
+      "name": "task found"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "86353b88-12d8-4358-8f9a-a627d7376af3",
+              "name": "task_id",
+              "value": "={{ $json.task_id }}",
+              "type": "string"
+            },
+            {
+              "id": "c81e6b80-f384-49fd-9ae3-489b4b67abd8",
+              "name": "task_uuid",
+              "value": "={{ $json.task_uuid }}",
+              "type": "string"
+            },
+            {
+              "id": "2834d7aa-e7ba-4e43-8362-78ce2841eb6a",
+              "name": "task_name",
+              "value": "={{ $json.task_name }}",
+              "type": "string"
+            },
+            {
+              "id": "147765ec-3a1e-4277-8a9d-2ecb1de21caf",
+              "name": "task_data",
+              "value": "={{ $json.task_data }}",
+              "type": "object"
+            },
+            {
+              "id": "089604a2-90b5-4866-a37b-1fb8fa92813d",
+              "name": "attempts",
+              "value": "={{ $json.attempts }}",
+              "type": "number"
+            },
+            {
+              "id": "01ddeffc-cf0d-4653-a33b-20bb56ee3b80",
+              "name": "max_attempts",
+              "value": "={{ $json.max_attempts }}",
+              "type": "number"
+            },
+            {
+              "id": "9f80f958-1d38-4540-a21e-19b1c314bcc0",
+              "name": "queue_name",
+              "value": "={{ $json.queue_name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4704,
+        16
+      ],
+      "id": "b2028242-6373-409e-a6d7-5104229f49f7",
+      "name": "parse task data"
+    },
+    {
+      "parameters": {
+        "jsCode": "const waitMs = $('Worker Config').item.json.pollWaitMs;\n\n// Optional: Log every 10th poll cycle to avoid spam\nconst state = $getWorkflowStaticData('global');\nstate.pollCount = (state.pollCount || 0) + 1;\n\nif (state.pollCount % 10 === 0) {\n  console.log('No tasks available (poll #' + state.pollCount + '), waiting', waitMs, 'ms');\n}\n\nawait new Promise(resolve => setTimeout(resolve, waitMs));\nreturn [];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4704,
+        208
+      ],
+      "id": "c0345f97-4cc9-46b0-b951-aec30f5c97b7",
+      "name": "wait for task"
+    },
+    {
+      "parameters": {
+        "jsCode": "const checkRegistrationItems = $items('check registration');\nconst registerWorkerItems = $items('register worker');\n\nconst apiKey = registerWorkerItems[0]?.json?.api_key;\nif (!apiKey) {\n  throw new Error('API key not found in register worker output');\n}\n\nreturn checkRegistrationItems.map((item) => {\n  // Destructure to remove 'needsRegistration' and 'registrationData'\n  const { needsRegistration, registrationData, ...rest } = item.json;\n\n  return {\n    json: {\n      ...rest,\n      api_key: apiKey,\n\n    },\n  };\n});\n;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        48
+      ],
+      "id": "f41ca4ff-e1fa-47a7-85e1-4271a4c48ce5",
+      "name": "add new api"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "73babc1d-e1ee-4966-85ae-7734fa456fcf",
+              "leftValue": "={{ $json.shouldShutdown }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2016,
+        112
+      ],
+      "id": "5551b9f1-ba3d-4ea6-9841-41e6cdd76b53",
+      "name": "shutdown needed"
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $getWorkflowStaticData('global');\nstate.counter = (state.counter || 0) + 1;\nconsole.log(state);\n\n\nconst config = $('load worker state').item.json;\nreturn [{\n  json: {\n    ...config,\n   \n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2912,
+        112
+      ],
+      "id": "d60db575-5142-4599-80ec-d375b3bd8dae",
+      "name": "worker state load again"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "55b71fae-0252-4281-91b7-e7af2e43f181",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        48
+      ],
+      "id": "a720f8c8-0160-4a86-b15a-68852d702750",
+      "name": "check errorfield"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "55b71fae-0252-4281-91b7-e7af2e43f181",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3808,
+        48
+      ],
+      "id": "ca8a1834-20de-4b07-80de-bb36f64ac09a",
+      "name": "has no error"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "55b71fae-0252-4281-91b7-e7af2e43f181",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3584,
+        352
+      ],
+      "id": "612fa01b-487f-4009-9019-24005cfc3c1f",
+      "name": "has no error1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "55b71fae-0252-4281-91b7-e7af2e43f181",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2464,
+        208
+      ],
+      "id": "5d92150c-bd94-4fd2-b8c6-a93e454bbbc0",
+      "name": "has no error2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $('load worker state').item.json;\nconst item = $input.item.json;\n\n// Set current task ID\nstate.currentTaskId = item.taskId;\nstate.taskStartTime = Date.now();\n\n// Reset consecutive errors on successful task acquisition\nstate.consecutiveErrors = 0;\nstate.errorBackoff = false;\n\nconsole.log('▶ Processing task:', {\n  taskId: item.taskId,\n  taskUuid: item.taskUuid,\n  taskName: item.taskName,\n  queue: item.queueName,\n  attempt: item.attemptNumber + '/' + item.maxAttempts\n});\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4928,
+        16
+      ],
+      "id": "3954ac66-e4a9-48aa-9a92-ac6f74f0d202",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT validate_worker_auth('{{ $json.api_key }}') as worker_id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        896,
+        256
+      ],
+      "id": "bb0cd69a-e61f-4ddf-9196-57d9ef88f987",
+      "name": "validate api key",
+      "credentials": {
+        "postgres": {
+          "id": "WWSlgNwWnnhIhoMv",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('worker config').item.json;\nconsole.log(config);\n\n// Treat null/undefined/empty string as \"no api key\"\nconst validationError = true; // TODO: Code for api validtion error\n\n// If no api key, we should register\nif (validationError) {\n  const registrationData = {\n    workerId: config.serviceId,\n    queueNames: config.queueNames ?? [],\n    maxConcurrentTasks: Number(config.maxConcurrentTasks ?? 1),\n    heartbeatInterval: config.heartbeatInterval, // keep original form if you need it\n  };\n\n  return [\n    {\n      json: {\n        ...config,\n        needsRegistration: true,\n        registrationData,\n      },\n    },\n  ];\n}\n\n// Otherwise, skip registration\nreturn [\n  {\n    json: {\n      ...config,\n      needsRegistration: false,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        400
+      ],
+      "id": "8171888e-bd75-4ba3-b9d2-9991e2ebbcd3",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT patch_worker_metadata(\n  '{{ $json.api_key }}',\n  '{{ JSON.stringify((({  ...rest }) => rest)($json)) }}'::jsonb\n) AS metadata;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -512,
+        272
+      ],
+      "id": "feff01a9-68ee-44cb-9423-b5484c504d90",
+      "name": "set metadata",
+      "credentials": {
+        "postgres": {
+          "id": "WWSlgNwWnnhIhoMv",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT get_worker_metadata('{{ $json.metadata.api_key }}') as metadata;\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -96,
+        288
+      ],
+      "id": "7ce1d9de-47b8-49e5-8dbe-6c6e9a427b3d",
+      "name": "get worker metadata1",
+      "credentials": {
+        "postgres": {
+          "id": "WWSlgNwWnnhIhoMv",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "wU8RyMS3GaBRH8pl",
+          "mode": "list",
+          "cachedResultName": "config",
+          "cachedResultUrl": "/projects/LojWTIlQr92VXNUs/datatables/wU8RyMS3GaBRH8pl"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "like",
+              "keyValue": "={{ \"api_\" + $json.serviceId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        688
+      ],
+      "id": "9bdedf03-b9fb-4d50-be22-e573802b66fc",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "wU8RyMS3GaBRH8pl",
+          "mode": "list",
+          "cachedResultName": "config",
+          "cachedResultUrl": "/projects/LojWTIlQr92VXNUs/datatables/wU8RyMS3GaBRH8pl"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "keyValue": "={{ \"api_\" + $json.serviceId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "={{ \"api_\" + $json.worker_id }}",
+            "value": "={{ $json.api_key }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "value",
+              "displayName": "value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        48
+      ],
+      "id": "72182ceb-0c7d-460a-b58f-74bb178f9b23",
+      "name": "Upsert row(s)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "set metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "worker config": {
+      "main": [
+        []
+      ]
+    },
+    "check registration": {
+      "main": [
+        [
+          {
+            "node": "Registration Needed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registration Needed": {
+      "main": [
+        [
+          {
+            "node": "register worker",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "validate api key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "register worker": {
+      "main": [
+        [
+          {
+            "node": "check errorfield",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "load worker state": {
+      "main": [
+        [
+          {
+            "node": "shutdown needed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validate queue": {
+      "main": [
+        [
+          {
+            "node": "has no error2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "queue valid": {
+      "main": [
+        [
+          {
+            "node": "worker state load again",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "queue validation failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "error backoff": {
+      "main": [
+        [
+          {
+            "node": "Wait backoff period",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "heartbeat due",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Promote Scheduled Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Promote Scheduled Tasks": {
+      "main": [
+        [
+          {
+            "node": "has no error1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "heartbeat due": {
+      "main": [
+        [
+          {
+            "node": "Send Worker Heartbeat",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "poll task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update heartbeat time": {
+      "main": [
+        [
+          {
+            "node": "poll task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Worker Heartbeat": {
+      "main": [
+        [
+          {
+            "node": "has no error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "poll task": {
+      "main": [
+        [
+          {
+            "node": "task found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "task found": {
+      "main": [
+        [
+          {
+            "node": "parse task data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "wait for task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "add new api": {
+      "main": [
+        [
+          {
+            "node": "load worker state",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "shutdown needed": {
+      "main": [
+        [
+          {
+            "node": "Graceful Shutdown",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "validate queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "worker state load again": {
+      "main": [
+        [
+          {
+            "node": "error backoff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check errorfield": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Upsert row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "has no error": {
+      "main": [
+        [
+          {
+            "node": "update heartbeat time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "has no error2": {
+      "main": [
+        [
+          {
+            "node": "queue valid",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "parse task data": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validate api key": {
+      "main": [
+        [
+          {
+            "node": "load worker state",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Registration Needed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get worker metadata1": {
+      "main": [
+        [
+          {
+            "node": "check registration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        []
+      ]
+    },
+    "Upsert row(s)": {
+      "main": [
+        [
+          {
+            "node": "add new api",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set metadata": {
+      "main": [
+        [
+          {
+            "node": "get worker metadata1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "d528506a-85ca-4bd5-983f-1b371835db29",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f94ee6675052c2b68be0785e7c4c1b60b0426d14c775c213c4e38fd0abd72c74"
+  },
+  "id": "jZuPlR-3s1V02AIMHDIMm",
+  "tags": []
+}

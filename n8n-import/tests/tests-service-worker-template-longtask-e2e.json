@@ -1,0 +1,964 @@
+{
+  "name": "Tests - Service Worker Template (Long Task) E2E",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Service Worker Template (Long Task) E2E Tests\n\n**Before running:**\n1) Ensure Postgres is running with `secure_task_scheduler.sql` installed\n2) Configure Postgres credentials for all DB nodes (default name: Worker PostgreSQL)\n\n**What this tests:**\n- create_queue, register_worker\n- enqueue/dequeue/complete (task_example_a)\n- enqueue/dequeue + heartbeat_task lease extension (task_long_batch)\n- enqueue/dequeue/fail (task_example_b)\n- worker_heartbeat, get_queue_stats\n\n**Output:** Final node returns a summary with per-test results.",
+        "height": 280,
+        "width": 480,
+        "color": 2
+      },
+      "id": "sticky-tests-instructions",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1000,
+        -240
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1000,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const runId = new Date().toISOString();\nconst runIdSafe = runId.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');\nconst queueName = `test_queue_${runIdSafe.slice(0, 24)}`;\nconst workerId = `test_worker_${runIdSafe.slice(0, 24)}`;\nconst workerName = `Test Worker ${runId}`;\n\nconst context = {\n  run_id: runId,\n  queue_name: queueName,\n  worker_id: workerId,\n  worker_name: workerName,\n  api_key: null,\n  task_id_a: null,\n  task_id_long: null,\n  task_id_b: null,\n  lease_before: null,\n  results: []\n};\n\nreturn [{ json: { context } }];"
+      },
+      "id": "init-test-context",
+      "name": "Init Test Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT create_queue('{{ $json.context.queue_name }}', '{{ 'Test queue for run ' + $json.context.run_id }}') AS create_queue;"
+      },
+      "id": "create-queue",
+      "name": "Create Queue",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -600,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('Init Test Context')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.create_queue === true || result.create_queue === 't' || result.create_queue === 1;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'create_queue',\n  success: ok && !error,\n  expected: 'create_queue returns true',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-create-queue",
+      "name": "After Create Queue",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM register_worker('{{ $json.context.worker_id }}', '{{ $json.context.worker_name }}', 3, '30 seconds'::INTERVAL, to_jsonb(ARRAY['default', '{{ $json.context.queue_name }}']::text[]));"
+      },
+      "id": "register-worker",
+      "name": "Register Worker",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -200,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Create Queue')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst apiKey = result.api_key || null;\nconst ok = !!apiKey;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'register_worker',\n  success: ok && !error,\n  expected: 'api_key returned from register_worker',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, api_key: apiKey || prev.api_key, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-register-worker",
+      "name": "After Register Worker",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT enqueue_task(\n  p_api_key := '{{ $json.context.api_key }}',\n  p_task_name := 'task_example_a',\n  p_task_data := to_jsonb(json_build_object('run_id', '{{ $json.context.run_id }}', 'test', 'task_a')),\n  p_priority := 10,\n  p_queue_name := '{{ $json.context.queue_name }}'\n) AS task_uuid;"
+      },
+      "id": "enqueue-task-a",
+      "name": "Enqueue Task A",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        200,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Register Worker')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst taskUuid = result.task_uuid || result.enqueue_task || null;\nconst ok = typeof taskUuid === 'string' && taskUuid.length >= 10;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'enqueue_task_a',\n  success: ok && !error,\n  expected: 'enqueue_task returns uuid',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-enqueue-task-a",
+      "name": "After Enqueue Task A",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM dequeue_task('{{ $json.context.api_key }}', '5 minutes'::INTERVAL, ARRAY['{{ $json.context.queue_name }}']);"
+      },
+      "id": "dequeue-task-a",
+      "name": "Dequeue Task A",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        600,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Enqueue Task A')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst taskId = result.id || result.task_id || null;\nconst ok = taskId !== null && taskId !== undefined;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'dequeue_task_a',\n  success: ok && !error,\n  expected: 'dequeue_task returns task_id',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, task_id_a: taskId, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-dequeue-task-a",
+      "name": "After Dequeue Task A",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT complete_task('{{ $json.context.api_key }}', {{ $json.context.task_id_a }}, to_jsonb(json_build_object('status', 'ok', 'run_id', '{{ $json.context.run_id }}'))) AS complete_task;"
+      },
+      "id": "complete-task-a",
+      "name": "Complete Task A",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1000,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Dequeue Task A')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.complete_task === true || result.complete_task === 't' || result.complete_task === 1;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'complete_task_a',\n  success: ok && !error,\n  expected: 'complete_task returns true',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-complete-task-a",
+      "name": "After Complete Task A",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT enqueue_task(\n  p_api_key := '{{ $json.context.api_key }}',\n  p_task_name := 'task_long_batch',\n  p_task_data := to_jsonb(json_build_object(\n    'run_id', '{{ $json.context.run_id }}',\n    'units', json_build_array(1,2,3,4,5),\n    'batchSize', 2,\n    'leaseBufferMs', 2000,\n    'extendByInterval', '5 minutes'\n  )),\n  p_priority := 20,\n  p_queue_name := '{{ $json.context.queue_name }}'\n) AS task_uuid;"
+      },
+      "id": "enqueue-task-long",
+      "name": "Enqueue Long Task",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1400,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Complete Task A')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst taskUuid = result.task_uuid || result.enqueue_task || null;\nconst ok = typeof taskUuid === 'string' && taskUuid.length >= 10;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'enqueue_task_long',\n  success: ok && !error,\n  expected: 'enqueue_task returns uuid (long task)',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-enqueue-task-long",
+      "name": "After Enqueue Long Task",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM dequeue_task('{{ $json.context.api_key }}', '1 minute'::INTERVAL, ARRAY['{{ $json.context.queue_name }}']);"
+      },
+      "id": "dequeue-task-long",
+      "name": "Dequeue Long Task",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1800,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Enqueue Long Task')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst taskId = result.id || result.task_id || null;\nconst ok = taskId !== null && taskId !== undefined;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'dequeue_task_long',\n  success: ok && !error,\n  expected: 'dequeue_task returns task_id (long task)',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, task_id_long: taskId, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-dequeue-task-long",
+      "name": "After Dequeue Long Task",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM get_task_status('{{ $json.context.api_key }}', {{ $json.context.task_id_long }});"
+      },
+      "id": "get-task-status-before",
+      "name": "Get Task Status Before",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2200,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Dequeue Long Task')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst leaseBefore = result.lease_expires_at || null;\nconst ok = !!result.id;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'get_task_status_before',\n  success: ok && !error,\n  expected: 'get_task_status returns task record',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, lease_before: leaseBefore, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-get-task-status-before",
+      "name": "After Get Task Status Before",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT heartbeat_task('{{ $json.context.api_key }}', {{ $json.context.task_id_long }}, '5 minutes'::INTERVAL) AS heartbeat_task;"
+      },
+      "id": "heartbeat-task",
+      "name": "Heartbeat Task (extend lease)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2600,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Get Task Status Before')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.heartbeat_task === true || result.heartbeat_task === 't' || result.heartbeat_task === 1;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'heartbeat_task',\n  success: ok && !error,\n  expected: 'heartbeat_task returns true',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-heartbeat-task",
+      "name": "After Heartbeat Task",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM get_task_status('{{ $json.context.api_key }}', {{ $json.context.task_id_long }});"
+      },
+      "id": "get-task-status-after",
+      "name": "Get Task Status After",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        3000,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Heartbeat Task')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst afterLease = result.lease_expires_at || null;\nlet extended = false;\nif (prev.lease_before && afterLease) {\n  extended = new Date(afterLease).getTime() > new Date(prev.lease_before).getTime();\n}\nconst ok = !!result.id && (prev.lease_before ? extended : true);\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'heartbeat_extends_lease',\n  success: ok && !error,\n  expected: 'lease_expires_at increases after heartbeat_task',\n  actual: { before: prev.lease_before, after: afterLease },\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-get-task-status-after",
+      "name": "After Get Task Status After",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT complete_task('{{ $json.context.api_key }}', {{ $json.context.task_id_long }}, to_jsonb(json_build_object('status', 'long_done', 'run_id', '{{ $json.context.run_id }}'))) AS complete_task;"
+      },
+      "id": "complete-task-long",
+      "name": "Complete Long Task",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        3400,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Get Task Status After')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.complete_task === true || result.complete_task === 't' || result.complete_task === 1;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'complete_task_long',\n  success: ok && !error,\n  expected: 'complete_task returns true (long task)',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-complete-task-long",
+      "name": "After Complete Long Task",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT enqueue_task(\n  p_api_key := '{{ $json.context.api_key }}',\n  p_task_name := 'task_example_b',\n  p_task_data := to_jsonb(json_build_object('run_id', '{{ $json.context.run_id }}', 'test', 'task_b')),\n  p_priority := 5,\n  p_queue_name := '{{ $json.context.queue_name }}'\n) AS task_uuid;"
+      },
+      "id": "enqueue-task-b",
+      "name": "Enqueue Task B",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        3800,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Complete Long Task')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst taskUuid = result.task_uuid || result.enqueue_task || null;\nconst ok = typeof taskUuid === 'string' && taskUuid.length >= 10;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'enqueue_task_b',\n  success: ok && !error,\n  expected: 'enqueue_task returns uuid (task B)',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-enqueue-task-b",
+      "name": "After Enqueue Task B",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4000,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM dequeue_task('{{ $json.context.api_key }}', '5 minutes'::INTERVAL, ARRAY['{{ $json.context.queue_name }}']);"
+      },
+      "id": "dequeue-task-b",
+      "name": "Dequeue Task B",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        4200,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Enqueue Task B')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst taskId = result.id || result.task_id || null;\nconst ok = taskId !== null && taskId !== undefined;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'dequeue_task_b',\n  success: ok && !error,\n  expected: 'dequeue_task returns task_id (task B)',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, task_id_b: taskId, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-dequeue-task-b",
+      "name": "After Dequeue Task B",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT fail_task('{{ $json.context.api_key }}', {{ $json.context.task_id_b }}, 'Intentional failure for test coverage', false) AS fail_task;"
+      },
+      "id": "fail-task-b",
+      "name": "Fail Task B",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        4600,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Dequeue Task B')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.fail_task === true || result.fail_task === 't' || result.fail_task === 1;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'fail_task_b',\n  success: ok && !error,\n  expected: 'fail_task returns true',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-fail-task-b",
+      "name": "After Fail Task B",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT worker_heartbeat('{{ $json.context.api_key }}', 0, '30 seconds'::INTERVAL) AS worker_heartbeat;"
+      },
+      "id": "worker-heartbeat",
+      "name": "Worker Heartbeat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        5000,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Fail Task B')[0].json.context;\nconst result = $input.all()[0]?.json ?? {};\nconst ok = result.worker_heartbeat === true || result.worker_heartbeat === 't' || result.worker_heartbeat === 1;\nconst error = result.error || result.message || null;\n\nconst testResult = {\n  name: 'worker_heartbeat',\n  success: ok && !error,\n  expected: 'worker_heartbeat returns true',\n  actual: result,\n  error\n};\n\nconst context = { ...prev, results: [...prev.results, testResult] };\n\nreturn [{ json: { context } }];"
+      },
+      "id": "after-worker-heartbeat",
+      "name": "After Worker Heartbeat",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM get_queue_stats();"
+      },
+      "id": "get-queue-stats",
+      "name": "Get Queue Stats",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        5400,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Worker PostgreSQL"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $items('After Worker Heartbeat')[0].json.context;\nconst items = $input.all();\nconst queueNames = items.map(i => i.json.queue_name).filter(Boolean);\nconst ok = queueNames.length > 0;\nconst error = items[0]?.json?.error || items[0]?.json?.message || null;\n\nconst testResult = {\n  name: 'get_queue_stats',\n  success: ok && !error,\n  expected: 'queue stats returned',\n  actual: items.map(i => i.json),\n  error\n};\n\nconst results = [...prev.results, testResult];\nconst passed = results.filter(r => r.success).length;\nconst failed = results.length - passed;\n\nreturn [{\n  json: {\n    run_id: prev.run_id,\n    queue_name: prev.queue_name,\n    worker_id: prev.worker_id,\n    api_key_prefix: prev.api_key ? String(prev.api_key).slice(0, 10) : null,\n    summary: { total: results.length, passed, failed },\n    results\n  }\n}];"
+      },
+      "id": "finalize-results",
+      "name": "Finalize Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5600,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Init Test Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Test Context": {
+      "main": [
+        [
+          {
+            "node": "Create Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Queue": {
+      "main": [
+        [
+          {
+            "node": "After Create Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Create Queue": {
+      "main": [
+        [
+          {
+            "node": "Register Worker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register Worker": {
+      "main": [
+        [
+          {
+            "node": "After Register Worker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Register Worker": {
+      "main": [
+        [
+          {
+            "node": "Enqueue Task A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enqueue Task A": {
+      "main": [
+        [
+          {
+            "node": "After Enqueue Task A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Enqueue Task A": {
+      "main": [
+        [
+          {
+            "node": "Dequeue Task A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dequeue Task A": {
+      "main": [
+        [
+          {
+            "node": "After Dequeue Task A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Dequeue Task A": {
+      "main": [
+        [
+          {
+            "node": "Complete Task A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Complete Task A": {
+      "main": [
+        [
+          {
+            "node": "After Complete Task A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Complete Task A": {
+      "main": [
+        [
+          {
+            "node": "Enqueue Long Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enqueue Long Task": {
+      "main": [
+        [
+          {
+            "node": "After Enqueue Long Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Enqueue Long Task": {
+      "main": [
+        [
+          {
+            "node": "Dequeue Long Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dequeue Long Task": {
+      "main": [
+        [
+          {
+            "node": "After Dequeue Long Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Dequeue Long Task": {
+      "main": [
+        [
+          {
+            "node": "Get Task Status Before",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Task Status Before": {
+      "main": [
+        [
+          {
+            "node": "After Get Task Status Before",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Get Task Status Before": {
+      "main": [
+        [
+          {
+            "node": "Heartbeat Task (extend lease)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Heartbeat Task (extend lease)": {
+      "main": [
+        [
+          {
+            "node": "After Heartbeat Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Heartbeat Task": {
+      "main": [
+        [
+          {
+            "node": "Get Task Status After",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Task Status After": {
+      "main": [
+        [
+          {
+            "node": "After Get Task Status After",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Get Task Status After": {
+      "main": [
+        [
+          {
+            "node": "Complete Long Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Complete Long Task": {
+      "main": [
+        [
+          {
+            "node": "After Complete Long Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Complete Long Task": {
+      "main": [
+        [
+          {
+            "node": "Enqueue Task B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enqueue Task B": {
+      "main": [
+        [
+          {
+            "node": "After Enqueue Task B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Enqueue Task B": {
+      "main": [
+        [
+          {
+            "node": "Dequeue Task B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dequeue Task B": {
+      "main": [
+        [
+          {
+            "node": "After Dequeue Task B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Dequeue Task B": {
+      "main": [
+        [
+          {
+            "node": "Fail Task B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fail Task B": {
+      "main": [
+        [
+          {
+            "node": "After Fail Task B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Fail Task B": {
+      "main": [
+        [
+          {
+            "node": "Worker Heartbeat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Worker Heartbeat": {
+      "main": [
+        [
+          {
+            "node": "After Worker Heartbeat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Worker Heartbeat": {
+      "main": [
+        [
+          {
+            "node": "Get Queue Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Queue Stats": {
+      "main": [
+        [
+          {
+            "node": "Finalize Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "00000000-0000-0000-0000-000000000002",
+  "meta": {
+    "instanceId": "tests-instance"
+  },
+  "id": "2",
+  "tags": []
+}

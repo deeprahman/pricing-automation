@@ -1,0 +1,396 @@
+{
+  "name": "🪵 Robust Logger",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "webhook-trigger",
+      "name": "🧩 Triggered by Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "notes": "Call this workflow from another workflow via Execute Workflow node. Input JSON: { level, message, source, metadata, error_code, error_stack, user_id, request_id, ip_address }"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Validate & Normalize Incoming Log Payload ───────────────\nconst VALID_LEVELS = ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'];\n\nconst input = $input.first().json;\nconst body = input.body ?? input;\nconst headers = input.headers ?? {};\n\n// ── Required field check ─────────────────────────────────────\nif (!body.message || typeof body.message !== 'string' || body.message.trim() === '') {\n  throw new Error('Validation failed: `message` is required and must be a non-empty string.');\n}\n\n// ── Normalize level ──────────────────────────────────────────\nconst rawLevel = (body.level ?? 'INFO').toString().toUpperCase().trim();\nconst level = VALID_LEVELS.includes(rawLevel) ? rawLevel : 'INFO';\n\n// ── Normalize client IP (first forwarded hop only) ───────────\nconst forwardedHeader =\n  headers['x-forwarded-for']\n  ?? headers['X-Forwarded-For']\n  ?? headers['x-real-ip']\n  ?? headers['X-Real-IP']\n  ?? null;\n\nconst forwardedValue = Array.isArray(forwardedHeader) ? forwardedHeader[0] : forwardedHeader;\nlet ipAddress = null;\n\nif (typeof forwardedValue === 'string' && forwardedValue.trim() !== '') {\n  const firstHop = forwardedValue.split(',')[0].trim();\n  const ipv4WithPort = firstHop.match(/^(\\d{1,3}(?:\\.\\d{1,3}){3}):\\d+$/);\n  const bracketedIpv6 = firstHop.match(/^\\[([0-9a-fA-F:]+)\\](?::\\d+)?$/);\n\n  if (ipv4WithPort) {\n    ipAddress = ipv4WithPort[1];\n  } else if (bracketedIpv6) {\n    ipAddress = bracketedIpv6[1];\n  } else {\n    ipAddress = firstHop;\n  }\n}\n\n// ── Extract execution context injected by n8n ────────────────\nconst execId   = $execution?.id   ?? null;\nconst wfId     = $workflow?.id    ?? null;\nconst wfName   = $workflow?.name  ?? null;\n\n// ── Build clean log entry ────────────────────────────────────\nconst logEntry = {\n  level,\n  message:       body.message.trim().substring(0, 5000),\n  source:        (body.source ?? 'n8n').toString().substring(0, 100),\n  workflow_id:   wfId,\n  workflow_name: wfName,\n  execution_id:  execId,\n  metadata:      (body.metadata && typeof body.metadata === 'object' && !Array.isArray(body.metadata)) ? body.metadata : {},\n  error_code:    body.error_code  ?? null,\n  error_stack:   body.error_stack ?? null,\n  request_id:    body.request_id  ?? null,\n  user_id:       body.user_id     ?? null,\n  ip_address:    ipAddress\n};\n\nreturn [{ json: logEntry }];"
+      },
+      "id": "validate-normalize",
+      "name": "🔍 Validate & Normalize",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "id": "is-error",
+              "leftValue": "={{ $json.level }}",
+              "rightValue": "ERROR",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "is-fatal",
+              "leftValue": "={{ $json.level }}",
+              "rightValue": "FATAL",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "is-error-router",
+      "name": "⚡ Is ERROR or FATAL?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "id": "is-fatal",
+              "leftValue": "={{ $json.level }}",
+              "rightValue": "FATAL",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "is-fatal-router",
+      "name": "🔥 Is FATAL?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        960,
+        160
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "name"
+        },
+        "table": {
+          "__rl": true,
+          "value": "app_logs",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "level": "={{ $json.level }}",
+            "message": "={{ $json.message }}",
+            "source": "={{ $json.source }}",
+            "workflow_id": "={{ $json.workflow_id }}",
+            "workflow_name": "={{ $json.workflow_name }}",
+            "execution_id": "={{ $json.execution_id }}",
+            "metadata": "={{ $json.metadata }}",
+            "error_code": "={{ $json.error_code }}",
+            "error_stack": "={{ $json.error_stack }}",
+            "request_id": "={{ $json.request_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "ip_address": "={{ $json.ip_address }}"
+          }
+        },
+        "options": {
+          "returnFields": [
+            "id",
+            "level",
+            "created_at"
+          ]
+        }
+      },
+      "id": "insert-log",
+      "name": "💾 Insert to DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1200,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "Postgres — Logger DB"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Build Slack / Email alert for FATAL logs ────────────────\nconst log = $input.first().json;\n\nconst alertPayload = {\n  title:    '🚨 FATAL LOG ALERT',\n  text:     `*${log.source}* reported a FATAL error`,\n  fields: [\n    { label: 'Message',    value: log.message },\n    { label: 'Workflow',   value: log.workflow_name ?? 'N/A' },\n    { label: 'Execution',  value: log.execution_id  ?? 'N/A' },\n    { label: 'Error Code', value: log.error_code    ?? 'N/A' },\n    { label: 'User',       value: log.user_id       ?? 'N/A' },\n    { label: 'Stack',      value: (log.error_stack ?? '').substring(0, 500) }\n  ],\n  timestamp: new Date().toISOString()\n};\n\nreturn [{\n  json: {\n    ...log,\n    alert_payload: alertPayload\n  }\n}];"
+      },
+      "id": "build-alert",
+      "name": "📣 Build Alert Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        60
+      ],
+      "notes": "Runs only for FATAL level. Extend this node to call Slack, PagerDuty, email etc.",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return success payload to the parent workflow\nconst inserted = $input.first().json;\n\nreturn [{\n  json: {\n    success: true,\n    log_id: inserted.id,\n    level: inserted.level,\n    saved_at: inserted.created_at\n  }\n}];"
+      },
+      "id": "success-response",
+      "name": "✅ Return Success",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Global error handler for workflow error output ───────────\nconst payload = $input.first().json ?? {};\nconst nestedError = payload.error ?? payload.execution?.error ?? null;\n\nconst errorMessage =\n  nestedError?.message\n  ?? payload.message\n  ?? (typeof nestedError === 'string' ? nestedError : null)\n  ?? 'Unknown error occurred';\n\nconsole.error('[Logger Workflow Error]', errorMessage);\n\nreturn [{\n  json: {\n    success: false,\n    error: errorMessage,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "error-handler",
+      "name": "❌ Error Handler",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return standardized error payload to the parent workflow\nreturn [{ json: $input.first().json }];"
+      },
+      "id": "error-response",
+      "name": "❌ Return Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        500
+      ]
+    }
+  ],
+  "connections": {
+    "🔍 Validate & Normalize": {
+      "main": [
+        [
+          {
+            "node": "⚡ Is ERROR or FATAL?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚡ Is ERROR or FATAL?": {
+      "main": [
+        [
+          {
+            "node": "🔥 Is FATAL?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "💾 Insert to DB",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔥 Is FATAL?": {
+      "main": [
+        [
+          {
+            "node": "📣 Build Alert Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "💾 Insert to DB",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📣 Build Alert Payload": {
+      "main": [
+        [
+          {
+            "node": "💾 Insert to DB",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💾 Insert to DB": {
+      "main": [
+        [
+          {
+            "node": "✅ Return Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "❌ Error Handler": {
+      "main": [
+        [
+          {
+            "node": "❌ Return Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧩 Triggered by Workflow": {
+      "main": [
+        [
+          {
+            "node": "🔍 Validate & Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "errorWorkflow": "",
+    "timezone": "UTC"
+  },
+  "staticData": null,
+  "meta": {
+    "instanceId": "n8n-logging-workflow",
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [
+    "logging",
+    "database",
+    "monitoring"
+  ],
+  "__readme__": {
+    "setup": [
+      "1. Run schemas/app_log.sql in your PostgreSQL database",
+      "2. Create a Postgres credential in n8n (Settings → Credentials)",
+      "3. Update node '💾 Insert to DB' → set your credential ID",
+      "4. Activate the workflow",
+      "5. Call this workflow from another workflow using an Execute Workflow node"
+    ],
+    "example_payload": {
+      "level": "ERROR",
+      "message": "Payment service timed out",
+      "source": "checkout-service",
+      "user_id": "usr_123",
+      "error_code": "PAYMENT_TIMEOUT",
+      "error_stack": "Error: Timeout\\n  at PaymentService.charge ...",
+      "metadata": {
+        "order_id": "ord_456",
+        "amount": 99.99
+      }
+    },
+    "valid_levels": [
+      "DEBUG",
+      "INFO",
+      "WARN",
+      "ERROR",
+      "FATAL"
+    ],
+    "caller_example_payload": {
+      "level": "ERROR",
+      "message": "Payment service timed out",
+      "source": "checkout-service",
+      "user_id": "usr_123",
+      "request_id": "req_789",
+      "error_code": "PAYMENT_TIMEOUT",
+      "error_stack": "Error: Timeout\\n  at PaymentService.charge ...",
+      "metadata": {
+        "order_id": "ord_456",
+        "amount": 99.99
+      }
+    }
+  }
+}

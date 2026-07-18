@@ -1,0 +1,72 @@
+{
+    "guest": {
+        "first_name": "PRIYA",
+        "id": 720000002,
+        "last_name": "PATEL"
+    },
+    "items": [
+        {
+            "body": "Reminder: checkout tomorrow at 1:00 PM. Text us if you need luggage storage.",
+            "date_utc": "2026-02-26T08:00:00Z",
+            "from_contact_id": 610005002,
+            "from_role": "co_host",
+            "id": 96000042,
+            "is_draft": false,
+            "thread_id": 91000002
+        },
+        {
+            "body": "All packed and leaving now. Thanks for hosting!",
+            "date_utc": "2026-02-26T12:15:00Z",
+            "from_contact_id": 720000002,
+            "from_role": "guest",
+            "id": 96000043,
+            "is_draft": false,
+            "thread_id": 91000002
+        },
+        {
+            "body": "Thank you for staying with us. Safe travels and we’d appreciate a quick review.",
+            "date_utc": "2026-02-26T13:00:00Z",
+            "from_contact_id": 610000002,
+            "from_role": "owner",
+            "id": 96000044,
+            "is_draft": false,
+            "thread_id": 91000002
+        },
+        {
+            "body": "Housekeeping confirmed the unit looks great. Thanks for taking care of the space.",
+            "date_utc": "2026-02-26T14:00:00Z",
+            "from_contact_id": 610005002,
+            "from_role": "co_host",
+            "id": 96000045,
+            "is_draft": false,
+            "thread_id": 91000002
+        },
+        {
+            "body": "If you need a receipt copy for your work trip, message us anytime and we can resend it.",
+            "date_utc": "2026-02-26T14:20:00Z",
+            "from_contact_id": 610000002,
+            "from_role": "owner",
+            "id": 96000046,
+            "is_draft": false,
+            "thread_id": 91000002
+        },
+        {
+            "body": "That would be helpful, thanks. I will check my inbox later and follow up if needed.",
+            "date_utc": "2026-02-26T14:40:00Z",
+            "from_contact_id": 720000002,
+            "from_role": "guest",
+            "id": 96000047,
+            "is_draft": false,
+            "thread_id": 91000002
+        }
+    ],
+    "limit": 6,
+    "offset": 18,
+    "thread": {
+        "booking_id": 51000002,
+        "id": 91000002,
+        "property_id": 480002,
+        "type": "channel",
+        "channel": "vrbo"
+    }
+}

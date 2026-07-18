@@ -1,0 +1,65 @@
+Commercial License Agreement
+
+Copyright (c) 2026 deeprahman <dp.rahman@gmail.com>
+All rights reserved.
+
+This software and associated documentation files (the "Software") are
+proprietary and confidential. Permission is hereby granted only to the
+person or organization that has obtained a valid written commercial license
+from the copyright holder to use the Software for internal and commercial
+purposes under the terms of that written agreement.
+
+This license applies to the project components listed below and any
+modifications, derivatives, or merged works based on them:
+
+- `schemas/pricing-engine.sql`
+- `schemas/pricing_engine_booking_class_position_migration.sql`
+- `schemas/pricing_engine_booking_class_position_migration_patched.sql`
+- `schemas/pricing_engine_condition_tree_migration.sql`
+- `schemas/pricing_engine_condition_tree_migration_patched.sql`
+- `schemas/pricing_engine_conflict_guard_migration.sql`
+- `schemas/pricing_engine_conflict_guard_migration_patched.sql`
+- `schemas/pricing_engine_rule_guard_migration.sql`
+- `schemas/pricing_engine_set_operation_migration.sql`
+- `schemas/pricing_engine_stay_adjustment_migration.sql`
+- `schemas/pricing_engine_target_rate_type_and_season_window_migration.sql`
+- `schemas/pricing_rules_listing_scope_migration.sql`
+- `schemas/pricelabs_pms_metadata_backfill.sql`
+- `schemas/deprecated/pricing_engine_booking_class_position_migration.sql`
+- `schemas/deprecated/pricing_engine_condition_tree_migration.sql`
+- `schemas/deprecated/pricing_engine_conflict_guard_migration.sql`
+- `schemas/seeds/pricing_data_only.sql`
+- `schemas/secure_task_scheduler.sql`
+- `schemas/secure_task_scheduler_dependencies.sql`
+- `schemas/secure_task_scheduler_metadata.sql`
+- `schemas/secure_task_scheduler_runtime_variables.sql`
+- `schemas/tests/pricing_engine_regression_tests.sql`
+- `schemas/tests/pricing_rule_variants_get_applicable_pricing_rules_test.sql`
+- `schemas/tests/secure_task_scheduler_dependencies_test.sql`
+- `schemas/tests/secure_task_scheduler_metadata_test.sql`
+- `schemas/tests/secure_task_scheduler_runtime_variables_test.sql`
+- `schemas/tests/secure_task_scheduler_test.sql`
+- `workers/pws_workers/`
+- `workers/specifications/`
+- `workers/server-maintenance/`
+- `workers/worker_manager.md`
+
+Unless expressly authorized in writing by the copyright holder, you may not:
+
+1. copy, modify, merge, publish, distribute, sublicense, or sell copies of
+   the Software;
+2. reverse engineer, decompile, or disassemble the Software, except where
+   such restriction is prohibited by applicable law;
+3. remove or alter any copyright, trademark, or proprietary notices; or
+4. use the copyright holder's name, project name, or branding to endorse or
+   market derived works.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+For custom commercial licensing inquiries, contact:
+dp.rahman@gmail.com

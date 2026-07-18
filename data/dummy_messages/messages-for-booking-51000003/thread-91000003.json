@@ -1,0 +1,53 @@
+{
+    "guest": {
+        "first_name": "JORDAN",
+        "id": 720000003,
+        "last_name": "CARTER"
+    },
+    "items": [
+        {
+            "body": "Reservation Confirmation\n\nDates & Details:\nCheck-in: Mar 08, 2026 at 4:00 PM\nCheck-out: Mar 11, 2026 at 10:00 AM\nNights: 3\nGuests: 2\n\nIf anything is incorrect, please let me know ASAP so I can update it before arrival.\n\nAddress:\n229 Banyan Blvd, West Palm Beach, FL 33401\nhttps://www.google.com/maps/place/26.71394,-80.05099\n\nParking:\nStreet parking is available on a first-come basis. Driveway parking is limited to registered vehicles.\n\nWIFI:\nNetwork name: PalmWaveGuest\nPassword: StaySunny\nHouse Rules:\nNo smoking or parties/events\nQuiet hours: 11:00 PM - 8:00 AM\n",
+            "date_utc": "2026-02-21T15:00:00Z",
+            "from_contact_id": 610000003,
+            "from_role": "owner",
+            "id": 96000030,
+            "is_draft": false,
+            "thread_id": 91000003
+        },
+        {
+            "body": "Hi,\n\nThanks for booking with us! Your door code is 4003. The code activates at 4 PM on check-in day. Please use the smart lock at the main entrance and message us if you have any trouble.",
+            "date_utc": "2026-02-21T17:00:00Z",
+            "from_contact_id": 610000003,
+            "from_role": "owner",
+            "id": 96000031,
+            "is_draft": false,
+            "thread_id": 91000003
+        },
+        {
+            "body": "Please send a quick message after you arrive so we can make sure everything is perfect for your stay.",
+            "date_utc": "2026-02-22T16:00:00Z",
+            "from_contact_id": 610005003,
+            "from_role": "co_host",
+            "id": 96000036,
+            "is_draft": false,
+            "thread_id": 91000003
+        },
+        {
+            "body": "Reminder: check-out is Mar 11, 2026 at 10:00 AM. Please load the dishwasher and start it, place used towels in the tub, and lock the door on your way out.",
+            "date_utc": "2026-02-23T18:00:00Z",
+            "from_contact_id": 610000003,
+            "from_role": "owner",
+            "id": 96000038,
+            "is_draft": false,
+            "thread_id": 91000003
+        }
+    ],
+    "limit": 4,
+    "offset": 0,
+    "thread": {
+        "booking_id": 51000003,
+        "id": 91000003,
+        "property_id": 480003,
+        "type": "sms"
+    }
+}

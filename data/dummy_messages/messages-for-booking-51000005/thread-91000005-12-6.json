@@ -1,0 +1,72 @@
+{
+    "guest": {
+        "first_name": "MORGAN",
+        "id": 720000005,
+        "last_name": "DIAZ"
+    },
+    "items": [
+        {
+            "body": "Thanks for the blanket and info.",
+            "date_utc": "2026-03-12T18:00:00Z",
+            "from_contact_id": 720000005,
+            "from_role": "guest",
+            "id": 96000064,
+            "is_draft": false,
+            "thread_id": 91000005
+        },
+        {
+            "body": "Wishing her a smooth appointment tomorrow. Let us know if you need a quieter time window.",
+            "date_utc": "2026-03-13T08:00:00Z",
+            "from_contact_id": 610005005,
+            "from_role": "co_host",
+            "id": 96000065,
+            "is_draft": false,
+            "thread_id": 91000005
+        },
+        {
+            "body": "Appointment went well. Could we extend checkout to 1 PM on the 15th?",
+            "date_utc": "2026-03-13T15:00:00Z",
+            "from_contact_id": 720000005,
+            "from_role": "guest",
+            "id": 96000066,
+            "is_draft": false,
+            "thread_id": 91000005
+        },
+        {
+            "body": "Yes, checkout extended to 1 PM. Please leave both sets of keys on the kitchen counter.",
+            "date_utc": "2026-03-13T15:30:00Z",
+            "from_contact_id": 610000005,
+            "from_role": "owner",
+            "id": 96000067,
+            "is_draft": false,
+            "thread_id": 91000005
+        },
+        {
+            "body": "Everything has been very calm—thank you.",
+            "date_utc": "2026-03-14T09:00:00Z",
+            "from_contact_id": 720000005,
+            "from_role": "guest",
+            "id": 96000068,
+            "is_draft": false,
+            "thread_id": 91000005
+        },
+        {
+            "body": "Quiet hours remain 11 PM–8 AM; text if you need anything tonight.",
+            "date_utc": "2026-03-14T20:00:00Z",
+            "from_contact_id": 610000005,
+            "from_role": "owner",
+            "id": 96000069,
+            "is_draft": false,
+            "thread_id": 91000005
+        }
+    ],
+    "limit": 6,
+    "offset": 12,
+    "thread": {
+        "booking_id": 51000005,
+        "id": 91000005,
+        "property_id": 480005,
+        "type": "channel",
+        "channel": "vrbo"
+    }
+}

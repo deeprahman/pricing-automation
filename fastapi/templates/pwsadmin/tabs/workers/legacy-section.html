@@ -1,0 +1,37 @@
+    <section data-panel="workers" class="panel hidden rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+      <div class="flex flex-wrap items-center gap-3 text-sm">
+        <label class="inline-flex items-center gap-2 text-slate-600 dark:text-slate-300">
+          <input id="worker-active-only" type="checkbox">
+          <span>Active only</span>
+        </label>
+        <input id="worker-limit" type="number" min="1" max="200" value="25" class="control-surface w-20 rounded border px-2 py-1">
+        <button id="worker-refresh" class="rounded bg-brand-600 px-3 py-1 text-white">Load</button>
+        <button id="worker-next" class="secondary-btn rounded border px-3 py-1">Next</button>
+      </div>
+      <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">
+        Worker health here comes from scheduler registrations in Postgres. Because the UI runs in the FastAPI container, this tab reflects DB heartbeat state and queue backlog rather than direct OS process inspection inside the separate <code>workers</code> container.
+      </p>
+      <div id="worker-summary" class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"></div>
+      <div class="mt-4 overflow-x-auto">
+        <table class="panel-table min-w-full text-sm">
+          <thead class="border-b text-left">
+            <tr><th>Worker</th><th>Worker ID</th><th>Status</th><th>Load</th><th>Queues</th><th>Completed</th><th>Failed</th><th>Success</th><th>Last Seen</th></tr>
+          </thead>
+          <tbody id="worker-rows"></tbody>
+        </table>
+      </div>
+      <div class="mt-5">
+        <div class="mb-2 flex items-center justify-between gap-2">
+          <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Queue Backlog</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Grouped from <code>task_queue</code></p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="panel-table min-w-full text-sm">
+            <thead class="border-b text-left">
+              <tr><th>Queue</th><th>Total</th><th>Pending</th><th>Processing</th><th>Scheduled</th><th>Retrying</th><th>Completed</th><th>Failed</th></tr>
+            </thead>
+            <tbody id="worker-queue-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>

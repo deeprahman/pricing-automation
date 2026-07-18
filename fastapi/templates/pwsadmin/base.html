@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}PWS Admin Console{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: { brand: { 500: "#0f766e", 600: "#0d6861" } },
+          fontFamily: { sans: ["Segoe UI", "Tahoma", "sans-serif"], mono: ["Consolas", "monospace"] },
+        },
+      },
+    };
+    (function setInitialTheme() {
+      try {
+        const savedTheme = localStorage.getItem("pwsadmin_theme");
+        const hasSavedPreference = savedTheme === "dark" || savedTheme === "light";
+        if (savedTheme && !hasSavedPreference) {
+          localStorage.removeItem("pwsadmin_theme");
+        }
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const nextTheme = hasSavedPreference ? savedTheme : (prefersDark ? "dark" : "light");
+        document.documentElement.classList.toggle("dark", nextTheme === "dark");
+        document.documentElement.dataset.theme = nextTheme;
+      } catch (_) {}
+    })();
+  </script>
+  {% for css_file in asset_css_files %}
+  <link rel="stylesheet" href="{{ css_file }}">
+  {% endfor %}
+  {% block head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+  {% block body %}{% endblock %}
+</body>
+</html>

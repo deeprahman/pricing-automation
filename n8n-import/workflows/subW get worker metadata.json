@@ -1,0 +1,285 @@
+{
+  "name": "subW get worker metadata",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT get_worker_metadata('{{ $json.api_key }}')AS metadata;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1120,
+        -80
+      ],
+      "id": "bbf5a960-f7f5-4985-93a2-a25a3817f34f",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "WWSlgNwWnnhIhoMv",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT get_runtime_variable(\n    '{{ $json.worker_id }}',\n    'api_key'::VARCHAR,\n    '{{ $json.worker_id }}'::VARCHAR,\n    TRUE,\n    FALSE\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        448,
+        -144
+      ],
+      "id": "8cc9bb7c-06f5-4b2e-b579-31e9191aea3f",
+      "name": "get api key",
+      "credentials": {
+        "postgres": {
+          "id": "WWSlgNwWnnhIhoMv",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b2ed6c6b-11f7-4f67-8c2d-0c4b99b19131",
+              "name": "worker_id",
+              "value": "={{ $json.worker_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -144
+      ],
+      "id": "be4350d2-ffc3-450d-886d-c48f9a805254",
+      "name": "worker id"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n \"api_key\": \"{{ $json.get_runtime_variable[0] }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        -144
+      ],
+      "id": "38eef4d2-5730-457f-a316-ff706d74e5e6",
+      "name": "api key"
+    },
+    {
+      "parameters": {
+        "jsCode": "const wid = $('worker id').first().json.worker_id;\n\nconst api = $('api key').first().json.api_key;\nconsole.log(api);\nreturn [\n  {\n    \"api_key\": api,\n    \"worker_id\": wid\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        -80
+      ],
+      "id": "7373f00e-a089-4ab2-abdd-2a3b78ff08f1",
+      "name": "data for getting meta"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Access the 'metadata' property from the current item\nconst metadata = $input.last().json.metadata;  // Accessing the 'metadata' from the first item\nconsole.log(metadata);\n// Check if 'metadata' exists, otherwise return an error\nif (metadata) {\n  return [{ json: metadata  }];\n} else {\n  throw new Error('Metadata is undefined or missing.');\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        -80
+      ],
+      "id": "eb2b12af-b9b2-4f27-8401-92aeb9b54d4c",
+      "name": "extract metadata"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1568,
+        -144
+      ],
+      "id": "c01d2f78-5256-45eb-8297-0cca1c65e754",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"worker_id\": \"test-ooo-001\"\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        16,
+        -128
+      ],
+      "id": "f2e38fe6-ac30-48e5-99a6-6f7fa36d6d5e",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "df2CmoxWTZFsHblh",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/df2CmoxWTZFsHblh",
+          "cachedResultName": "subW Metadata Formatter"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1776,
+        -144
+      ],
+      "name": "Call Metadata Formatter",
+      "id": "73c3625d-39c8-4fd1-ba7b-9714f59af9c3"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "api_key": "sk_9cef380214ab64c5e062baa92c55d620989ecc88a262e117be5903d15788b3d3",
+          "worker_id": "test-worker-000"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "get api key": {
+      "main": [
+        [
+          {
+            "node": "api key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "worker id": {
+      "main": [
+        [
+          {
+            "node": "get api key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "api key": {
+      "main": [
+        [
+          {
+            "node": "data for getting meta",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "data for getting meta": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "extract metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract metadata": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Call Metadata Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "worker id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "f167c161-35d5-4f34-9a8f-bb39291f7a75",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f94ee6675052c2b68be0785e7c4c1b60b0426d14c775c213c4e38fd0abd72c74"
+  },
+  "id": "gNZLL3CbPI07V54VKTlvC",
+  "tags": []
+}

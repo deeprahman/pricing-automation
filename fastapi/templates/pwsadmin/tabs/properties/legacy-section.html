@@ -1,0 +1,123 @@
+    <section data-panel="properties" class="panel hidden rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+      <div class="flex flex-wrap items-center gap-2 text-sm">
+        <button id="properties-subtab-import" class="secondary-btn rounded border px-3 py-1">Import / Sync</button>
+        <button id="properties-subtab-existing" class="secondary-btn rounded border px-3 py-1">Existing Properties</button>
+      </div>
+      <div id="properties-subtab-import-panel" class="mt-3">
+        <div class="rounded-lg border border-slate-200 bg-white/85 p-3 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
+          Selection order: <strong>PMS</strong> -> <strong>OTA (OTP)</strong> -> <strong>DPT</strong>. Fetch and import in that order.
+          <div id="property-stage-buttons" class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+            <button type="button" class="property-stage-btn secondary-btn rounded border px-2 py-1" data-stage="pms">1. PMS</button>
+            <button type="button" class="property-stage-btn secondary-btn rounded border px-2 py-1" data-stage="ota">2. OTA</button>
+            <button type="button" class="property-stage-btn secondary-btn rounded border px-2 py-1" data-stage="dpt">3. DPT</button>
+          </div>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+          <select id="platform-select" class="control-surface w-56 rounded border px-2 py-1"></select>
+          <button id="remote-fetch" class="rounded bg-brand-600 px-3 py-1 text-white">Fetch All</button>
+          <button id="remote-import" class="secondary-btn rounded border px-3 py-1">Import Selected</button>
+        </div>
+        <p id="property-stage-hint" class="mt-2 text-xs text-slate-600 dark:text-slate-300"></p>
+        <div class="mt-3 overflow-x-auto text-sm">
+          <table class="panel-table w-full min-w-[1080px]">
+            <thead id="remote-columns-head" class="border-b text-left"></thead>
+            <tbody id="remote-rows"></tbody>
+          </table>
+        </div>
+        <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-300">
+          <div id="remote-pagination-status">Page 1 of 1 - 0 properties</div>
+          <div class="flex items-center gap-2">
+            <button id="remote-page-prev" class="secondary-btn rounded border px-2 py-1">Prev</button>
+            <button id="remote-page-next" class="secondary-btn rounded border px-2 py-1">Next</button>
+          </div>
+        </div>
+      </div>
+      <div id="properties-subtab-existing-panel" class="mt-3 hidden">
+        <div class="flex flex-wrap items-center gap-2 text-sm">
+          <button id="existing-properties-refresh" class="rounded bg-brand-600 px-3 py-1 text-white">Refresh Existing</button>
+        </div>
+        <div class="mt-3 overflow-x-auto">
+          <table class="panel-table w-full min-w-[900px] text-sm">
+            <thead class="border-b text-left">
+              <tr><th>Property</th><th>Name</th><th>Lat/Lon</th><th>Listed Platforms</th></tr>
+            </thead>
+            <tbody id="existing-properties-rows"></tbody>
+          </table>
+        </div>
+        <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-300">
+          <div id="existing-properties-pagination-status">Page 1 of 1 - Showing 0 properties</div>
+          <div class="flex items-center gap-2">
+            <button id="existing-properties-page-prev" class="secondary-btn rounded border px-2 py-1">Prev</button>
+            <button id="existing-properties-page-next" class="secondary-btn rounded border px-2 py-1">Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="existing-property-links-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/50 p-4">
+      <div class="control-surface w-full max-w-4xl rounded-xl border bg-white/95 p-4 shadow-xl dark:bg-slate-900/95">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h3 id="existing-property-links-title" class="text-base font-semibold text-slate-900 dark:text-slate-100">Property Listings</h3>
+            <p id="existing-property-links-subtitle" class="mt-1 text-xs text-slate-600 dark:text-slate-300"></p>
+          </div>
+          <button id="existing-property-links-close" type="button" class="secondary-btn rounded border px-3 py-1 text-sm">Close</button>
+        </div>
+        <div class="mt-3 overflow-x-auto">
+          <table class="panel-table w-full min-w-[860px] text-sm">
+            <thead class="border-b text-left">
+              <tr><th>Platform</th><th>Listing</th><th>Listing ID</th><th>Status</th><th>Link To</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="existing-property-links-rows"></tbody>
+          </table>
+        </div>
+        <p id="existing-property-links-status" class="mt-3 text-xs text-slate-600 dark:text-slate-300"></p>
+      </div>
+    </div>
+
+    <div id="task-payload-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/50 p-4">
+      <div class="control-surface w-full max-w-5xl rounded-xl border bg-white/95 p-4 shadow-xl dark:bg-slate-900/95">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h3 id="task-payload-title" class="text-base font-semibold text-slate-900 dark:text-slate-100">Task Payload</h3>
+            <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">Rendered in YML format.</p>
+          </div>
+          <button id="task-payload-close" type="button" class="secondary-btn rounded border px-3 py-1 text-sm">Close</button>
+        </div>
+        <pre id="task-payload-body" class="control-surface mt-3 min-h-[240px] max-h-[70vh] overflow-auto whitespace-pre rounded border p-3 text-xs leading-5">Select a task payload to view details.</pre>
+      </div>
+    </div>
+
+    <div id="bso-instruction-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/50 p-4">
+      <div class="control-surface w-full max-w-4xl rounded-xl border bg-white/95 p-4 shadow-xl dark:bg-slate-900/95">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h3 id="bso-instruction-title" class="text-base font-semibold text-slate-900 dark:text-slate-100">Instruction</h3>
+            <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">Rendered in YML format.</p>
+          </div>
+          <button id="bso-instruction-close" type="button" class="secondary-btn rounded border px-3 py-1 text-sm">Close</button>
+        </div>
+        <pre id="bso-instruction-body" class="control-surface mt-3 min-h-[240px] max-h-[70vh] overflow-auto whitespace-pre-wrap break-words rounded border p-3 text-xs leading-5">Select an instruction to view details.</pre>
+      </div>
+    </div>
+
+    <div id="booking-thread-messages-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/50 p-4">
+      <div class="control-surface w-full max-w-5xl rounded-xl border bg-white/95 p-4 shadow-xl dark:bg-slate-900/95">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h3 id="booking-thread-messages-title" class="text-base font-semibold text-slate-900 dark:text-slate-100">Messages for Thread</h3>
+            <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">Message content is capped at 120 characters.</p>
+          </div>
+          <button id="booking-thread-messages-close" type="button" class="secondary-btn rounded border px-3 py-1 text-sm">Close</button>
+        </div>
+        <div class="mt-3 max-h-[70vh] overflow-auto">
+          <table class="panel-table w-full min-w-[760px] text-sm">
+            <thead class="border-b text-left">
+              <tr><th>Message ID</th><th>Content</th><th>Class / Status</th></tr>
+            </thead>
+            <tbody id="booking-thread-message-rows"></tbody>
+          </table>
+          <p id="booking-thread-messages-empty" class="hidden py-6 text-center text-sm text-slate-600 dark:text-slate-300">No messages found for this thread.</p>
+        </div>
+      </div>
+    </div>

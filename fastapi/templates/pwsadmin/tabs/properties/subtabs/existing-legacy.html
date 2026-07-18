@@ -1,0 +1,18 @@
+        <div class="flex flex-wrap items-center gap-2 text-sm">
+          <button id="existing-properties-refresh" class="rounded bg-brand-600 px-3 py-1 text-white">Refresh Existing</button>
+        </div>
+        <div class="mt-3 overflow-x-auto">
+          <table class="panel-table w-full min-w-[900px] text-sm">
+            <thead class="border-b text-left">
+              <tr><th>Property</th><th>Name</th><th>Lat/Lon</th><th>Listed Platforms</th></tr>
+            </thead>
+            <tbody id="existing-properties-rows"></tbody>
+          </table>
+        </div>
+        <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-300">
+          <div id="existing-properties-pagination-status">Page 1 of 1 - Showing 0 properties</div>
+          <div class="flex items-center gap-2">
+            <button id="existing-properties-page-prev" class="secondary-btn rounded border px-2 py-1">Prev</button>
+            <button id="existing-properties-page-next" class="secondary-btn rounded border px-2 py-1">Next</button>
+          </div>
+        </div>

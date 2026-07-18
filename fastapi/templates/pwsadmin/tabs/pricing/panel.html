@@ -1,0 +1,25 @@
+<div class="panel rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+  <div class="flex flex-wrap items-center gap-2 text-sm">
+    {% for subtab in tab.subtabs %}
+    <button
+      id="subtab-{{ tab.key }}-{{ subtab.key }}-trigger"
+      type="button"
+      data-subtab-parent="{{ tab.key }}"
+      data-subtab-key="{{ subtab.key }}"
+      data-subtab-trigger
+      class="secondary-btn rounded border px-3 py-1{% if active_subtabs.get(tab.key) == subtab.key %} nav-btn-active{% endif %}"
+    >{{ subtab.label }}</button>
+    {% endfor %}
+  </div>
+  {% for subtab in tab.subtabs %}
+  <div
+    id="subtab-{{ tab.key }}-{{ subtab.key }}-panel"
+    data-subtab-parent="{{ tab.key }}"
+    data-subtab-key="{{ subtab.key }}"
+    data-subtab-panel
+    class="{% if active_subtabs.get(tab.key) != subtab.key %}hidden {% endif %}subtab-panel-host"
+  >
+    {% include subtab.template %}
+  </div>
+  {% endfor %}
+</div>

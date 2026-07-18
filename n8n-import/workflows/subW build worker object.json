@@ -1,0 +1,175 @@
+{
+  "name": "subW build worker object",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select config_key,config_value,config_type from scheduler_config AS config;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        160,
+        -240
+      ],
+      "id": "2d353f0e-9fd8-4630-a496-d4bf5f637b4a",
+      "name": "get config",
+      "credentials": {
+        "postgres": {
+          "id": "WWSlgNwWnnhIhoMv",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select * from worker_registry where worker_id = '{{ $json.worker_id }}';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        384,
+        48
+      ],
+      "id": "54e9ec57-a335-4c53-9e4c-f31367aa357a",
+      "name": "get worker data",
+      "credentials": {
+        "postgres": {
+          "id": "WWSlgNwWnnhIhoMv",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code node\n// Converts config_key -> typed value\n// interval is treated as STRING (no conversion)\n\nfunction castValueByType(value, type) {\n  switch ((type || '').toLowerCase()) {\n    case 'integer': {\n      const n = Number(value);\n      if (!Number.isNaN(n)) return n;\n      throw new Error(`Invalid integer: \"${value}\"`);\n    }\n\n    case 'boolean': {\n      if (typeof value === 'boolean') return value;\n      const v = String(value).trim().toLowerCase();\n      if (v === 'true') return true;\n      if (v === 'false') return false;\n      throw new Error(`Invalid boolean: \"${value}\"`);\n    }\n\n    case 'interval':\n      // Keep interval exactly as provided (string)\n      return String(value);\n\n    case 'string':\n    default:\n      return String(value);\n  }\n}\n\nconst rows = $input.all().map(i => i.json);\n\n// Handle both: direct array OR multiple input items\nconst normalized = Array.isArray(rows[0]) ? rows[0] : rows;\n\nconst output = {};\n\nfor (const row of normalized) {\n  if (!row?.config_key) continue;\n  output[row.config_key] = castValueByType(\n    row.config_value,\n    row.config_type\n  );\n}\n\nreturn [{ json: output }];\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        -240
+      ],
+      "id": "c85eb05e-f3fd-4b66-9bd9-4b58a8f16eef",
+      "name": "config data"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        608,
+        -112
+      ],
+      "id": "265baf77-5eb6-4fb3-b1a3-768bf8c7ba2e",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"worker_id\": \"abc-123\",\n  \"api_key\": \"sk_\"\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        -96
+      ],
+      "id": "9948fdd0-a3cb-4731-9eac-8db027f89df9",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "worker_id": "test-worker-000",
+          "api_key": "sk_fcc0e857fe3b853e2a9e7d18c1a36df0f05020c8d5f7d6e425ba4bbbe8cbf69d"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "get config": {
+      "main": [
+        [
+          {
+            "node": "config data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get worker data": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "config data": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        []
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "get config",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "get worker data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "f7a035e9-63e5-4522-bfe8-02f88b570e29",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f94ee6675052c2b68be0785e7c4c1b60b0426d14c775c213c4e38fd0abd72c74"
+  },
+  "id": "6fcs_uGq0D7cLzAVv7yEk",
+  "tags": []
+}

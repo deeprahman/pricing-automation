@@ -1,0 +1,18 @@
+    <section data-panel="logs" class="panel hidden rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+      <div class="flex flex-wrap items-center gap-2 text-sm">
+        <input id="log-level" placeholder="level" class="control-surface w-24 rounded border px-2 py-1">
+        <input id="log-source" placeholder="source" class="control-surface w-24 rounded border px-2 py-1">
+        <input id="log-workflow" placeholder="workflow" class="control-surface w-28 rounded border px-2 py-1">
+        <input id="log-limit" type="number" min="1" max="200" value="50" class="control-surface w-20 rounded border px-2 py-1">
+        <button id="log-apply" class="rounded bg-brand-600 px-3 py-1 text-white">Load</button>
+        <button id="log-next" class="secondary-btn rounded border px-3 py-1">Next</button>
+      </div>
+      <div class="mt-3 overflow-x-auto">
+        <table class="panel-table w-full min-w-[960px] text-sm">
+          <thead class="border-b text-left">
+            <tr><th>Time</th><th>Level</th><th>Source</th><th>Workflow</th><th>Message</th></tr>
+          </thead>
+          <tbody id="log-rows"></tbody>
+        </table>
+      </div>
+    </section>

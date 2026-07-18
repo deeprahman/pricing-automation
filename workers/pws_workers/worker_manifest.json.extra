@@ -1,0 +1,26 @@
+{
+  "workers": [
+    {
+      "name": "example-worker",
+      "script_path": "./example_worker.py",
+      "primary_queue": "example",
+      "subscribed_queues": ["example"],
+      "args": ["--db-name", "{db}"],
+      "log_prefix": "example",
+      "startup_delay_seconds": 2,
+      "enabled": true
+    }
+  ],
+  "maintenance": {
+    "reset_interval_seconds": 60,
+    "log_prefix": "worker-maintenance",
+    "actions": [
+      {
+        "name": "small_server_disk_maintenance_run",
+        "enabled": true,
+        "interval_minutes": 60,
+        "payload": {}
+      }
+    ]
+  }
+}

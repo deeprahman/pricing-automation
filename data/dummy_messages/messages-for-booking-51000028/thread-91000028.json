@@ -1,0 +1,63 @@
+{
+    "guest": {
+        "first_name": "CASEY",
+        "id": 720000028,
+        "last_name": "LOPEZ"
+    },
+    "items": [
+        {
+            "body": "Reservation Confirmation\n\nDates & Details:\nCheck-in: Apr 02, 2026 at 4:00 PM\nCheck-out: Apr 06, 2026 at 10:00 AM\nNights: 4\nGuests: 3\n\nIf anything is incorrect, please let me know ASAP so I can update it before arrival.\n\nAddress:\n229 Banyan Blvd, West Palm Beach, FL 33401\nhttps://www.google.com/maps/place/26.71394,-80.05099\n\nParking:\nStreet parking is available on a first-come basis. Driveway parking is limited to registered vehicles.\n\nWIFI:\nNetwork name: PalmWaveGuest\nPassword: StaySunny\nHouse Rules:\nNo smoking or parties/events\nQuiet hours: 11:00 PM - 8:00 AM\n",
+            "date_utc": "2026-03-18T15:00:00Z",
+            "from_contact_id": 610000028,
+            "from_role": "owner",
+            "id": 96000280,
+            "is_draft": false,
+            "thread_id": 91000028
+        },
+        {
+            "body": "Hi,\n\nThanks for booking with us! Your door code is 4028. The code activates at 4 PM on check-in day. Please use the smart lock at the main entrance and message us if you have any trouble.",
+            "date_utc": "2026-03-18T17:00:00Z",
+            "from_contact_id": 610000028,
+            "from_role": "owner",
+            "id": 96000281,
+            "is_draft": false,
+            "thread_id": 91000028
+        },
+        {
+            "body": "Hi, just confirming this trip is for a work project near the port. I will need reliable WiFi for calls each evening.",
+            "date_utc": "2026-03-18T20:00:00Z",
+            "from_contact_id": 720000028,
+            "from_role": "guest",
+            "id": 96000284,
+            "is_draft": false,
+            "thread_id": 91000028
+        },
+        {
+            "body": "No problem. The desk in the living room has a surge protector and we average 300 Mbps down. Let us know if you need a monitor.",
+            "date_utc": "2026-03-18T22:00:00Z",
+            "from_contact_id": 610005028,
+            "from_role": "co_host",
+            "id": 96000286,
+            "is_draft": false,
+            "thread_id": 91000028
+        },
+        {
+            "body": "Please send a quick message after you arrive so we can make sure everything is perfect for your stay.",
+            "date_utc": "2026-03-19T16:00:00Z",
+            "from_contact_id": 610005028,
+            "from_role": "co_host",
+            "id": 96000288,
+            "is_draft": false,
+            "thread_id": 91000028
+        }
+    ],
+    "limit": 5,
+    "offset": 0,
+    "thread": {
+        "booking_id": 51000028,
+        "id": 91000028,
+        "property_id": 480004,
+        "type": "channel",
+        "channel": "airbnb"
+    }
+}
