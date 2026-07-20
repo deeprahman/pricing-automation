@@ -183,26 +183,7 @@ Run scheduler tests separately from bootstrap:
 ./scripts/run_secure_task_scheduler_tests.sh --test-only
 ```
 
-## N8N Encryption Key (Practical Approach)
-n8n stores its encryption key in the data volume. If the `N8N_ENCRYPTION_KEY`
-env var changes later, n8n will refuse to start with a mismatch error.
 
-Choose one path:
-- Local dev (no important data): reset the volume and start fresh.
-  ```bash
-  docker compose down -v
-  docker compose -f docker-compose.yml -f docker-compose.local.yml --env-file .env.local up -d --build
-  ```
-- Keep existing workflows/credentials: reuse the original key.
-  ```bash
-  docker compose run --rm n8n cat /home/node/.n8n/config
-  ```
-  Copy `encryptionKey` into `N8N_ENCRYPTION_KEY`, then restart:
-  ```bash
-  docker compose -f docker-compose.yml -f docker-compose.local.yml --env-file .env.local up -d
-  ```
-
-Rule of thumb: once a key is set for an environment, do not change it.
 
 ## Nginx Templating
 Nginx reads `nginx/templates/default.conf.template` and renders it at startup
