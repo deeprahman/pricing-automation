@@ -4,10 +4,31 @@ This repo runs Postgres, a dedicated Python `workers` service, and FastAPI
 behind Nginx. The admin UI is served under `/pwsadmin/home`.
 
 ## What This Does
-A highly optimized, AI-powered orchestrator that lets users identify
-property-specific demand and manage pricing, then synchronizes that pricing
-across Property Management Systems (PMS), dynamic pricing tools, and OTAs
-(Online Travel Agencies).
+A highly optimized, AI-powered pricing orchestrator that solves multi-PMS and multi-tool pricing complexity:
+
+1. **Unified Pricing Analysis & Configuration**
+   - Integrates with multiple Property Management Systems (PMS) and dynamic pricing tools simultaneously
+   - Analyzes various data types (demand signals, seasonality, market trends, occupancy) to identify property-specific pricing opportunities
+   - Allows granular pricing configuration at multiple levels: individual property, property group, seasonal, OTA, and PMS level
+
+2. **Fill Pricing Gaps**
+   - Handles pricing scenarios that your dynamic pricing tools cannot cover
+   - Automatically applies custom pricing rules based on your configuration
+
+3. **Intelligent Demand-Based Pricing**
+   - Identifies demand patterns on specific properties
+   - Automatically adjusts pricing across all connected systems based on detected demand and your rules
+
+4. **Cross-Platform Price Synchronization**
+   - Synchronizes pricing across Property Management Systems (PMS), dynamic pricing tools, and OTAs (Online Travel Agencies)
+   - Ensures consistent pricing across all booking channels and integrations
+   - Maintains real-time sync with OTA APIs where available
+
+## Compatibility
+This solution is compatible with:
+- **Multiple PMS (Property Management Systems)**: Support for various property management platforms
+- **Multiple DPT (Dynamic Pricing Tools)**: Integration with different dynamic pricing providers
+- **Multiple LLM Service Providers**: Flexible AI/LLM backend support (e.g., OpenAI, Ollama, and others)
 
 ## Requirements
 - Docker and Docker Compose
@@ -24,7 +45,7 @@ across Property Management Systems (PMS), dynamic pricing tools, and OTAs
 
 ## Local Docker Compose overrides
 - `docker-compose.yml` defines the full stack (workers, Postgres, FastAPI, nginx).
-- `docker-compose.local.yml` is intentionally minimal; it runs on top of the base compose file, publishes Postgres plus the workers debugpy port to `127.0.0.1` for local tooling, and switches live message classification to Ollama for local runs.
+- `docker-compose.local.yml` is intentionally minimal; it runs on top of the base compose file, publishes Postgres plus the workers debugpy port to `127.0.0.1` for local tooling, and switches live mes[...]
 - Always invoke Docker Compose with both files when you need local host access:
 
   ```bash
@@ -69,7 +90,7 @@ across Property Management Systems (PMS), dynamic pricing tools, and OTAs
      -f docker-compose.local.yml \
      --env-file .env.local up -d --build
    ```
-   Local runs expect an Ollama server reachable from the `workers` container at `http://host.docker.internal:11550` by default. Override `OLLAMA_API_URL` or `OLLAMA_MODEL` in `.env.local` if your local setup differs.
+   Local runs expect an Ollama server reachable from the `workers` container at `http://host.docker.internal:11550` by default. Override `OLLAMA_API_URL` or `OLLAMA_MODEL` in `.env.local` if your loca[...]
 7. Visit:
    - Admin UI: `https://auto.pricingautomation.lo/pwsadmin/home`
 8. Connect to local Postgres from host tools (including Python):
@@ -205,7 +226,7 @@ docker compose down
    python tests/task-scheduler-helper/task_scheduler_helper_worker.py --once
    ```
 
-   Omit `--once` for continuous processing, and use `--dsn <dsn>`/`--no-auto-dsn` if you need custom credentials. The helper reads `tests/task-scheduler-helper/tsh_in/enqueue_task.json`, runs `reset_stuck_tasks()`, monitors enqueued tasks through `get_task_status(...)`, and writes callback/status snapshots to `tests/task-scheduler-helper/tsh_out/`.
+   Omit `--once` for continuous processing, and use `--dsn <dsn>`/`--no-auto-dsn` if you need custom credentials. The helper reads `tests/task-scheduler-helper/tsh_in/enqueue_task.json`, runs `reset_s[...]
 3. In a second terminal, run the external service handler:
 
    ```bash
@@ -213,9 +234,9 @@ docker compose down
    ```
 
    Or rely on auto DSN (`--auto-dsn`) if you have the Postgres env vars already set.
-4. With both processes running, add tasks to `tests/task-scheduler-helper/tsh_in/enqueue_task.json`. Each entry should specify `worker`, `queue`, `action`, and (optionally) `return_handler`; the helper normalizes payloads according to `tests/task-scheduler-helper/README.md`.
+4. With both processes running, add tasks to `tests/task-scheduler-helper/tsh_in/enqueue_task.json`. Each entry should specify `worker`, `queue`, `action`, and (optionally) `return_handler`; the helpe[...]
 
-The worker scripts write runtime logs to `tests/logs/<worker>.err.log` during direct runs; when using `tests/run-worker-stack.ps1`, check the worker log files under the selected log directory. For helper monitoring output, check `tests/task-scheduler-helper/tsh_in/enqueued_task.json` and `tests/task-scheduler-helper/tsh_out/task_uuid_<uuid>.json`.
+The worker scripts write runtime logs to `tests/logs/<worker>.err.log` during direct runs; when using `tests/run-worker-stack.ps1`, check the worker log files under the selected log directory. For hel[...]
 
 For stepping through one worker in VS Code while the rest of the local worker stack runs normally, use:
 
@@ -237,5 +258,5 @@ docker exec -i n8n-postgres psql -U n8n -d admin_pws -c "SELECT id,email,usernam
 ```
 # 3) Activate first account
 ```
-docker exec -i n8n-postgres psql -U n8n -d admin_pws -c "UPDATE users SET is_active = TRUE, updated_at = NOW() WHERE id = (SELECT id FROM users ORDER BY id ASC LIMIT 1) RETURNING id,email,username,is_active,is_admin;"
+docker exec -i n8n-postgres psql -U n8n -d admin_pws -c "UPDATE users SET is_active = TRUE, updated_at = NOW() WHERE id = (SELECT id FROM users ORDER BY id ASC LIMIT 1) RETURNING id,email,username,is_[...]
 ```
