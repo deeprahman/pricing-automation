@@ -24,6 +24,11 @@ A highly optimized, AI-powered pricing orchestrator that solves multi-PMS and mu
    - Ensures consistent pricing across all booking channels and integrations
    - Maintains real-time sync with OTA APIs where available
 
+## Use Case
+Suppose you manage many listings across multiple OTAs, PMSs, and dynamic pricing tools. Dynamic pricing tools generally do their job correctly, but there are situations they cannot address on their own because they lack access to booking patterns and guest behavior data. Those situations — where only a human with access to guest and booking data can correctly interpret the opportunity — often require manual overrides or custom nightly rates to optimize revenue.
+
+When your portfolio contains many listings, manually identifying and updating rates becomes time consuming. This project automates that process: it analyzes booking patterns and guest data, identifies opportunities that dynamic pricing tools cannot act on, and applies overrides or updated rates across your connected systems so you don't have to do it manually for each listing.
+
 ## Compatibility
 This solution is compatible with:
 - **Multiple PMS (Property Management Systems)**: Support for various property management platforms
@@ -234,9 +239,9 @@ docker compose down
    ```
 
    Or rely on auto DSN (`--auto-dsn`) if you have the Postgres env vars already set.
-4. With both processes running, add tasks to `tests/task-scheduler-helper/tsh_in/enqueue_task.json`. Each entry should specify `worker`, `queue`, `action`, and (optionally) `return_handler`; the helpe[...]
+4. With both processes running, add tasks to `tests/task-scheduler-helper/tsh_in/enqueue_task.json`. Each entry should specify `worker`, `queue`, `action`, and (optionally) `return_handler`; the [...]
 
-The worker scripts write runtime logs to `tests/logs/<worker>.err.log` during direct runs; when using `tests/run-worker-stack.ps1`, check the worker log files under the selected log directory. For hel[...]
+The worker scripts write runtime logs to `tests/logs/<worker>.err.log` during direct runs; when using `tests/run-worker-stack.ps1`, check the worker log files under the selected log directory. For hel[...] 
 
 For stepping through one worker in VS Code while the rest of the local worker stack runs normally, use:
 
@@ -258,5 +263,5 @@ docker exec -i n8n-postgres psql -U n8n -d admin_pws -c "SELECT id,email,usernam
 ```
 # 3) Activate first account
 ```
-docker exec -i n8n-postgres psql -U n8n -d admin_pws -c "UPDATE users SET is_active = TRUE, updated_at = NOW() WHERE id = (SELECT id FROM users ORDER BY id ASC LIMIT 1) RETURNING id,email,username,is_[...]
+docker exec -i n8n-postgres psql -U n8n -d admin_pws -c "UPDATE users SET is_active = TRUE, updated_at = NOW() WHERE id = (SELECT id FROM users ORDER BY id ASC LIMIT 1) RETURNING id,email,username,is_[...]"
 ```
